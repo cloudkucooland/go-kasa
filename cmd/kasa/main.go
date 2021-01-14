@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cloudkucooland/go-kasa"
+	"sort"
 	"strconv"
 )
 
@@ -136,8 +137,16 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		keys := make([]string, 0, len(m))
+		for k := range m {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
 		fmt.Printf("found %d devices\n", len(m))
-		for k, v := range m {
+		for _, k := range keys {
+			v := m[k]
 			fmt.Printf("%s: %s [state: %d] [brightness: %3d] %s\n", k, v.Model, v.RelayState, v.Brightness, v.Alias)
 		}
 	case "reboot":
