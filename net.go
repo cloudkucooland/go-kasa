@@ -17,14 +17,14 @@ func (d *Device) sendTCP(cmd string) (string, error) {
 		fmt.Printf("Cannot connnect to device: %s", err.Error())
 		return "", err
 	}
-	n, err := conn.Write(payload)
+	_, err = conn.Write(payload)
 	if err != nil {
 		fmt.Printf("Cannot send command to device: %s", err.Error())
 		return "", err
 	}
 
 	data := make([]byte, 1024)
-	n, err = conn.Read(data)
+	n, err := conn.Read(data)
 	if err != nil {
 		fmt.Println("Cannot read data from device:", err)
 		return "", err
@@ -34,18 +34,14 @@ func (d *Device) sendTCP(cmd string) (string, error) {
 }
 
 func (d *Device) sendUDP(cmd string) error {
-	// we don't need ListenUDP, DialUDP would be better
 	payload := encryptUDP(cmd)
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
-	_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: d.parsed, Port: 9999})
+	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.parsed, Port: 9999})
+	if err != nil {
+		return err
+	}
+	_, err = conn.Write(payload)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func broadcastCmd(cmd string) error {
-	// get interface subnets and real local broadcast addresses
-	d := Device{IP: "255.255.255.255"}
-	return d.sendUDP(cmd)
 }

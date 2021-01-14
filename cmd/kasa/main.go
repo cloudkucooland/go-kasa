@@ -34,6 +34,9 @@ func main() {
 		fmt.Printf("command: %s ; host: %s ; value: %s\n", command, host, value)
 	case "info":
 		k, err := kasa.NewDevice(host)
+		if err != nil {
+			panic(err)
+		}
 		s, err := k.GetSettings()
 		if err != nil {
 			panic(err)
@@ -55,6 +58,9 @@ func main() {
 			fmt.Println("usage: kasa status [host]")
 		}
 		k, err := kasa.NewDevice(host)
+		if err != nil {
+			panic(err)
+		}
 		s, err := k.GetSettings()
 		if err != nil {
 			panic(err)

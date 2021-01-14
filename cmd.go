@@ -91,8 +91,7 @@ func (d *Device) SetAlias(s string) error {
 }
 
 func (d *Device) GetWIFIStatus() (string, error) {
-	cmd := fmt.Sprintf(`{"netif":{"get_stainfo":{}}}`)
-	res, err := d.sendTCP(cmd)
+	res, err := d.sendTCP(`{"netif":{"get_stainfo":{}}}`)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
