@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-func BroadcastDiscovery() (map[string]*kasaSysinfo, error) {
-	const timeout = 5
-	const probes = 2
+func BroadcastDiscovery(timeout, probes int) (map[string]*kasaSysinfo, error) {
 	m := make(map[string]*kasaSysinfo)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
@@ -18,7 +16,7 @@ func BroadcastDiscovery() (map[string]*kasaSysinfo, error) {
 		return m, err
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * timeout))
+	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 
 	go func() {
 		payload := encryptUDP(sysinfo)
@@ -29,7 +27,7 @@ func BroadcastDiscovery() (map[string]*kasaSysinfo, error) {
 				fmt.Printf("discovery failed: %s\n", err.Error())
 				return
 			}
-			time.Sleep(time.Second * timeout / (probes + 1))
+			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
 		}
 	}()
 
