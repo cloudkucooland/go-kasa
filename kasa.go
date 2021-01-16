@@ -33,16 +33,17 @@ func NewDevice(ip string) (*Device, error) {
 
 // defined by kasa devices
 type kasaDevice struct {
-	System kasaSystem `json:"system"`
+	GetSysinfo getSysinfo `json:"system"`
+	Dimmer     dimmer     `json:"smartlife.iot.dimmer"`
 }
 
 // defined by kasa devices
-type kasaSystem struct {
-	Sysinfo kasaSysinfo `json:"get_sysinfo"`
+type getSysinfo struct {
+	Sysinfo Sysinfo `json:"get_sysinfo"`
 }
 
 // defined by kasa devices
-type kasaSysinfo struct {
+type Sysinfo struct {
 	SWVersion  string `json:"sw_ver"`
 	HWVersion  string `json:"hw_ver"`
 	Model      string `json:"model"`
@@ -64,4 +65,22 @@ type kasaSysinfo struct {
 	OnTime     int    `json:"on_time"`
 	ActiveMode string `json:"active_mode"`
 	DevName    string `json:"dev_name"`
+}
+
+type dimmer struct {
+	Parameters dimmerParameters `json:"get_dimmer_parameters"`
+	ErrCode    int              `json:"err_code"`
+	ErrMsg     string           `json:"err_msg"`
+}
+
+type dimmerParameters struct {
+	MinThreshold  int    `json:"minThreshold"`
+	FadeOnTime    int    `json:"fadeOnTime"`
+	FadeOffTime   int    `json:"fadeOffTime"`
+	GentleOnTime  int    `json:"gentleOnTime"`
+	GentleOffTime int    `json:"gentleOffTime"`
+	RampRate      int    `json:"rampRate"`
+	BulbType      int    `json:"bulb_type"`
+	ErrCode       int    `json:"err_code"`
+	ErrMsg        string `json:"err_msg"`
 }

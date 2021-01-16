@@ -209,6 +209,16 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(res)
+	case "getalldimmer":
+		m, err := kasa.BroadcastDimmerParameters(*timeout, *repeats)
+		if err != nil {
+			panic(err)
+		}
+		for k, v := range *m {
+			if v.ErrCode == 0 {
+				fmt.Printf("%s: %+v\n", k, v)
+			}
+		}
 	case "getsched":
 		if host == "" {
 			fmt.Println("usage: kasa getsched [host]")

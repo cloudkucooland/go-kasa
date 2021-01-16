@@ -32,7 +32,7 @@ func (d *Device) SetBrightness(newval int) error {
 
 const sysinfo = `{"system":{"get_sysinfo":{}}}`
 
-func (d *Device) GetSettings() (*kasaSysinfo, error) {
+func (d *Device) GetSettings() (*Sysinfo, error) {
 	res, err := d.sendTCP(sysinfo)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -44,7 +44,7 @@ func (d *Device) GetSettings() (*kasaSysinfo, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	return &kd.System.Sysinfo, nil
+	return &kd.GetSysinfo.Sysinfo, nil
 }
 
 // forget any cloud settings

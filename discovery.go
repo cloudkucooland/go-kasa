@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func BroadcastDiscovery(timeout, probes int) (map[string]*kasaSysinfo, error) {
-	m := make(map[string]*kasaSysinfo)
+func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
+	m := make(map[string]*Sysinfo)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
@@ -47,7 +47,58 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*kasaSysinfo, error) {
 			fmt.Printf("unmarshal: %s\n", err.Error())
 			return nil, err
 		}
-		m[addr.IP.String()] = &kd.System.Sysinfo
+		m[addr.IP.String()] = &kd.GetSysinfo.Sysinfo
 	}
 	return m, nil
+}
+
+// func BroadcastDimmerParam(timeout, probes int) (map[string]*kasaSysinfo, error) {
+func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParameters, error) {
+	m := make(map[string]*dimmerParameters)
+
+	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
+	if err != nil {
+		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		return &m, err
+	}
+	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+
+	go func() {
+		payload := encryptUDP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
+		for i := 0; i < probes; i++ {
+			// fmt.Println("sending broadcast")
+			_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: net.ParseIP("255.255.255.255"), Port: 9999})
+			if err != nil {
+				fmt.Printf("discovery failed: %s\n", err.Error())
+				return
+			}
+			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
+		}
+	}()
+
+	buffer := make([]byte, 1024)
+	// fmt.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
+	for {
+		n, addr, err := conn.ReadFromUDP(buffer)
+		if err != nil {
+			fmt.Println(err.Error())
+			break
+		}
+		res := decrypt(buffer[:n])
+
+		// fmt.Printf("%s\n", res)
+		var kd kasaDevice
+		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+			fmt.Printf("unmarshal: %s\n", err.Error())
+			continue
+		}
+		if kd.Dimmer.ErrCode != 0 {
+			// fmt.Printf("%s\n", kd.Dimmer.ErrMsg)
+			continue
+		}
+		// fmt.Printf("%+v\n", kd.Dimmer.Parameters)
+		m[addr.IP.String()] = &(kd.Dimmer.Parameters)
+	}
+	return &m, nil
 }
