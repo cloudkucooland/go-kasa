@@ -53,13 +53,13 @@ func main() {
 		fmt.Printf("MAC:\t\t%s\n", s.MAC)
 		fmt.Printf("LED Off:\t%d\n", s.LEDOff)
 		fmt.Printf("Active Mode:\t%s\n", s.ActiveMode)
-        if s.NumChildren > 0 {
-            for _, v := range s.Children {
-		        fmt.Printf("Outlet [%s]:\t%d\t\t(%s)\n", v.Alias, v.RelayState, v.ID)
-            }
-        } else {
-		    fmt.Printf("Relay:\t%d\tBrightness:\t%d%%\n", s.RelayState, s.Brightness)
-        }
+		if s.NumChildren > 0 {
+			for _, v := range s.Children {
+				fmt.Printf("Outlet [%s]:\t%d\t\t(%s)\n", v.Alias, v.RelayState, v.ID)
+			}
+		} else {
+			fmt.Printf("Relay:\t%d\tBrightness:\t%d%%\n", s.RelayState, s.Brightness)
+		}
 	case "status":
 		if host == "" {
 			fmt.Println("usage: kasa status [host]")
@@ -72,13 +72,13 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-        if s.NumChildren > 0 {
-            for _, v := range s.Children {
-		        fmt.Printf("[%s].[%s]:\t%d\n", s.Alias, v.Alias, v.RelayState)
-            }
-        } else {
-		    fmt.Printf("[%s]\tRelay:\t%d\tBrightness:\t%d%%\n", s.Alias, s.RelayState, s.Brightness)
-        }
+		if s.NumChildren > 0 {
+			for _, v := range s.Children {
+				fmt.Printf("[%s].[%s]:\t%d\n", s.Alias, v.Alias, v.RelayState)
+			}
+		} else {
+			fmt.Printf("[%s]\tRelay:\t%d\tBrightness:\t%d%%\n", s.Alias, s.RelayState, s.Brightness)
+		}
 	case "brightness":
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa brightness [host] [1-100]")
@@ -127,11 +127,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-        if *child != "" {
-            k.SetRelayStateChild(*child, b)
-        } else {
-		    err = k.SetRelayState(b)
-        }
+		if *child != "" {
+			k.SetRelayStateChild(*child, b)
+		} else {
+			err = k.SetRelayState(b)
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -194,7 +194,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		err = k.SetAlias(value)
+		if *child != "" {
+			err = k.SetChildAlias(*child, value)
+		} else {
+			err = k.SetAlias(value)
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -235,6 +239,14 @@ func main() {
 			if v.ErrCode == 0 {
 				fmt.Printf("%s: %+v\n", k, v)
 			}
+		}
+	case "getallemeter":
+		m, err := kasa.BroadcastEmeter(*timeout, *repeats)
+		if err != nil {
+			panic(err)
+		}
+		for k, v := range *m {
+			fmt.Printf("%s: %s\n", k, v)
 		}
 	case "getsched":
 		if host == "" {

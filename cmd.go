@@ -27,12 +27,11 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 		state = 1
 	}
 	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}`, childID, state)
-	res, err := d.sendTCP(cmd)
+	err := d.sendUDP(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
-	fmt.Println(res)
 	return nil
 }
 
@@ -101,12 +100,23 @@ func (d *Device) SetLEDOff(t bool) error {
 }
 
 func (d *Device) SetAlias(s string) error {
-	cmd := fmt.Sprintf(`{"system":{"set_dev_alias":{"alias":%s}}}`, s)
+	cmd := fmt.Sprintf(`{"system":{"set_dev_alias":{"alias":"%s"}}}`, s)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
+	return nil
+}
+
+func (d *Device) SetChildAlias(childID, s string) error {
+	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}`, childID, s)
+	res, err := d.sendTCP(cmd)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	fmt.Println(res)
 	return nil
 }
 

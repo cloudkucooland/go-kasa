@@ -102,3 +102,52 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 	}
 	return &m, nil
 }
+
+func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
+	m := make(map[string]string)
+
+	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
+	if err != nil {
+		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		return &m, err
+	}
+	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+
+	go func() {
+		payload := encryptUDP(`{"emeter":{"get_realtime":{}}}`)
+		for i := 0; i < probes; i++ {
+			// fmt.Println("sending broadcast")
+			_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: net.ParseIP("255.255.255.255"), Port: 9999})
+			if err != nil {
+				fmt.Printf("discovery failed: %s\n", err.Error())
+				return
+			}
+			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
+		}
+	}()
+
+	buffer := make([]byte, 1024)
+	for {
+		n, addr, err := conn.ReadFromUDP(buffer)
+		if err != nil {
+			fmt.Println(err.Error())
+			break
+		}
+		res := decrypt(buffer[:n])
+
+		// I don't have anything to test with yet
+		/* var kd kasaDevice
+		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+			fmt.Printf("unmarshal: %s\n", err.Error())
+			continue
+		}
+		if kd.Dimmer.ErrCode != 0 {
+			// fmt.Printf("%s\n", kd.Dimmer.ErrMsg)
+			continue
+		} */
+		// fmt.Printf("%+v\n", kd.Dimmer.Parameters)
+		m[addr.IP.String()] = res
+	}
+	return &m, nil
+}
