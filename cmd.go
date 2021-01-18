@@ -20,6 +20,22 @@ func (d *Device) SetRelayState(newstate bool) error {
 	return nil
 }
 
+func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
+	// fmt.Printf("setting kasa hardware state for [%s] to [%t]", a.Name, newstate)
+	state := 0
+	if newstate {
+		state = 1
+	}
+	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}`, childID, state)
+	res, err := d.sendTCP(cmd)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	fmt.Println(res)
+	return nil
+}
+
 func (d *Device) SetBrightness(newval int) error {
 	cmd := fmt.Sprintf(`{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`, newval)
 	err := d.sendUDP(cmd)
@@ -39,11 +55,15 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 		return nil, err
 	}
 
+	// fmt.Println(res)
+
 	var kd kasaDevice
 	if err = json.Unmarshal([]byte(res), &kd); err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
+
+	// fmt.Printf("%+v\n", kd)
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 

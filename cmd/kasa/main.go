@@ -12,6 +12,7 @@ func main() {
 	var command, host, value string
 	repeats := flag.Int("r", 1, "UDP repeats")
 	timeout := flag.Int("t", 2, "timeout")
+	child := flag.String("c", "", "child")
 
 	flag.Parse()
 	args := flag.Args()
@@ -52,7 +53,13 @@ func main() {
 		fmt.Printf("MAC:\t\t%s\n", s.MAC)
 		fmt.Printf("LED Off:\t%d\n", s.LEDOff)
 		fmt.Printf("Active Mode:\t%s\n", s.ActiveMode)
-		fmt.Printf("Relay:\t%d\tBrightness:\t%d%%\n", s.RelayState, s.Brightness)
+        if s.NumChildren > 0 {
+            for _, v := range s.Children {
+		        fmt.Printf("Outlet [%s]:\t%d\t\t(%s)\n", v.Alias, v.RelayState, v.ID)
+            }
+        } else {
+		    fmt.Printf("Relay:\t%d\tBrightness:\t%d%%\n", s.RelayState, s.Brightness)
+        }
 	case "status":
 		if host == "" {
 			fmt.Println("usage: kasa status [host]")
@@ -65,7 +72,13 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("[%s]\tRelay:\t%d\tBrightness:\t%d%%\n", s.Alias, s.RelayState, s.Brightness)
+        if s.NumChildren > 0 {
+            for _, v := range s.Children {
+		        fmt.Printf("[%s].[%s]:\t%d\n", s.Alias, v.Alias, v.RelayState)
+            }
+        } else {
+		    fmt.Printf("[%s]\tRelay:\t%d\tBrightness:\t%d%%\n", s.Alias, s.RelayState, s.Brightness)
+        }
 	case "brightness":
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa brightness [host] [1-100]")
@@ -114,7 +127,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		err = k.SetRelayState(b)
+        if *child != "" {
+            k.SetRelayStateChild(*child, b)
+        } else {
+		    err = k.SetRelayState(b)
+        }
 		if err != nil {
 			panic(err)
 		}
