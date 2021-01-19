@@ -11,6 +11,7 @@ import (
 type Device struct {
 	IP     string
 	parsed net.IP
+	Debug  bool
 }
 
 func NewDevice(ip string) (*Device, error) {
@@ -44,54 +45,61 @@ type getSysinfo struct {
 
 // defined by kasa devices
 type Sysinfo struct {
-	SWVersion   string  `json:"sw_ver"`
-	HWVersion   string  `json:"hw_ver"`
-	Model       string  `json:"model"`
-	DeviceID    string  `json:"deviceId"`
-	OEMID       string  `json:"oemId"`
-	HWID        string  `json:"hwId"`
-	RSSI        int     `json:"rssi"`
-	Longitude   int     `json:"longitude_i"`
-	Latitude    int     `json:"latitude_i"`
-	Alias       string  `json:"alias"`
-	Status      string  `json:"status"`
-	MIC         string  `json:"mic_type"`
-	Feature     string  `json:"feature"`
-	MAC         string  `json:"mac"`
-	Updating    int     `json""updating"`
-	LEDOff      int     `json:"led_off"`
-	RelayState  int     `json:"relay_state"`
-	Brightness  int     `json:"brightness"`
-	OnTime      int     `json:"on_time"`
-	ActiveMode  string  `json:"active_mode"`
-	DevName     string  `json:"dev_name"`
-	Children    []child `json:"children"`
-	NumChildren int     `json:"child_num"`
-	NTCState    int     `json:"ntc_state"`
+	SWVersion      string   `json:"sw_ver"`
+	HWVersion      string   `json:"hw_ver"`
+	Model          string   `json:"model"`
+	DeviceID       string   `json:"deviceId"`
+	OEMID          string   `json:"oemId"`
+	HWID           string   `json:"hwId"`
+	RSSI           int8     `json:"rssi"`
+	Longitude      int      `json:"longitude_i"`
+	Latitude       int      `json:"latitude_i"`
+	Alias          string   `json:"alias"`
+	Status         string   `json:"status"`
+	MIC            string   `json:"mic_type"`
+	Feature        string   `json:"feature"`
+	MAC            string   `json:"mac"`
+	Updating       uint8    `json""updating"`
+	LEDOff         uint8    `json:"led_off"`
+	RelayState     uint8    `json:"relay_state"`
+	Brightness     uint8    `json:"brightness"`
+	OnTime         int      `json:"on_time"`
+	ActiveMode     string   `json:"active_mode"`
+	DevName        string   `json:"dev_name"`
+	Children       []child  `json:"children"`
+	NumChildren    uint8    `json:"child_num"`
+	NTCState       int      `json:"ntc_state"`
+	PreferredState []preset `json:"preferred_state"`
+	ErrCode        uint8    `json:"error_code"`
 }
 
 type dimmer struct {
 	Parameters dimmerParameters `json:"get_dimmer_parameters"`
-	ErrCode    int              `json:"err_code"`
+	ErrCode    uint8            `json:"err_code"`
 	ErrMsg     string           `json:"err_msg"`
 }
 
 type dimmerParameters struct {
-	MinThreshold  int    `json:"minThreshold"`
-	FadeOnTime    int    `json:"fadeOnTime"`
-	FadeOffTime   int    `json:"fadeOffTime"`
-	GentleOnTime  int    `json:"gentleOnTime"`
-	GentleOffTime int    `json:"gentleOffTime"`
-	RampRate      int    `json:"rampRate"`
-	BulbType      int    `json:"bulb_type"`
-	ErrCode       int    `json:"err_code"`
+	MinThreshold  uint16 `json:"minThreshold"`
+	FadeOnTime    uint16 `json:"fadeOnTime"`
+	FadeOffTime   uint16 `json:"fadeOffTime"`
+	GentleOnTime  uint16 `json:"gentleOnTime"`
+	GentleOffTime uint16 `json:"gentleOffTime"`
+	RampRate      uint16 `json:"rampRate"`
+	BulbType      uint8  `json:"bulb_type"`
+	ErrCode       uint8  `json:"err_code"`
 	ErrMsg        string `json:"err_msg"`
 }
 
 type child struct {
 	ID         string `json:"id"`
-	RelayState int    `json:"state"`
+	RelayState uint8  `json:"state"`
 	Alias      string `json:"alias"`
 	OnTime     int    `json:"on_time"`
 	// NextAction
+}
+
+type preset struct {
+	Index      uint8 `json:"index"`
+	Brightness uint8 `json:"brightness"`
 }

@@ -13,6 +13,7 @@ func main() {
 	repeats := flag.Int("r", 1, "UDP repeats")
 	timeout := flag.Int("t", 2, "timeout")
 	child := flag.String("c", "", "child")
+	debug := flag.Bool("d", false, "debug")
 
 	flag.Parse()
 	args := flag.Args()
@@ -30,14 +31,20 @@ func main() {
 		value = args[2]
 	}
 
+	var k *kasa.Device
+	if host != "" {
+		var err error
+		k, err = kasa.NewDevice(host)
+		if err != nil {
+			panic(err)
+		}
+		k.Debug = *debug
+	}
+
 	switch command {
 	case "args":
 		fmt.Printf("command: %s ; host: %s ; value: %s\n", command, host, value)
 	case "info":
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
 		s, err := k.GetSettings()
 		if err != nil {
 			panic(err)
@@ -64,10 +71,6 @@ func main() {
 		if host == "" {
 			fmt.Println("usage: kasa status [host]")
 		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
 		s, err := k.GetSettings()
 		if err != nil {
 			panic(err)
@@ -82,10 +85,6 @@ func main() {
 	case "brightness":
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa brightness [host] [1-100]")
-		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
 		}
 		b, err := strconv.Atoi(value)
 		if err != nil {
@@ -106,11 +105,7 @@ func main() {
 			fmt.Println("usage: kasa nocloud [host]")
 			return
 		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
-		err = k.DisableCloud()
+		err := k.DisableCloud()
 		if err != nil {
 			panic(err)
 		}
@@ -118,10 +113,6 @@ func main() {
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa switch [host] [true|false]")
 			return
-		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
 		}
 		b, err := strconv.ParseBool(value)
 		if err != nil {
@@ -139,10 +130,6 @@ func main() {
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa ledoff [host] [true|false]")
 			return
-		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
 		}
 		b, err := strconv.ParseBool(value)
 		if err != nil {
@@ -170,18 +157,21 @@ func main() {
 		fmt.Printf("found %d devices\n", len(m))
 		for _, k := range keys {
 			v := m[k]
-			fmt.Printf("%s: %s [state: %d] [brightness: %3d] %s\n", k, v.Model, v.RelayState, v.Brightness, v.Alias)
+			if len(v.Children) == 0 {
+				fmt.Printf("%15s: %s %32s [state: %d] [brightness: %3d]\n", k, v.Model, v.Alias, v.RelayState, v.Brightness)
+			} else {
+				fmt.Printf("%15s: %s %s\n", k, v.Model, v.Alias)
+				for _, c := range v.Children {
+					fmt.Printf("    ID: %40s%s %26s [state: %d]\n", v.DeviceID, c.ID, c.Alias, c.RelayState)
+				}
+			}
 		}
 	case "reboot":
 		if host == "" {
 			fmt.Println("usage: kasa reboot [host]")
 			return
 		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
-		err = k.Reboot()
+		err := k.Reboot()
 		if err != nil {
 			panic(err)
 		}
@@ -190,10 +180,7 @@ func main() {
 			fmt.Println("usage: kasa alias [host] [NewName]")
 			return
 		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
+		var err error
 		if *child != "" {
 			err = k.SetChildAlias(*child, value)
 		} else {
@@ -207,10 +194,6 @@ func main() {
 			fmt.Println("usage: kasa wifistatus [host]")
 			return
 		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
-		}
 		res, err := k.GetWIFIStatus()
 		if err != nil {
 			panic(err)
@@ -220,10 +203,6 @@ func main() {
 		if host == "" {
 			fmt.Println("usage: kasa getdimmer [host]")
 			return
-		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
 		}
 		res, err := k.GetDimmerParameters()
 		if err != nil {
@@ -248,14 +227,19 @@ func main() {
 		for k, v := range *m {
 			fmt.Printf("%s: %s\n", k, v)
 		}
+	case "setmode":
+		if host == "" {
+			fmt.Println("usage: kasa setmode [host] mode")
+			return
+		}
+		err := k.SetMode(value)
+		if err != nil {
+			panic(err)
+		}
 	case "getsched":
 		if host == "" {
 			fmt.Println("usage: kasa getsched [host]")
 			return
-		}
-		k, err := kasa.NewDevice(host)
-		if err != nil {
-			panic(err)
 		}
 		res, err := k.GetRules()
 		if err != nil {
