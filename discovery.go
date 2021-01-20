@@ -22,10 +22,13 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 		payload := encryptUDP(sysinfo)
 		for i := 0; i < probes; i++ {
 			// fmt.Println("sending broadcast")
-			_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: net.ParseIP("255.255.255.255"), Port: 9999})
-			if err != nil {
-				fmt.Printf("discovery failed: %s\n", err.Error())
-				return
+			bcast, err := broadcastAddresses()
+			for _, b := range bcast {
+				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
+				if err != nil {
+					fmt.Printf("discovery failed: %s\n", err.Error())
+					return
+				}
 			}
 			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
 		}
@@ -68,10 +71,13 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 		payload := encryptUDP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
 		for i := 0; i < probes; i++ {
 			// fmt.Println("sending broadcast")
-			_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: net.ParseIP("255.255.255.255"), Port: 9999})
-			if err != nil {
-				fmt.Printf("discovery failed: %s\n", err.Error())
-				return
+			bcast, err := broadcastAddresses()
+			for _, b := range bcast {
+				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
+				if err != nil {
+					fmt.Printf("discovery failed: %s\n", err.Error())
+					return
+				}
 			}
 			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
 		}
@@ -118,10 +124,13 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 		payload := encryptUDP(`{"emeter":{"get_realtime":{}}}`)
 		for i := 0; i < probes; i++ {
 			// fmt.Println("sending broadcast")
-			_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: net.ParseIP("255.255.255.255"), Port: 9999})
-			if err != nil {
-				fmt.Printf("discovery failed: %s\n", err.Error())
-				return
+			bcast, err := broadcastAddresses()
+			for _, b := range bcast {
+				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
+				if err != nil {
+					fmt.Printf("discovery failed: %s\n", err.Error())
+					return
+				}
 			}
 			time.Sleep(time.Second * time.Duration(timeout/(probes+1)))
 		}
