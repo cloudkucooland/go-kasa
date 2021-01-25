@@ -225,7 +225,15 @@ func main() {
 			panic(err)
 		}
 		for k, v := range *m {
-			fmt.Printf("%s: %s\n", k, v)
+			fmt.Printf("%s: %+v\n", k, v)
+		}
+	case "getallwifi":
+		m, err := kasa.BroadcastWifiParameters(*timeout, *repeats)
+		if err != nil {
+			panic(err)
+		}
+		for k, v := range *m {
+			fmt.Printf("%s: %+v\n", k, v)
 		}
 	case "setmode":
 		if host == "" {

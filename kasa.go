@@ -36,6 +36,7 @@ func NewDevice(ip string) (*Device, error) {
 type kasaDevice struct {
 	GetSysinfo getSysinfo `json:"system"`
 	Dimmer     dimmer     `json:"smartlife.iot.dimmer"`
+	NetIf      netif      `json:"netif"`
 }
 
 // defined by kasa devices
@@ -70,12 +71,12 @@ type Sysinfo struct {
 	NumChildren    uint8    `json:"child_num"`
 	NTCState       int      `json:"ntc_state"`
 	PreferredState []preset `json:"preferred_state"`
-	ErrCode        uint8    `json:"error_code"`
+	ErrCode        int8     `json:"error_code"`
 }
 
 type dimmer struct {
 	Parameters dimmerParameters `json:"get_dimmer_parameters"`
-	ErrCode    uint8            `json:"err_code"`
+	ErrCode    int8             `json:"err_code"`
 	ErrMsg     string           `json:"err_msg"`
 }
 
@@ -87,7 +88,7 @@ type dimmerParameters struct {
 	GentleOffTime uint16 `json:"gentleOffTime"`
 	RampRate      uint16 `json:"rampRate"`
 	BulbType      uint8  `json:"bulb_type"`
-	ErrCode       uint8  `json:"err_code"`
+	ErrCode       int8   `json:"err_code"`
 	ErrMsg        string `json:"err_msg"`
 }
 
@@ -102,4 +103,19 @@ type child struct {
 type preset struct {
 	Index      uint8 `json:"index"`
 	Brightness uint8 `json:"brightness"`
+}
+
+//{"netif":{"get_stainfo":{"ssid":"IoT8417","key_type":3,"rssi":-61,"err_code":0}}}
+type netif struct {
+	StaInfo stainfo `json:"get_stainfo"`
+	ErrCode int8    `json:"err_code"`
+	ErrMsg  string  `json:"err_msg"`
+}
+
+type stainfo struct {
+	SSID    string `json:"ssid"`
+	KeyType int8   `json:"key_type"`
+	RSSI    int8   `json:"rssi"`
+	ErrCode int8   `json:"err_code"`
+	ErrMsg  string `json:"err_msg"`
 }
