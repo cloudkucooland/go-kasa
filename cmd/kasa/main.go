@@ -149,8 +149,8 @@ func main() {
 		}
 
 		keys := make([]string, 0, len(m))
-		for k := range m {
-			keys = append(keys, k)
+		for key := range m {
+			keys = append(keys, key)
 		}
 		sort.Strings(keys)
 
@@ -165,6 +165,56 @@ func main() {
 					fmt.Printf("    ID: %40s%s %26s [state: %d]\n", v.DeviceID, c.ID, c.Alias, c.RelayState)
 				}
 			}
+		}
+	case "emeter":
+		if host == "" {
+			fmt.Println("usage: kasa emeter [host] [month] [year]")
+			return
+		}
+		month := 0
+		year := 0
+		var err error
+
+		if value != "" {
+			month, err = strconv.Atoi(value)
+			if err != nil {
+				panic(err)
+			}
+			if month < 1 || month > 12 {
+				panic("invalid month")
+			}
+		}
+
+		if argc > 3 {
+			year, err = strconv.Atoi(args[3])
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		if month == 0 {
+			em, err := k.GetEmeter()
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Printf("CurrentMA:\t%d\n", em.CurrentMA)
+			fmt.Printf("VoltageMV:\t%d\n", em.VoltageMV)
+			fmt.Printf("PowerMW:\t%d\n", em.PowerMW)
+			fmt.Printf("TotalWH:\t%d\n", em.TotalWH)
+			return
+		}
+
+		if year == 0 {
+			year = 2021 // make this auto-determine the current year
+		}
+		// get month/year date range
+		em, err := k.GetEmeterMonth(month, year)
+		if err != nil {
+			panic(err)
+		}
+		for _, v := range em.List {
+			fmt.Printf("%d-%02d-%02d Total WH:\t%d\n", v.Year, v.Month, v.Day, v.WH)
 		}
 	case "reboot":
 		if host == "" {

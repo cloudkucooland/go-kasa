@@ -196,6 +196,8 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 		}
 		res := decrypt(buffer[:n])
 
+		fmt.Printf("%s\n", res)
+
 		// I don't have anything to test with yet
 		/* var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
@@ -205,8 +207,8 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 		if kd.Dimmer.ErrCode != 0 {
 			// fmt.Printf("%s\n", kd.Dimmer.ErrMsg)
 			continue
-		} */
-		// fmt.Printf("%+v\n", kd.Dimmer.Parameters)
+		}
+		fmt.Printf("%+v\n", kd.Dimmer.Parameters) */
 		m[addr.IP.String()] = res
 	}
 	return &m, nil

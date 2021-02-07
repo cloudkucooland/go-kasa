@@ -70,6 +70,80 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 
+const emeter = `{"emeter":{"get_realtime":{}}}`
+
+func (d *Device) GetEmeter() (*emeterRealtime, error) {
+	res, err := d.sendTCP(emeter)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Println(res)
+	}
+
+	var em emeterTop
+	if err = json.Unmarshal([]byte(res), &em); err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Printf("%+v\n", em)
+	}
+	return &em.E.Realtime, nil
+}
+
+const emeterGetDaystat = `{"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
+
+func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
+	q := fmt.Sprintf(emeterGetDaystat, month, year)
+
+	res, err := d.sendTCP(q)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Println(res)
+	}
+
+	var em emeterTop
+	if err = json.Unmarshal([]byte(res), &em); err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Printf("%+v\n", em)
+	}
+	return &em.E.DayStat, nil
+}
+
+/*
+Get EMeter VGain and IGain Settings
+{"emeter":{"get_vgain_igain":{}}}
+
+Set EMeter VGain and Igain
+{"emeter":{"set_vgain_igain":{"vgain":13462,"igain":16835}}}
+
+Start EMeter Calibration
+{"emeter":{"start_calibration":{"vtarget":13462,"itarget":16835}}}
+*/
+
+/*
+Get Daily Statistic for given Month
+{"emeter":{"get_daystat":{"month":1,"year":2016}}}
+
+Get Montly Statistic for given Year
+{"emeter":{"get_monthstat":{"year":2016}}}
+
+Erase All EMeter Statistics
+{"emeter":{"erase_emeter_stat":null}}
+*/
+
 // forget any cloud settings
 func (d *Device) DisableCloud() error {
 	err := d.sendUDP(`{"cnCloud":{"unbind":null}}`)

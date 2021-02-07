@@ -95,3 +95,19 @@ LED Off:	0
 Active Mode:	none
 Relay:	0	Brightness:	25%
 ```
+
+Get real-time usage
+```
+% kasa emeter 192.168.1.203
+CurrentMA:	1807
+VoltageMV:	122209
+PowerMW:	175494
+TotalWH:	2097
+```
+
+Get daily stats for a month (Feb 2021)
+```
+% kasa emeter 192.168.1.203 02 2021
+2021-02-06 Total WH:	842
+2021-02-07 Total WH:	1257
+```

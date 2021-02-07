@@ -119,3 +119,36 @@ type stainfo struct {
 	ErrCode int8   `json:"err_code"`
 	ErrMsg  string `json:"err_msg"`
 }
+
+// {"emeter":{"get_realtime":{"current_ma":1799,"voltage_mv":121882,"power_mw":174545,"total_wh":547,"err_code":0}}}
+// {"emeter":{"get_daystat":{"day_list":[{"year":2021,"month":2,"day":6,"energy_wh":842},{"year":2021,"month":2,"day":7,"energy_wh":1142}],"err_code":0}}}
+type emeterTop struct {
+	E emeterSub `json:"emeter"`
+}
+
+type emeterSub struct {
+	Realtime emeterRealtime `json:"get_realtime"`
+	DayStat  emeterDaystat  `json:"get_daystat"`
+}
+
+type emeterRealtime struct {
+	CurrentMA uint   `json:"current_ma"`
+	VoltageMV uint   `json:"voltage_mv"`
+	PowerMW   uint   `json:"power_mw"`
+	TotalWH   uint   `json:"total_wh"`
+	ErrCode   int8   `json:"err_code"`
+	ErrMsg    string `json:"err_msg"`
+}
+
+type emeterDaystat struct {
+	List    []emeterDay `json:"day_list"`
+	ErrCode int8        `json:"err_code"`
+	ErrMsg  string      `json:"err_msg"`
+}
+
+type emeterDay struct {
+	Year  uint16 `json:"year"`
+	Month uint8  `json:"month"`
+	Day   uint8  `json:"day"`
+	WH    uint16 `json:"energy_wh"`
+}
