@@ -216,6 +216,21 @@ func main() {
 		for _, v := range em.List {
 			fmt.Printf("%d-%02d-%02d Total WH:\t%d\n", v.Year, v.Month, v.Day, v.WH)
 		}
+	case "countdown":
+		if host == "" {
+			fmt.Println("usage: kasa countdown [host] [delete|time]")
+		}
+		if value == "delete" {
+			k.ClearCountdownRules()
+			return
+		}
+		rules, err := k.GetCountdownRules()
+		if err != nil {
+			panic(err)
+		}
+		for _, r := range *rules {
+			fmt.Printf("%+v\n", r)
+		}
 	case "reboot":
 		if host == "" {
 			fmt.Println("usage: kasa reboot [host]")

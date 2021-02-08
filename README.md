@@ -108,3 +108,14 @@ Get daily stats for a month (Feb 2021)
 2021-02-06 Total WH:	842
 2021-02-07 Total WH:	1257
 ```
+
+Get Countdown Rules (needs to be prettier)
+% kasa countdown 192.168.1.206
+```
+{ID:8725326BB2D0C0DD8D521379163C7D67 Name:TooFar Enable:0 Delay:0 Active:1 Remaining:0}
+```
+
+Clear Countdown rules
+```
+% kasa countdown 192.168.1.206 delete
+```

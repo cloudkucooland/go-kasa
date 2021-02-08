@@ -235,6 +235,38 @@ func (d *Device) GetRules() (string, error) {
 	return res, nil
 }
 
+func (d *Device) GetCountdownRules() (*[]rule, error) {
+	res, err := d.sendTCP(`{"count_down":{"get_rules":{}}}`)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Println(res)
+	}
+
+	var c kasaDevice
+	if err = json.Unmarshal([]byte(res), &c); err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	if d.Debug {
+		fmt.Printf("%+v\n", c)
+	}
+	return &c.Countdown.GetRules.RuleList, nil
+}
+
+func (d *Device) ClearCountdownRules() error {
+	err := d.sendUDP(`{"count_down":{"delete_all_rules":{}}}`)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
 
 // when I get bored, set myself up as the cloud server... -- make it as responsive as the shellies

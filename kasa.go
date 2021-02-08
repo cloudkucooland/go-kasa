@@ -37,6 +37,7 @@ type kasaDevice struct {
 	GetSysinfo getSysinfo `json:"system"`
 	Dimmer     dimmer     `json:"smartlife.iot.dimmer"`
 	NetIf      netif      `json:"netif"`
+	Countdown  countdown  `json:"count_down"`
 }
 
 // defined by kasa devices
@@ -151,4 +152,36 @@ type emeterDay struct {
 	Month uint8  `json:"month"`
 	Day   uint8  `json:"day"`
 	WH    uint16 `json:"energy_wh"`
+}
+
+type countdown struct {
+	GetRules getRules `json:"get_rules"`
+	DelRules delRules `json:"delete_all_rules"`
+	AddRule  addRule  `json:"add_rule"`
+}
+
+type getRules struct {
+	RuleList     []rule `json:"rule_list"`
+	ErrorCode    int8   `json:"err_code"`
+	ErrorMessage string `json:"err_msg"`
+}
+
+type rule struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Enable    uint8  `json:"enable"`
+	Delay     uint16 `json:"delay"`
+	Active    uint8  `json:"act"`
+	Remaining uint16 `json:"remain"`
+}
+
+type delRules struct {
+	ErrorCode    int8   `json:"err_code"`
+	ErrorMessage string `json:"err_msg"`
+}
+
+type addRule struct {
+	ID           string `json:"id"`
+	ErrorCode    int8   `json:"err_code"`
+	ErrorMessage string `json:"err_msg"`
 }
