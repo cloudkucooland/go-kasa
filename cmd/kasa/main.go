@@ -236,10 +236,7 @@ func main() {
 			fmt.Println("usage: kasa reboot [host]")
 			return
 		}
-		err := k.Reboot()
-		if err != nil {
-			panic(err)
-		}
+		k.Reboot()
 	case "alias":
 		if host == "" || value == "" {
 			fmt.Println("usage: kasa alias [host] [NewName]")
@@ -334,11 +331,10 @@ func main() {
 			fmt.Println("usage: kasa cleaercountdown [host]")
 			return
 		}
-		res, err := k.ClearCountdownRules()
+		err := k.ClearCountdownRules()
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(res)
 	default:
 		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getrules, getcountdown, getallwifi, emeter, getallemeter, clearcountdown")
 	}
