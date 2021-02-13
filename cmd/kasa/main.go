@@ -309,9 +309,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-	case "getsched":
+	case "getrules":
 		if host == "" {
-			fmt.Println("usage: kasa getsched [host]")
+			fmt.Println("usage: kasa getrules [host]")
 			return
 		}
 		res, err := k.GetRules()
@@ -319,7 +319,27 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(res)
+	case "getcountdown":
+		if host == "" {
+			fmt.Println("usage: kasa getcountdown [host]")
+			return
+		}
+		res, err := k.GetCountdownRules()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(res)
+	case "clearcountdown":
+		if host == "" {
+			fmt.Println("usage: kasa cleaercountdown [host]")
+			return
+		}
+		res, err := k.ClearCountdownRules()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(res)
 	default:
-		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getsched")
+		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getrules, getcountdown, getallwifi, emeter, getallemeter, clearcountdown")
 	}
 }

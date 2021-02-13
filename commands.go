@@ -198,7 +198,7 @@ func (d *Device) SetChildAlias(childID, s string) error {
 }
 
 func (d *Device) SetMode(m string) error {
-	cmd := fmt.Sprintf(`{"system":{"set_mode":{"mode":"%m"}}}`, m)
+	cmd := fmt.Sprintf(`{"system":{"set_mode":{"mode":"%s"}}}`, m)
 	res, err := d.sendTCP(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
