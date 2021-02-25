@@ -83,16 +83,17 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 		fmt.Println(res)
 	}
 
-	var em emeterTop
-	if err = json.Unmarshal([]byte(res), &em); err != nil {
+	var k kasaDevice
+	if err = json.Unmarshal([]byte(res), &k); err != nil {
 		fmt.Println(err.Error())
+		fmt.Println(res)
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", em)
+		fmt.Printf("%+v\n", k)
 	}
-	return &em.E.Realtime, nil
+	return &k.Emeter.Realtime, nil
 }
 
 const emeterGetDaystat = `{"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
@@ -110,16 +111,17 @@ func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 		fmt.Println(res)
 	}
 
-	var em emeterTop
-	if err = json.Unmarshal([]byte(res), &em); err != nil {
+	var k kasaDevice
+	if err = json.Unmarshal([]byte(res), &k); err != nil {
 		fmt.Println(err.Error())
+		fmt.Println(res)
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", em)
+		fmt.Printf("%+v\n", k)
 	}
-	return &em.E.DayStat, nil
+	return &k.Emeter.DayStat, nil
 }
 
 /*

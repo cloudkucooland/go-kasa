@@ -38,6 +38,7 @@ type kasaDevice struct {
 	Dimmer     dimmer     `json:"smartlife.iot.dimmer"`
 	NetIf      netif      `json:"netif"`
 	Countdown  countdown  `json:"count_down"`
+	Emeter     emeterSub  `json:"emeter"`
 }
 
 // defined by kasa devices
@@ -123,9 +124,6 @@ type stainfo struct {
 
 // {"emeter":{"get_realtime":{"current_ma":1799,"voltage_mv":121882,"power_mw":174545,"total_wh":547,"err_code":0}}}
 // {"emeter":{"get_daystat":{"day_list":[{"year":2021,"month":2,"day":6,"energy_wh":842},{"year":2021,"month":2,"day":7,"energy_wh":1142}],"err_code":0}}}
-type emeterTop struct {
-	E emeterSub `json:"emeter"`
-}
 
 type emeterSub struct {
 	Realtime emeterRealtime `json:"get_realtime"`
