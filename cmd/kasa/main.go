@@ -198,10 +198,10 @@ func main() {
 				panic(err)
 			}
 
-			fmt.Printf("CurrentMA:\t%d\n", em.CurrentMA)
-			fmt.Printf("VoltageMV:\t%d\n", em.VoltageMV)
-			fmt.Printf("PowerMW:\t%d\n", em.PowerMW)
-			fmt.Printf("TotalWH:\t%d\n", em.TotalWH)
+			fmt.Printf("Current:\t%dmA\n", em.CurrentMA)
+			fmt.Printf("Voltage:\t%2.2fV\n", float64(em.VoltageMV)/1000)
+			fmt.Printf("Power:\t\t%2.2fW\n", float64(em.PowerMW)/1000)
+			fmt.Printf("Total:\t\t%2.2fkWh\n", float64(em.TotalWH)/1000)
 			return
 		}
 
@@ -214,7 +214,7 @@ func main() {
 			panic(err)
 		}
 		for _, v := range em.List {
-			fmt.Printf("%d-%02d-%02d Total WH:\t%d\n", v.Year, v.Month, v.Day, v.WH)
+			fmt.Printf("%d-%02d-%02d:\t%2.2fkWh\n", v.Year, v.Month, v.Day, float64(v.WH)/1000)
 		}
 	case "countdown":
 		if host == "" {
