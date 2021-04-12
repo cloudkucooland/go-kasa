@@ -2,7 +2,6 @@ package kasa
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"time"
 )
@@ -12,7 +11,7 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start discovery listener: %s", err.Error())
 		return m, err
 	}
 	defer conn.Close()
@@ -21,12 +20,12 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	go func() {
 		payload := encryptUDP(sysinfo)
 		for i := 0; i < probes; i++ {
-			// fmt.Println("sending broadcast")
+			// klogger.Println("sending broadcast")
 			bcast, _ := broadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
-					fmt.Printf("discovery failed: %s\n", err.Error())
+					klogger.Printf("discovery failed: %s\n", err.Error())
 					return
 				}
 			}
@@ -35,19 +34,19 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	}()
 
 	buffer := make([]byte, 1024)
-	// fmt.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
+	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
-			fmt.Println(err.Error())
+			klogger.Println(err.Error())
 			break
 		}
 		res := decrypt(buffer[:n])
-		// fmt.Printf("%s:\n%s\n", addr.IP.String(), res)
+		// klogger.Printf("%s:\n%s\n", addr.IP.String(), res)
 
 		var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
-			fmt.Printf("unmarshal: %s\n", err.Error())
+			klogger.Printf("unmarshal: %s\n", err.Error())
 			return nil, err
 		}
 		m[addr.IP.String()] = &kd.GetSysinfo.Sysinfo
@@ -61,7 +60,7 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start discovery listener: %s", err.Error())
 		return &m, err
 	}
 	defer conn.Close()
@@ -70,12 +69,12 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 	go func() {
 		payload := encryptUDP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
 		for i := 0; i < probes; i++ {
-			// fmt.Println("sending broadcast")
+			// klogger.Println("sending broadcast")
 			bcast, _ := broadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
-					fmt.Printf("discovery failed: %s\n", err.Error())
+					klogger.Printf("discovery failed: %s\n", err.Error())
 					return
 				}
 			}
@@ -84,26 +83,26 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 	}()
 
 	buffer := make([]byte, 1024)
-	// fmt.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
+	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
-			fmt.Println(err.Error())
+			klogger.Println(err.Error())
 			break
 		}
 		res := decrypt(buffer[:n])
 
-		// fmt.Printf("%s\n", res)
+		// klogger.Printf("%s\n", res)
 		var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
-			fmt.Printf("unmarshal: %s\n", err.Error())
+			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
 		if kd.Dimmer.ErrCode != 0 {
-			// fmt.Printf("%s\n", kd.Dimmer.ErrMsg)
+			// klogger.Printf("%s\n", kd.Dimmer.ErrMsg)
 			continue
 		}
-		// fmt.Printf("%+v\n", kd.Dimmer.Parameters)
+		// klogger.Printf("%+v\n", kd.Dimmer.Parameters)
 		m[addr.IP.String()] = &(kd.Dimmer.Parameters)
 	}
 	return &m, nil
@@ -114,7 +113,7 @@ func BroadcastWifiParameters(timeout, probes int) (*map[string]*stainfo, error) 
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start discovery listener: %s", err.Error())
 		return &m, err
 	}
 	defer conn.Close()
@@ -127,7 +126,7 @@ func BroadcastWifiParameters(timeout, probes int) (*map[string]*stainfo, error) 
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
-					fmt.Printf("discovery failed: %s\n", err.Error())
+					klogger.Printf("discovery failed: %s\n", err.Error())
 					return
 				}
 			}
@@ -139,22 +138,22 @@ func BroadcastWifiParameters(timeout, probes int) (*map[string]*stainfo, error) 
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
-			fmt.Println(err.Error())
+			klogger.Println(err.Error())
 			break
 		}
 		res := decrypt(buffer[:n])
-		// fmt.Println(string(res))
+		// klogger.Println(string(res))
 
 		var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
-			fmt.Printf("unmarshal: %s\n", err.Error())
+			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
 		if kd.NetIf.ErrCode != 0 {
-			fmt.Printf("%s\n", kd.NetIf.ErrMsg)
+			klogger.Printf("%s\n", kd.NetIf.ErrMsg)
 			continue
 		}
-		// fmt.Printf("%+v\n", kd.NetIf.StaInfo)
+		// klogger.Printf("%+v\n", kd.NetIf.StaInfo)
 		m[addr.IP.String()] = &(kd.NetIf.StaInfo)
 	}
 	return &m, nil
@@ -165,7 +164,7 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		fmt.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start discovery listener: %s", err.Error())
 		return &m, err
 	}
 	defer conn.Close()
@@ -174,12 +173,12 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 	go func() {
 		payload := encryptUDP(`{"emeter":{"get_realtime":{}}}`)
 		for i := 0; i < probes; i++ {
-			// fmt.Println("sending broadcast")
+			// klogger.Println("sending broadcast")
 			bcast, _ := broadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
-					fmt.Printf("discovery failed: %s\n", err.Error())
+					klogger.Printf("discovery failed: %s\n", err.Error())
 					return
 				}
 			}
@@ -191,24 +190,24 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
-			fmt.Println(err.Error())
+			klogger.Println(err.Error())
 			break
 		}
 		res := decrypt(buffer[:n])
 
-		fmt.Printf("%s\n", res)
+		klogger.Printf("%s\n", res)
 
 		// I don't have anything to test with yet
 		/* var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
-			fmt.Printf("unmarshal: %s\n", err.Error())
+			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
 		if kd.Dimmer.ErrCode != 0 {
-			// fmt.Printf("%s\n", kd.Dimmer.ErrMsg)
+			// klogger.Printf("%s\n", kd.Dimmer.ErrMsg)
 			continue
 		}
-		fmt.Printf("%+v\n", kd.Dimmer.Parameters) */
+		klogger.Printf("%+v\n", kd.Dimmer.Parameters) */
 		m[addr.IP.String()] = res
 	}
 	return &m, nil
