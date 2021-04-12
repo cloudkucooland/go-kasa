@@ -1,7 +1,6 @@
 package kasa
 
 import (
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -16,12 +15,12 @@ func (d *Device) sendTCP(cmd string) (string, error) {
 
 	conn, err := net.DialTCP("tcp", nil, &r)
 	if err != nil {
-		fmt.Printf("Cannot connnect to device: %s", err.Error())
+		klogger.Printf("Cannot connnect to device: %s", err.Error())
 		return "", err
 	}
 	_, err = conn.Write(payload)
 	if err != nil {
-		fmt.Printf("Cannot send command to device: %s", err.Error())
+		klogger.Printf("Cannot send command to device: %s", err.Error())
 		return "", err
 	}
 

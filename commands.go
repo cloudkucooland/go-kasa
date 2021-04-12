@@ -6,7 +6,10 @@ import (
 )
 
 func (d *Device) SetRelayState(newstate bool) error {
-	// fmt.Printf("setting kasa hardware state for [%s] to [%t]", a.Name, newstate)
+	if d.Debug {
+		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
+	}
+
 	state := 0
 	if newstate {
 		state = 1
@@ -14,14 +17,17 @@ func (d *Device) SetRelayState(newstate bool) error {
 	cmd := fmt.Sprintf(`{"system":{"set_relay_state":{"state":%d}}}`, state)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
 }
 
 func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
-	// fmt.Printf("setting kasa hardware state for [%s] to [%t]", a.Name, newstate)
+	if d.Debug {
+		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
+	}
+
 	state := 0
 	if newstate {
 		state = 1
@@ -29,7 +35,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}`, childID, state)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -39,7 +45,7 @@ func (d *Device) SetBrightness(newval int) error {
 	cmd := fmt.Sprintf(`{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`, newval)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -50,22 +56,22 @@ const sysinfo = `{"system":{"get_sysinfo":{}}}`
 func (d *Device) GetSettings() (*Sysinfo, error) {
 	res, err := d.sendTCP(sysinfo)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Println(res)
+		klogger.Println(res)
 	}
 
 	var kd kasaDevice
 	if err = json.Unmarshal([]byte(res), &kd); err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", kd)
+		klogger.Printf("%+v\n", kd)
 	}
 	return &kd.GetSysinfo.Sysinfo, nil
 }
@@ -75,23 +81,23 @@ const emeter = `{"emeter":{"get_realtime":{}}}`
 func (d *Device) GetEmeter() (*emeterRealtime, error) {
 	res, err := d.sendTCP(emeter)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Println(res)
+		klogger.Println(res)
 	}
 
 	var k kasaDevice
 	if err = json.Unmarshal([]byte(res), &k); err != nil {
-		fmt.Println(err.Error())
-		fmt.Println(res)
+		klogger.Println(err.Error())
+		klogger.Println(res)
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", k)
+		klogger.Printf("%+v\n", k)
 	}
 	return &k.Emeter.Realtime, nil
 }
@@ -103,23 +109,23 @@ func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 
 	res, err := d.sendTCP(q)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Println(res)
+		klogger.Println(res)
 	}
 
 	var k kasaDevice
 	if err = json.Unmarshal([]byte(res), &k); err != nil {
-		fmt.Println(err.Error())
-		fmt.Println(res)
+		klogger.Println(err.Error())
+		klogger.Println(res)
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", k)
+		klogger.Printf("%+v\n", k)
 	}
 	return &k.Emeter.DayStat, nil
 }
@@ -150,7 +156,7 @@ Erase All EMeter Statistics
 func (d *Device) DisableCloud() error {
 	err := d.sendUDP(`{"cnCloud":{"unbind":null}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -159,7 +165,7 @@ func (d *Device) DisableCloud() error {
 func (d *Device) Reboot() error {
 	err := d.sendUDP(`{"system":{"reboot":{"delay":2}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -173,7 +179,7 @@ func (d *Device) SetLEDOff(t bool) error {
 	cmd := fmt.Sprintf(`{"system":{"set_led_off":{"off":%d}}}`, off)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -183,7 +189,7 @@ func (d *Device) SetAlias(s string) error {
 	cmd := fmt.Sprintf(`{"system":{"set_dev_alias":{"alias":"%s"}}}`, s)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -193,7 +199,7 @@ func (d *Device) SetChildAlias(childID, s string) error {
 	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}`, childID, s)
 	err := d.sendUDP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil
@@ -203,17 +209,17 @@ func (d *Device) SetMode(m string) error {
 	cmd := fmt.Sprintf(`{"system":{"set_mode":{"mode":"%s"}}}`, m)
 	res, err := d.sendTCP(cmd)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
-	fmt.Println(res)
+	klogger.Println(res)
 	return nil
 }
 
 func (d *Device) GetWIFIStatus() (string, error) {
 	res, err := d.sendTCP(`{"netif":{"get_stainfo":{}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return "", err
 	}
 	return res, nil
@@ -222,7 +228,7 @@ func (d *Device) GetWIFIStatus() (string, error) {
 func (d *Device) GetDimmerParameters() (string, error) {
 	res, err := d.sendTCP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return "", err
 	}
 	return res, nil
@@ -231,7 +237,7 @@ func (d *Device) GetDimmerParameters() (string, error) {
 func (d *Device) GetRules() (string, error) {
 	res, err := d.sendTCP(`{"smartlife.iot.common.schedule":{"get_rules":{}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return "", err
 	}
 	return res, nil
@@ -240,22 +246,22 @@ func (d *Device) GetRules() (string, error) {
 func (d *Device) GetCountdownRules() (*[]rule, error) {
 	res, err := d.sendTCP(`{"count_down":{"get_rules":{}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Println(res)
+		klogger.Println(res)
 	}
 
 	var c kasaDevice
 	if err = json.Unmarshal([]byte(res), &c); err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return nil, err
 	}
 
 	if d.Debug {
-		fmt.Printf("%+v\n", c)
+		klogger.Printf("%+v\n", c)
 	}
 	return &c.Countdown.GetRules.RuleList, nil
 }
@@ -263,7 +269,7 @@ func (d *Device) GetCountdownRules() (*[]rule, error) {
 func (d *Device) ClearCountdownRules() error {
 	err := d.sendUDP(`{"count_down":{"delete_all_rules":{}}}`)
 	if err != nil {
-		fmt.Println(err.Error())
+		klogger.Println(err.Error())
 		return err
 	}
 	return nil

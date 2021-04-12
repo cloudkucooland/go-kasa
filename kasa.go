@@ -2,6 +2,7 @@ package kasa
 
 import (
 	"fmt"
+	"log"
 	"net"
 )
 
@@ -12,6 +13,14 @@ type Device struct {
 	IP     string
 	parsed net.IP
 	Debug  bool
+}
+
+// by default, use the standard logger, can be overwritten using kasa.SetLogger(l)
+var klogger kasalogger = log.Default()
+
+type kasalogger interface {
+	Println(...interface{})
+	Printf(string, ...interface{})
 }
 
 func NewDevice(ip string) (*Device, error) {
@@ -182,4 +191,8 @@ type addRule struct {
 	ID           string `json:"id"`
 	ErrorCode    int8   `json:"err_code"`
 	ErrorMessage string `json:"err_msg"`
+}
+
+func SetLogger(l kasalogger) {
+	klogger = l
 }
