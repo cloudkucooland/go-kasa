@@ -55,13 +55,13 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 }
 
 // func BroadcastDimmerParam(timeout, probes int) (map[string]*kasaSysinfo, error) {
-func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParameters, error) {
+func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameters, error) {
 	m := make(map[string]*dimmerParameters)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
 		klogger.Printf("unable to start discovery listener: %s", err.Error())
-		return &m, err
+		return m, err
 	}
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
@@ -105,16 +105,16 @@ func BroadcastDimmerParameters(timeout, probes int) (*map[string]*dimmerParamete
 		// klogger.Printf("%+v\n", kd.Dimmer.Parameters)
 		m[addr.IP.String()] = &(kd.Dimmer.Parameters)
 	}
-	return &m, nil
+	return m, nil
 }
 
-func BroadcastWifiParameters(timeout, probes int) (*map[string]*stainfo, error) {
+func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 	m := make(map[string]*stainfo)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
 		klogger.Printf("unable to start discovery listener: %s", err.Error())
-		return &m, err
+		return m, err
 	}
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
@@ -156,16 +156,16 @@ func BroadcastWifiParameters(timeout, probes int) (*map[string]*stainfo, error) 
 		// klogger.Printf("%+v\n", kd.NetIf.StaInfo)
 		m[addr.IP.String()] = &(kd.NetIf.StaInfo)
 	}
-	return &m, nil
+	return m, nil
 }
 
-func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
+func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 	m := make(map[string]string)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
 		klogger.Printf("unable to start discovery listener: %s", err.Error())
-		return &m, err
+		return m, err
 	}
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
@@ -210,5 +210,5 @@ func BroadcastEmeter(timeout, probes int) (*map[string]string, error) {
 		klogger.Printf("%+v\n", kd.Dimmer.Parameters) */
 		m[addr.IP.String()] = res
 	}
-	return &m, nil
+	return m, nil
 }

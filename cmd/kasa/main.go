@@ -276,7 +276,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		for k, v := range *m {
+		for k, v := range m {
 			if v.ErrCode == 0 {
 				fmt.Printf("%s: %+v\n", k, v)
 			}
@@ -286,7 +286,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		for k, v := range *m {
+		for k, v := range m {
 			fmt.Printf("%s: %+v\n", k, v)
 		}
 	case "getallwifi":
@@ -294,7 +294,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		for k, v := range *m {
+		for k, v := range m {
 			fmt.Printf("%s: %+v\n", k, v)
 		}
 	case "setmode":
