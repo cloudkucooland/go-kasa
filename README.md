@@ -1,5 +1,5 @@
-[![Travis]https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main](https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main)
-[![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![LICENSE](https://img.shields.io/badge/license-BSD-green.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main)](https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main)
 [![GoReportCard](https://goreportcard.com/badge/cloudkucooland/go-kasa)](https://goreportcard.com/report/cloudkucooland/go-kasa)
 [![GoDoc](https://godoc.org/github.com/cloudkucooland/go-kasa?status.svg)](https://godoc.org/github.com/cloudkucooland/go-kasa)
 
