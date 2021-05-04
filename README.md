@@ -1,3 +1,9 @@
+[![Travis]https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main](https://travis-ci.org/cloudkucooland/go-kasa.svg?branch=main)
+[![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GoReportCard](https://goreportcard.com/badge/cloudkucooland/go-kasa)](https://goreportcard.com/report/cloudkucooland/go-kasa)
+[![GoDoc](https://godoc.org/github.com/cloudkucooland/go-kasa?status.svg)](https://godoc.org/github.com/cloudkucooland/go-kasa)
+
+
 # go-kasa
 Go library to control TP-Link Kasa devices.
 This library uses the local API, not the cloud API.
@@ -110,8 +116,8 @@ Get daily stats for a month (Feb 2021)
 ```
 
 Get Countdown Rules (needs to be prettier)
-% kasa countdown 192.168.1.206
 ```
+% kasa countdown 192.168.1.206
 {ID:8725326BB2D0C0DD8D521379163C7D67 Name:TooFar Enable:0 Delay:0 Active:1 Remaining:0}
 ```
 
