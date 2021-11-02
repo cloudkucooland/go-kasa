@@ -6,6 +6,7 @@ import (
 	"github.com/cloudkucooland/go-kasa"
 	"sort"
 	"strconv"
+	"os"
 )
 
 func main() {
@@ -165,6 +166,30 @@ func main() {
 					fmt.Printf("    ID: %40s%s %26s [state: %d]\n", v.DeviceID, c.ID, c.Alias, c.RelayState)
 				}
 			}
+		}
+	case "tf":
+		if argc > 1 {
+			fmt.Println("ignoring host, discover always broadcasts")
+		}
+		m, err := kasa.BroadcastDiscovery(*timeout, *repeats)
+		if err != nil {
+			panic(err)
+		}
+
+		keys := make([]string, 0, len(m))
+		for key := range m {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		fmt.Printf("found %d devices\n", len(m))
+		for _, k := range keys {
+            s := fmt.Sprintf(`{ "IP":"%s", "Platform":"Kasa" }`, k)
+            fn := fmt.Sprintf("Kasa_%s.json", k[len(k)-3:])
+            err := os.WriteFile(fn, []byte(s), 0644)
+            if err != nil {
+                fmt.Println(err.Error())
+            }
 		}
 	case "emeter":
 		if host == "" {
@@ -336,6 +361,6 @@ func main() {
 			panic(err)
 		}
 	default:
-		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getrules, getcountdown, getallwifi, emeter, getallemeter, clearcountdown")
+		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown")
 	}
 }
