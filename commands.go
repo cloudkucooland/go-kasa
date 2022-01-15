@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// SetRelayState changes the relay state of the device -- for multi-relay devices use SetRelayStateChild
 func (d *Device) SetRelayState(newstate bool) error {
 	if d.Debug {
 		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
@@ -23,6 +24,7 @@ func (d *Device) SetRelayState(newstate bool) error {
 	return nil
 }
 
+// SetRelayStateChild adjusts a single relay on a multi-relay device
 func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 	if d.Debug {
 		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
@@ -41,6 +43,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 	return nil
 }
 
+// SetBrightness adjust the brightness setting on a dimmer-capable device (1-100)
 func (d *Device) SetBrightness(newval int) error {
 	cmd := fmt.Sprintf(`{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`, newval)
 	err := d.sendUDP(cmd)
@@ -53,6 +56,7 @@ func (d *Device) SetBrightness(newval int) error {
 
 const sysinfo = `{"system":{"get_sysinfo":{}}}`
 
+// GetSettings gets the device sys info
 func (d *Device) GetSettings() (*Sysinfo, error) {
 	res, err := d.sendTCP(sysinfo)
 	if err != nil {
@@ -78,6 +82,7 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 
 const emeter = `{"emeter":{"get_realtime":{}}}`
 
+// GetEmeter returns emeter data from the device
 func (d *Device) GetEmeter() (*emeterRealtime, error) {
 	res, err := d.sendTCP(emeter)
 	if err != nil {
@@ -104,6 +109,7 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 
 const emeterGetDaystat = `{"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
 
+// GetEmeterMonth returns a single month's emeter data from the device
 func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 	q := fmt.Sprintf(emeterGetDaystat, month, year)
 
@@ -152,7 +158,8 @@ Erase All EMeter Statistics
 {"emeter":{"erase_emeter_stat":null}}
 */
 
-// forget any cloud settings
+// DisableCloud sets the device to "local only" mode.
+// TODO: forget any cloud settings
 func (d *Device) DisableCloud() error {
 	err := d.sendUDP(`{"cnCloud":{"unbind":null}}`)
 	if err != nil {
@@ -162,6 +169,7 @@ func (d *Device) DisableCloud() error {
 	return nil
 }
 
+// Reboot instructs the device to reboot
 func (d *Device) Reboot() error {
 	err := d.sendUDP(`{"system":{"reboot":{"delay":2}}}`)
 	if err != nil {
@@ -171,6 +179,7 @@ func (d *Device) Reboot() error {
 	return nil
 }
 
+// SetLEDOff is insanely named... it should be SetLED, but I'm just going with what TP-Link called these things internally...
 func (d *Device) SetLEDOff(t bool) error {
 	off := 0
 	if t {
@@ -185,6 +194,7 @@ func (d *Device) SetLEDOff(t bool) error {
 	return nil
 }
 
+// SetAlias sets a device name
 func (d *Device) SetAlias(s string) error {
 	cmd := fmt.Sprintf(`{"system":{"set_dev_alias":{"alias":"%s"}}}`, s)
 	err := d.sendUDP(cmd)
@@ -195,6 +205,7 @@ func (d *Device) SetAlias(s string) error {
 	return nil
 }
 
+// SetChildAlias sets the name of an individual relay on a multi-relay device, I don't think this works
 func (d *Device) SetChildAlias(childID, s string) error {
 	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}`, childID, s)
 	err := d.sendUDP(cmd)
@@ -205,6 +216,7 @@ func (d *Device) SetChildAlias(childID, s string) error {
 	return nil
 }
 
+// SetMode sets the target mode of the system
 func (d *Device) SetMode(m string) error {
 	cmd := fmt.Sprintf(`{"system":{"set_mode":{"mode":"%s"}}}`, m)
 	res, err := d.sendTCP(cmd)
@@ -216,6 +228,7 @@ func (d *Device) SetMode(m string) error {
 	return nil
 }
 
+// GetWIFIStatus returns the WiFi station info
 func (d *Device) GetWIFIStatus() (string, error) {
 	res, err := d.sendTCP(`{"netif":{"get_stainfo":{}}}`)
 	if err != nil {
@@ -225,6 +238,7 @@ func (d *Device) GetWIFIStatus() (string, error) {
 	return res, nil
 }
 
+// GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
 func (d *Device) GetDimmerParameters() (string, error) {
 	res, err := d.sendTCP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
 	if err != nil {
@@ -234,6 +248,7 @@ func (d *Device) GetDimmerParameters() (string, error) {
 	return res, nil
 }
 
+// GetRules returns the rule information from a device
 func (d *Device) GetRules() (string, error) {
 	res, err := d.sendTCP(`{"smartlife.iot.common.schedule":{"get_rules":{}}}`)
 	if err != nil {
@@ -243,6 +258,7 @@ func (d *Device) GetRules() (string, error) {
 	return res, nil
 }
 
+// GetCountdownRules returns a list of the countdown timers on a device
 func (d *Device) GetCountdownRules() (*[]rule, error) {
 	res, err := d.sendTCP(`{"count_down":{"get_rules":{}}}`)
 	if err != nil {
@@ -266,6 +282,7 @@ func (d *Device) GetCountdownRules() (*[]rule, error) {
 	return &c.Countdown.GetRules.RuleList, nil
 }
 
+// ClearCountdownRules resets all countdown rules on the device
 func (d *Device) ClearCountdownRules() error {
 	err := d.sendUDP(`{"count_down":{"delete_all_rules":{}}}`)
 	if err != nil {

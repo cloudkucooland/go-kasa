@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+const bufsize = 2048 // 6-outlet strips cross the 1k mark, double to 2k
+
+// BroadcastDiscovery pulls every attached subnet for kasa devices and returns whatever is discovered
 func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	m := make(map[string]*Sysinfo)
 
@@ -33,7 +36,7 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 		}
 	}()
 
-	buffer := make([]byte, 2048)
+	buffer := make([]byte, bufsize)
 	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
@@ -55,6 +58,8 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 }
 
 // func BroadcastDimmerParam(timeout, probes int) (map[string]*kasaSysinfo, error) {
+
+// BroadcastDimmerParameters queries all devices on all attached subnets for dimmer state
 func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameters, error) {
 	m := make(map[string]*dimmerParameters)
 
@@ -82,7 +87,7 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 		}
 	}()
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, bufsize)
 	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
@@ -108,6 +113,7 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 	return m, nil
 }
 
+// BroadcastWifiParameters polls all devices on all attached subnets for wifi status. This is handy when you have one device that never wants to respond, seeing how its wifi status changes over time
 func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 	m := make(map[string]*stainfo)
 
@@ -134,7 +140,7 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 		}
 	}()
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, bufsize)
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
@@ -159,6 +165,7 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 	return m, nil
 }
 
+// BroadcastEmeter pulls all devices on all attached subnets for emeter data
 func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 	m := make(map[string]string)
 
@@ -186,7 +193,7 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 		}
 	}()
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, bufsize)
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
 		if err != nil {
@@ -197,7 +204,7 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 
 		klogger.Printf("%s\n", res)
 
-		// I don't have anything to test with yet
+		// I don't have anything to test with yet -- I do now, I need to write this
 		/* var kd kasaDevice
 		if err = json.Unmarshal([]byte(res), &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())

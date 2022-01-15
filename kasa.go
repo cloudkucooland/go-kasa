@@ -18,11 +18,13 @@ type Device struct {
 // by default, use the standard logger, can be overwritten using kasa.SetLogger(l)
 var klogger kasalogger = log.Default()
 
+// Any log interface that has Println and Printf will do
 type kasalogger interface {
 	Println(...interface{})
 	Printf(string, ...interface{})
 }
 
+// NewDevice sets up a new Kasa device for polling
 func NewDevice(ip string) (*Device, error) {
 	d := Device{IP: ip}
 	d.parsed = net.ParseIP(ip)
@@ -55,7 +57,7 @@ type getSysinfo struct {
 	Sysinfo Sysinfo `json:"get_sysinfo"`
 }
 
-// defined by kasa devices
+// Sysinfo is defined by kasa devices
 type Sysinfo struct {
 	SWVersion      string   `json:"sw_ver"`
 	HWVersion      string   `json:"hw_ver"`
@@ -193,6 +195,7 @@ type addRule struct {
 	ErrorMessage string `json:"err_msg"`
 }
 
+// SetLogger allows applications to register their own logging interface
 func SetLogger(l kasalogger) {
 	klogger = l
 }
