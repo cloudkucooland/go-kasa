@@ -33,7 +33,7 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 		}
 	}()
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 2048)
 	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
