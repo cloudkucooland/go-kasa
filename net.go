@@ -8,12 +8,8 @@ import (
 
 func (d *Device) sendTCP(cmd string) (string, error) {
 	payload := encrypt(cmd)
-	r := net.TCPAddr{
-		IP:   d.parsed,
-		Port: 9999,
-	}
 
-	conn, err := net.DialTCP("tcp", nil, &r)
+	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP:   d.parsed, Port: 9999})
 	if err != nil {
 		klogger.Printf("Cannot connnect to device: %s", err.Error())
 		return "", err
