@@ -7,15 +7,14 @@ import (
 )
 
 func (d *Device) sendTCP(cmd string) (string, error) {
-	payload := encrypt(cmd)
+	payload := encryptTCP(cmd)
 
-	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP:   d.parsed, Port: 9999})
+	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: d.parsed, Port: 9999})
 	if err != nil {
 		klogger.Printf("Cannot connnect to device: %s", err.Error())
 		return "", err
 	}
-	_, err = conn.Write(payload)
-	if err != nil {
+	if _, err = conn.Write(payload); err != nil {
 		klogger.Printf("Cannot send command to device: %s", err.Error())
 		return "", err
 	}
@@ -48,13 +47,13 @@ func (d *Device) sendTCP(cmd string) (string, error) {
 }
 
 func (d *Device) sendUDP(cmd string) error {
-	payload := encryptUDP(cmd)
 	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.parsed, Port: 9999})
 	if err != nil {
 		return err
 	}
-	_, err = conn.Write(payload)
-	if err != nil {
+
+	payload := encryptUDP(cmd)
+	if _, err = conn.Write(payload); err != nil {
 		return err
 	}
 	return nil
