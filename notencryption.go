@@ -7,14 +7,21 @@ import (
 
 // encryptTCP is for TCP, It writes the length in the first byte. It uses a binary buffer and writer.
 func encryptTCP(plaintext string) []byte {
+	var buf bytes.Buffer
+
 	n := len(plaintext)
-	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.BigEndian, uint32(n))
+	buf.Grow(n + 4)
+
+	// write the length as a 32-bit big-endian uint
+	binary.Write(&buf, binary.BigEndian, uint32(n))
 
 	key := byte(0xAB)
 	for i := 0; i < n; i++ {
 		key = plaintext[i] ^ key
-		binary.Write(buf, binary.BigEndian, key)
+		if err := buf.WriteByte(key); err != nil {
+			klogger.Printf(err.Error())
+			break
+		}
 	}
 
 	return buf.Bytes()
@@ -34,8 +41,8 @@ func encryptUDP(plaintext string) []byte {
 	return payload
 }
 
-// decrypt works in place
-func decrypt(ciphertext []byte) string {
+// decrypt works in place -- probably dumb
+func decrypt(ciphertext []byte) []byte {
 	key := byte(0xAB)
 	var nextKey byte
 
@@ -44,5 +51,5 @@ func decrypt(ciphertext []byte) string {
 		ciphertext[i] = ciphertext[i] ^ key
 		key = nextKey
 	}
-	return string(ciphertext)
+	return ciphertext
 }

@@ -69,7 +69,7 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 	}
 
 	var kd kasaDevice
-	if err = json.Unmarshal([]byte(res), &kd); err != nil {
+	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 	}
 
 	var k kasaDevice
-	if err = json.Unmarshal([]byte(res), &k); err != nil {
+	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
 		return nil, err
@@ -124,7 +124,7 @@ func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 	}
 
 	var k kasaDevice
-	if err = json.Unmarshal([]byte(res), &k); err != nil {
+	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
 		return nil, err
@@ -235,7 +235,7 @@ func (d *Device) GetWIFIStatus() (string, error) {
 		klogger.Println(err.Error())
 		return "", err
 	}
-	return res, nil
+	return string(res), nil
 }
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
@@ -245,7 +245,7 @@ func (d *Device) GetDimmerParameters() (string, error) {
 		klogger.Println(err.Error())
 		return "", err
 	}
-	return res, nil
+	return string(res), nil
 }
 
 // GetRules returns the rule information from a device
@@ -255,7 +255,7 @@ func (d *Device) GetRules() (string, error) {
 		klogger.Println(err.Error())
 		return "", err
 	}
-	return res, nil
+	return string(res), nil
 }
 
 // GetCountdownRules returns a list of the countdown timers on a device
@@ -271,7 +271,7 @@ func (d *Device) GetCountdownRules() (*[]rule, error) {
 	}
 
 	var c kasaDevice
-	if err = json.Unmarshal([]byte(res), &c); err != nil {
+	if err = json.Unmarshal(res, &c); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
 	}

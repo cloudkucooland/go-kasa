@@ -48,7 +48,7 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 		// klogger.Printf("%s:\n%s\n", addr.IP.String(), res)
 
 		var kd kasaDevice
-		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 
 		// klogger.Printf("%s\n", res)
 		var kd kasaDevice
-		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
@@ -148,10 +148,11 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 			break
 		}
 		res := decrypt(buffer[:n])
+		// res := decrypt(buffer)
 		// klogger.Println(string(res))
 
 		var kd kasaDevice
-		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
@@ -206,7 +207,7 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 
 		// I don't have anything to test with yet -- I do now, I need to write this
 		/* var kd kasaDevice
-		if err = json.Unmarshal([]byte(res), &kd); err != nil {
+		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
@@ -215,7 +216,7 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 			continue
 		}
 		klogger.Printf("%+v\n", kd.Dimmer.Parameters) */
-		m[addr.IP.String()] = res
+		m[addr.IP.String()] = string(res)
 	}
 	return m, nil
 }

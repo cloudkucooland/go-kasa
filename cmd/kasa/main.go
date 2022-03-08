@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cloudkucooland/go-kasa"
+	"os"
 	"sort"
 	"strconv"
-	"os"
 )
 
 func main() {
@@ -184,12 +184,12 @@ func main() {
 
 		fmt.Printf("found %d devices\n", len(m))
 		for _, k := range keys {
-            s := fmt.Sprintf(`{ "IP":"%s", "Platform":"Kasa" }`, k)
-            fn := fmt.Sprintf("Kasa_%s.json", k[len(k)-3:])
-            err := os.WriteFile(fn, []byte(s), 0644)
-            if err != nil {
-                fmt.Println(err.Error())
-            }
+			s := fmt.Sprintf(`{ "IP":"%s", "Platform":"Kasa" }`, k)
+			fn := fmt.Sprintf("Kasa_%s.json", k[len(k)-3:])
+			err := os.WriteFile(fn, []byte(s), 0644)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	case "emeter":
 		if host == "" {

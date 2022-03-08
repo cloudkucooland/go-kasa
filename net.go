@@ -6,17 +6,20 @@ import (
 	"time"
 )
 
-func (d *Device) sendTCP(cmd string) (string, error) {
+// better would be to read the first 4 bytes, convert to uint32, allocate that much, then read the rest of the stream
+func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	payload := encryptTCP(cmd)
 
 	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: d.parsed, Port: 9999})
 	if err != nil {
 		klogger.Printf("Cannot connnect to device: %s", err.Error())
-		return "", err
+		return nil, err
 	}
+	defer conn.Close()
+
 	if _, err = conn.Write(payload); err != nil {
 		klogger.Printf("Cannot send command to device: %s", err.Error())
-		return "", err
+		return nil, err
 	}
 
 	blocksize := 1024
@@ -26,11 +29,10 @@ func (d *Device) sendTCP(cmd string) (string, error) {
 	tmp := make([]byte, blocksize)
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Second * 3))
-		defer conn.SetDeadline(time.Time{})
 
 		n, err := conn.Read(tmp)
 		if err != nil && err != io.EOF {
-			return "", err
+			return nil, err
 		}
 		data = append(data, tmp[:n]...)
 		bytesread += n
@@ -51,6 +53,7 @@ func (d *Device) sendUDP(cmd string) error {
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	payload := encryptUDP(cmd)
 	if _, err = conn.Write(payload); err != nil {
