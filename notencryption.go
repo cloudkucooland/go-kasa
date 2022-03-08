@@ -27,7 +27,7 @@ func encryptTCP(plaintext string) []byte {
 	return buf.Bytes()
 }
 
-// encrpytUDP is simplier. UDP doesn't require the length header, just allocates and write to a slice,
+// encryptUDP is simplier. UDP doesn't require the length header, just allocates and write to a slice.
 func encryptUDP(plaintext string) []byte {
 	n := len(plaintext)
 	payload := make([]byte, n)
