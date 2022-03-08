@@ -57,15 +57,13 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	return m, nil
 }
 
-// func BroadcastDimmerParam(timeout, probes int) (map[string]*kasaSysinfo, error) {
-
 // BroadcastDimmerParameters queries all devices on all attached subnets for dimmer state
 func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameters, error) {
 	m := make(map[string]*dimmerParameters)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		klogger.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start dimmer listener: %s", err.Error())
 		return m, err
 	}
 	defer conn.Close()
@@ -119,7 +117,7 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		klogger.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start wifi parameter listener: %s", err.Error())
 		return m, err
 	}
 	defer conn.Close()
@@ -172,7 +170,7 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
-		klogger.Printf("unable to start discovery listener: %s", err.Error())
+		klogger.Printf("unable to start emeter listener: %s", err.Error())
 		return m, err
 	}
 	defer conn.Close()
