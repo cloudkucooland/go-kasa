@@ -1,7 +1,10 @@
 package kasa
 
 import (
-	"io"
+	"encoding/binary"
+	// "bytes"
+	"fmt"
+	// "io"
 	"net"
 	"time"
 )
@@ -22,7 +25,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 		return nil, err
 	}
 
-	blocksize := 1024
+	/* blocksize := 1024
 	bufsize := 10 * blocksize
 	bytesread := 0
 	data := make([]byte, 0, bufsize)
@@ -45,6 +48,38 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	}
 
 	result := decrypt(data[4:bytesread]) // start reading at 4, go to total bytes read
+	*/
+
+	conn.SetReadDeadline(time.Now().Add(time.Second * 3))
+
+	header := make([]byte, 4) // uint32
+	n, err := conn.Read(header)
+	if err != nil {
+		return nil, err
+	}
+	if n != 4 {
+		err := fmt.Errorf("header not 32 bits (4 bytes): %d", n)
+		klogger.Printf(err.Error())
+		return nil, err
+	}
+	size := binary.BigEndian.Uint32(header[0:])
+	klogger.Printf("size: %d\n", size)
+
+	data := make([]byte, size)
+
+	n, err = conn.Read(data)
+	if err != nil {
+		return nil, err
+	}
+	if n != int(size) {
+		err := fmt.Errorf("not all bytes read: %d/%d, %s", n, size, data)
+		klogger.Printf(err.Error())
+		return nil, err
+	}
+	conn.Close()
+
+	result := decrypt(data)
+
 	return result, nil
 }
 
