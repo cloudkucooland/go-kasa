@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func broadcastAddresses() ([]net.IP, error) {
+func BroadcastAddresses() ([]net.IP, error) {
 	var broadcasts []net.IP
 	ifaces, err := net.Interfaces()
 	if err != nil {

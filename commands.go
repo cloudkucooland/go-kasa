@@ -15,7 +15,7 @@ func (d *Device) SetRelayState(newstate bool) error {
 	if newstate {
 		state = 1
 	}
-	cmd := fmt.Sprintf(`{"system":{"set_relay_state":{"state":%d}}}`, state)
+	cmd := fmt.Sprintf(CmdSetRelayState, state)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -34,7 +34,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 	if newstate {
 		state = 1
 	}
-	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}`, childID, state)
+	cmd := fmt.Sprintf(CmdSetRelayStateChild, childID, state)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -45,7 +45,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 
 // SetBrightness adjust the brightness setting on a dimmer-capable device (1-100)
 func (d *Device) SetBrightness(newval int) error {
-	cmd := fmt.Sprintf(`{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`, newval)
+	cmd := fmt.Sprintf(CmdSetBrightness, newval)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -54,11 +54,9 @@ func (d *Device) SetBrightness(newval int) error {
 	return nil
 }
 
-const sysinfo = `{"system":{"get_sysinfo":{}}}`
-
 // GetSettings gets the device sys info
 func (d *Device) GetSettings() (*Sysinfo, error) {
-	res, err := d.sendTCP(sysinfo)
+	res, err := d.sendTCP(CmdGetSysinfo)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -68,7 +66,7 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 		klogger.Println(res)
 	}
 
-	var kd kasaDevice
+	var kd KasaDevice
 	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -80,11 +78,9 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 
-const emeter = `{"emeter":{"get_realtime":{}}}`
-
 // GetEmeter returns emeter data from the device
 func (d *Device) GetEmeter() (*emeterRealtime, error) {
-	res, err := d.sendTCP(emeter)
+	res, err := d.sendTCP(CmdGetEmeter)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -94,7 +90,7 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 		klogger.Println(res)
 	}
 
-	var k kasaDevice
+	var k KasaDevice
 	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
@@ -107,11 +103,9 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 	return &k.Emeter.Realtime, nil
 }
 
-const emeterGetDaystat = `{"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
-
 // GetEmeterMonth returns a single month's emeter data from the device
 func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
-	q := fmt.Sprintf(emeterGetDaystat, month, year)
+	q := fmt.Sprintf(CmdEmeterGetMonth, month, year)
 
 	res, err := d.sendTCP(q)
 	if err != nil {
@@ -123,7 +117,7 @@ func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 		klogger.Println(res)
 	}
 
-	var k kasaDevice
+	var k KasaDevice
 	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
@@ -136,32 +130,10 @@ func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
 	return &k.Emeter.DayStat, nil
 }
 
-/*
-Get EMeter VGain and IGain Settings
-{"emeter":{"get_vgain_igain":{}}}
-
-Set EMeter VGain and Igain
-{"emeter":{"set_vgain_igain":{"vgain":13462,"igain":16835}}}
-
-Start EMeter Calibration
-{"emeter":{"start_calibration":{"vtarget":13462,"itarget":16835}}}
-*/
-
-/*
-Get Daily Statistic for given Month
-{"emeter":{"get_daystat":{"month":1,"year":2016}}}
-
-Get Montly Statistic for given Year
-{"emeter":{"get_monthstat":{"year":2016}}}
-
-Erase All EMeter Statistics
-{"emeter":{"erase_emeter_stat":null}}
-*/
-
 // DisableCloud sets the device to "local only" mode.
 // TODO: forget any cloud settings
 func (d *Device) DisableCloud() error {
-	err := d.sendUDP(`{"cnCloud":{"unbind":null}}`)
+	err := d.sendUDP(CmdCloudUnbind)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -171,7 +143,7 @@ func (d *Device) DisableCloud() error {
 
 // Reboot instructs the device to reboot
 func (d *Device) Reboot() error {
-	err := d.sendUDP(`{"system":{"reboot":{"delay":2}}}`)
+	err := d.sendUDP(CmdReboot)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -185,7 +157,7 @@ func (d *Device) SetLEDOff(t bool) error {
 	if t {
 		off = 1
 	}
-	cmd := fmt.Sprintf(`{"system":{"set_led_off":{"off":%d}}}`, off)
+	cmd := fmt.Sprintf(CmdLEDOff, off)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -196,7 +168,7 @@ func (d *Device) SetLEDOff(t bool) error {
 
 // SetAlias sets a device name
 func (d *Device) SetAlias(s string) error {
-	cmd := fmt.Sprintf(`{"system":{"set_dev_alias":{"alias":"%s"}}}`, s)
+	cmd := fmt.Sprintf(CmdDeviceAlias, s)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -207,7 +179,7 @@ func (d *Device) SetAlias(s string) error {
 
 // SetChildAlias sets the name of an individual relay on a multi-relay device, I don't think this works
 func (d *Device) SetChildAlias(childID, s string) error {
-	cmd := fmt.Sprintf(`{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}`, childID, s)
+	cmd := fmt.Sprintf(CmdChildAlias, childID, s)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -218,19 +190,19 @@ func (d *Device) SetChildAlias(childID, s string) error {
 
 // SetMode sets the target mode of the system
 func (d *Device) SetMode(m string) error {
-	cmd := fmt.Sprintf(`{"system":{"set_mode":{"mode":"%s"}}}`, m)
+	cmd := fmt.Sprintf(CmdSetMode, m)
 	res, err := d.sendTCP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
 	}
-	klogger.Println(res)
+	klogger.Println(string(res))
 	return nil
 }
 
 // GetWIFIStatus returns the WiFi station info
 func (d *Device) GetWIFIStatus() (string, error) {
-	res, err := d.sendTCP(`{"netif":{"get_stainfo":{}}}`)
+	res, err := d.sendTCP(CmdWifiStainfo)
 	if err != nil {
 		klogger.Println(err.Error())
 		return "", err
@@ -240,7 +212,7 @@ func (d *Device) GetWIFIStatus() (string, error) {
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
 func (d *Device) GetDimmerParameters() (string, error) {
-	res, err := d.sendTCP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
+	res, err := d.sendTCP(CmdGetDimmer)
 	if err != nil {
 		klogger.Println(err.Error())
 		return "", err
@@ -250,7 +222,7 @@ func (d *Device) GetDimmerParameters() (string, error) {
 
 // GetRules returns the rule information from a device
 func (d *Device) GetRules() (string, error) {
-	res, err := d.sendTCP(`{"smartlife.iot.common.schedule":{"get_rules":{}}}`)
+	res, err := d.sendTCP(CmdGetRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return "", err
@@ -260,7 +232,7 @@ func (d *Device) GetRules() (string, error) {
 
 // GetCountdownRules returns a list of the countdown timers on a device
 func (d *Device) GetCountdownRules() (*[]rule, error) {
-	res, err := d.sendTCP(`{"count_down":{"get_rules":{}}}`)
+	res, err := d.sendTCP(CmdGetCountdownRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -270,7 +242,7 @@ func (d *Device) GetCountdownRules() (*[]rule, error) {
 		klogger.Println(res)
 	}
 
-	var c kasaDevice
+	var c KasaDevice
 	if err = json.Unmarshal(res, &c); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -284,7 +256,7 @@ func (d *Device) GetCountdownRules() (*[]rule, error) {
 
 // ClearCountdownRules resets all countdown rules on the device
 func (d *Device) ClearCountdownRules() error {
-	err := d.sendUDP(`{"count_down":{"delete_all_rules":{}}}`)
+	err := d.sendUDP(CmdDeleteAllRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -292,8 +264,18 @@ func (d *Device) ClearCountdownRules() error {
 	return nil
 }
 
-// https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
+// AddCountdownRule adds a new countdown
+func (d *Device) AddCountdownRule(dur int, target bool, name string) error {
+	state := 0
+	if target {
+		state = 1
+	}
 
-// when I get bored, set myself up as the cloud server... -- make it as responsive as the shellies
-// {"cnCloud":{"set_server_url":{"server":"devs.tplinkcloud.com"}}}
-// {"cnCloud":{"bind":{"username":alice@home.com, "password":"secret"}}}
+	cmd := fmt.Sprintf(CmdAddCountdownRule, dur, state, name)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}

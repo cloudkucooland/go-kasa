@@ -21,10 +21,10 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 
 	go func() {
-		payload := encryptUDP(sysinfo)
+		payload := Scramble(CmdGetSysinfo)
 		for i := 0; i < probes; i++ {
 			// klogger.Println("sending broadcast")
-			bcast, _ := broadcastAddresses()
+			bcast, _ := BroadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
@@ -44,10 +44,10 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 			klogger.Println(err.Error())
 			break
 		}
-		res := decrypt(buffer[:n])
+		res := Unscramble(buffer[:n])
 		// klogger.Printf("%s:\n%s\n", addr.IP.String(), res)
 
-		var kd kasaDevice
+		var kd KasaDevice
 		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			return nil, err
@@ -70,10 +70,10 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 
 	go func() {
-		payload := encryptUDP(`{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`)
+		payload := Scramble(CmdGetDimmer)
 		for i := 0; i < probes; i++ {
 			// klogger.Println("sending broadcast")
-			bcast, _ := broadcastAddresses()
+			bcast, _ := BroadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
@@ -93,10 +93,10 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 			klogger.Println(err.Error())
 			break
 		}
-		res := decrypt(buffer[:n])
+		res := Unscramble(buffer[:n])
 
 		// klogger.Printf("%s\n", res)
-		var kd kasaDevice
+		var kd KasaDevice
 		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
@@ -124,9 +124,9 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 
 	go func() {
-		payload := encryptUDP(`{"netif":{"get_stainfo":{}}}`)
+		payload := Scramble(CmdWifiStainfo)
 		for i := 0; i < probes; i++ {
-			bcast, _ := broadcastAddresses()
+			bcast, _ := BroadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
@@ -145,11 +145,11 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
 			klogger.Println(err.Error())
 			break
 		}
-		res := decrypt(buffer[:n])
-		// res := decrypt(buffer)
+		res := Unscramble(buffer[:n])
+		// res := Unscramble(buffer)
 		// klogger.Println(string(res))
 
-		var kd kasaDevice
+		var kd KasaDevice
 		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
@@ -177,10 +177,10 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 
 	go func() {
-		payload := encryptUDP(`{"emeter":{"get_realtime":{}}}`)
+		payload := Scramble(CmdGetEmeter)
 		for i := 0; i < probes; i++ {
 			// klogger.Println("sending broadcast")
-			bcast, _ := broadcastAddresses()
+			bcast, _ := BroadcastAddresses()
 			for _, b := range bcast {
 				_, err = conn.WriteToUDP(payload, &net.UDPAddr{IP: b, Port: 9999})
 				if err != nil {
@@ -199,12 +199,12 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 			klogger.Println(err.Error())
 			break
 		}
-		res := decrypt(buffer[:n])
+		res := Unscramble(buffer[:n])
 
 		klogger.Printf("%s\n", res)
 
 		// I don't have anything to test with yet -- I do now, I need to write this
-		/* var kd kasaDevice
+		/* var kd KasaDevice
 		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue

@@ -18,7 +18,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	conn.SetReadDeadline(time.Now().Add(time.Second))
 
 	// send the command with the uint32 "header"
-	payload := encryptTCP(cmd)
+	payload := ScrambleTCP(cmd)
 	if _, err = conn.Write(payload); err != nil {
 		klogger.Printf("Cannot send command to device: %s", err.Error())
 		return nil, err
@@ -52,7 +52,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	}
 	conn.Close()
 
-	return decrypt(data), nil
+	return Unscramble(data), nil
 }
 
 func (d *Device) sendUDP(cmd string) error {
@@ -62,7 +62,7 @@ func (d *Device) sendUDP(cmd string) error {
 	}
 	defer conn.Close()
 
-	payload := encryptUDP(cmd)
+	payload := Scramble(cmd)
 	if _, err = conn.Write(payload); err != nil {
 		return err
 	}
