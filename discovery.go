@@ -57,9 +57,9 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	return m, nil
 }
 
-// BroadcastDimmerParameters queries all devices on all attached subnets for dimmer state
-func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameters, error) {
-	m := make(map[string]*dimmerParameters)
+// BroadcastDimmerParameters  queries all devices on all attached subnets for dimmer state
+func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameters, error) {
+	m := make(map[string]*DimmerParameters)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
@@ -112,8 +112,8 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*dimmerParameter
 }
 
 // BroadcastWifiParameters polls all devices on all attached subnets for wifi status. This is handy when you have one device that never wants to respond, seeing how its wifi status changes over time
-func BroadcastWifiParameters(timeout, probes int) (map[string]*stainfo, error) {
-	m := make(map[string]*stainfo)
+func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
+	m := make(map[string]*StaInfo)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {

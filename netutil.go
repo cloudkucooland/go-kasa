@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// BroadcastAddresses - probably belongs in its own library, get all broadcast addresses
 func BroadcastAddresses() ([]net.IP, error) {
 	var broadcasts []net.IP
 	ifaces, err := net.Interfaces()

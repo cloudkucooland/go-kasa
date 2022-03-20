@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	var command, host, value string
+	var command, host, value, v2 string
 	repeats := flag.Int("r", 1, "UDP repeats")
 	timeout := flag.Int("t", 2, "timeout")
 	child := flag.String("c", "", "child")
@@ -30,6 +30,9 @@ func main() {
 	}
 	if argc > 2 {
 		value = args[2]
+	}
+	if argc > 3 {
+		v2 = args[3]
 	}
 
 	var k *kasa.Device
@@ -360,7 +363,26 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+    case "addcountdown":
+        if host == "" {
+			fmt.Println("usage: kasa addcountdown [host] [duration] [True|False]")
+			return
+        }
+        dur, err := strconv.Atoi(value)
+		if err != nil {
+			panic(err)
+		}
+		if dur < 1 || dur > 3600 {
+			panic("invalid duration")
+		}
+		b, err := strconv.ParseBool(v2)
+		if err != nil {
+			panic(err)
+		}
+        if err := k.AddCountdownRule(dur, b, "auto"); err != nil {
+			panic(err)
+		}
 	default:
-		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown")
+		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown", "addcountdown")
 	}
 }

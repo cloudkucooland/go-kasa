@@ -48,17 +48,17 @@ func NewDevice(ip string) (*Device, error) {
 	return &d, nil
 }
 
-// defined by kasa devices
+// KasaDevice is the primary type, defined by kasa devices
 type KasaDevice struct {
-	GetSysinfo getSysinfo `json:"system"`
-	Dimmer     dimmer     `json:"smartlife.iot.dimmer"`
-	NetIf      netif      `json:"netif"`
-	Countdown  countdown  `json:"count_down"`
-	Emeter     emeterSub  `json:"emeter"`
+	GetSysinfo GetSysinfo `json:"system"`
+	Dimmer     Dimmer     `json:"smartlife.iot.dimmer"`
+	NetIf      NetIf      `json:"netif"`
+	Countdown  Countdown  `json:"count_down"`
+	Emeter     EmeterSub  `json:"emeter"`
 }
 
-// defined by kasa devices
-type getSysinfo struct {
+// GetSysinfo is defined by kasa devices
+type GetSysinfo struct {
 	Sysinfo Sysinfo `json:"get_sysinfo"`
 }
 
@@ -85,20 +85,22 @@ type Sysinfo struct {
 	OnTime         int      `json:"on_time"`
 	ActiveMode     string   `json:"active_mode"`
 	DevName        string   `json:"dev_name"`
-	Children       []child  `json:"children"`
+	Children       []Child  `json:"children"`
 	NumChildren    uint8    `json:"child_num"`
 	NTCState       int      `json:"ntc_state"`
-	PreferredState []preset `json:"preferred_state"`
+	PreferredState []Preset `json:"preferred_state"`
 	ErrCode        int8     `json:"error_code"`
 }
 
-type dimmer struct {
-	Parameters dimmerParameters `json:"get_dimmer_parameters"`
+// Dimmer is defined by kasa devices
+type Dimmer struct {
+	Parameters DimmerParameters `json:"get_dimmer_parameters"`
 	ErrCode    int8             `json:"err_code"`
 	ErrMsg     string           `json:"err_msg"`
 }
 
-type dimmerParameters struct {
+// DimmerParameters is defined by kasa devices
+type DimmerParameters struct {
 	MinThreshold  uint16 `json:"minThreshold"`
 	FadeOnTime    uint16 `json:"fadeOnTime"`
 	FadeOffTime   uint16 `json:"fadeOffTime"`
@@ -110,7 +112,8 @@ type dimmerParameters struct {
 	ErrMsg        string `json:"err_msg"`
 }
 
-type child struct {
+// Child is defined by kasa devices
+type Child struct {
 	ID         string `json:"id"`
 	RelayState uint8  `json:"state"`
 	Alias      string `json:"alias"`
@@ -118,19 +121,22 @@ type child struct {
 	// NextAction
 }
 
-type preset struct {
+// Preset is defined by kasa devices
+type Preset struct {
 	Index      uint8 `json:"index"`
 	Brightness uint8 `json:"brightness"`
 }
 
+// NetIf is defined by kasa devices
 //{"netif":{"get_stainfo":{"ssid":"IoT8417","key_type":3,"rssi":-61,"err_code":0}}}
-type netif struct {
-	StaInfo stainfo `json:"get_stainfo"`
+type NetIf struct {
+	StaInfo StaInfo `json:"get_stainfo"`
 	ErrCode int8    `json:"err_code"`
 	ErrMsg  string  `json:"err_msg"`
 }
 
-type stainfo struct {
+// StaInfo is defined by kasa devices
+type StaInfo struct {
 	SSID    string `json:"ssid"`
 	KeyType int8   `json:"key_type"`
 	RSSI    int8   `json:"rssi"`
@@ -141,12 +147,14 @@ type stainfo struct {
 // {"emeter":{"get_realtime":{"current_ma":1799,"voltage_mv":121882,"power_mw":174545,"total_wh":547,"err_code":0}}}
 // {"emeter":{"get_daystat":{"day_list":[{"year":2021,"month":2,"day":6,"energy_wh":842},{"year":2021,"month":2,"day":7,"energy_wh":1142}],"err_code":0}}}
 
-type emeterSub struct {
-	Realtime emeterRealtime `json:"get_realtime"`
-	DayStat  emeterDaystat  `json:"get_daystat"`
+// EmeterSub is defined by kasa devices
+type EmeterSub struct {
+	Realtime EmeterRealtime `json:"get_realtime"`
+	DayStat  EmeterDaystat  `json:"get_daystat"`
 }
 
-type emeterRealtime struct {
+// EmeterRealtime is defined by kasa devices
+type EmeterRealtime struct {
 	CurrentMA uint   `json:"current_ma"`
 	VoltageMV uint   `json:"voltage_mv"`
 	PowerMW   uint   `json:"power_mw"`
@@ -155,32 +163,37 @@ type emeterRealtime struct {
 	ErrMsg    string `json:"err_msg"`
 }
 
-type emeterDaystat struct {
-	List    []emeterDay `json:"day_list"`
+// EmeterDaystat is defined by kasa devices
+type EmeterDaystat struct {
+	List    []EmeterDay `json:"day_list"`
 	ErrCode int8        `json:"err_code"`
 	ErrMsg  string      `json:"err_msg"`
 }
 
-type emeterDay struct {
+// EmeterDay is defined by kasa devices
+type EmeterDay struct {
 	Year  uint16 `json:"year"`
 	Month uint8  `json:"month"`
 	Day   uint8  `json:"day"`
 	WH    uint16 `json:"energy_wh"`
 }
 
-type countdown struct {
-	GetRules getRules `json:"get_rules"`
-	DelRules delRules `json:"delete_all_rules"`
-	AddRule  addRule  `json:"add_rule"`
+// Countdown is defined by kasa devices
+type Countdown struct {
+	GetRules GetRules `json:"get_rules"`
+	DelRules DelRules `json:"delete_all_rules"`
+	AddRule  AddRule  `json:"add_rule"`
 }
 
-type getRules struct {
-	RuleList     []rule `json:"rule_list"`
+// GetRules is defined by kasa devices
+type GetRules struct {
+	RuleList     []Rule `json:"rule_list"`
 	ErrorCode    int8   `json:"err_code"`
 	ErrorMessage string `json:"err_msg"`
 }
 
-type rule struct {
+// Rule is defined by kasa devices
+type Rule struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Enable    uint8  `json:"enable"`
@@ -189,12 +202,14 @@ type rule struct {
 	Remaining uint16 `json:"remain"`
 }
 
-type delRules struct {
+// DelRules is defined by kasa devices
+type DelRules struct {
 	ErrorCode    int8   `json:"err_code"`
 	ErrorMessage string `json:"err_msg"`
 }
 
-type addRule struct {
+// AddRule is defined by kasa devices
+type AddRule struct {
 	ID           string `json:"id"`
 	ErrorCode    int8   `json:"err_code"`
 	ErrorMessage string `json:"err_msg"`

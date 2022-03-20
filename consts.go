@@ -2,6 +2,7 @@ package kasa
 
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
 
+// Request strings
 const (
 	CmdSetRelayState = `{"system":{"set_relay_state":{"state":%d}}}` // 0 or 1
 	CmdGetSysinfo    = `{"system":{"get_sysinfo":{}}}`
@@ -31,9 +32,13 @@ const (
 
 	CmdGetCountdownRules = `{"count_down":{"get_rules":{}}}`
 	CmdDeleteAllRules    = `{"count_down":{"delete_all_rules":{}}}`
-	CmdAddCountdownRule  = `{"count_down":{"add_rule":"enable":1,"delay":%d,"act":%d,"name":%s"}}` // 0-3600, 0/1, string
+	CmdAddCountdownRule  = `{"count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}` // 0-3600, 0/1, string
+
+	// CmdGetCountdownRules = `{"smartlife.iot.common.count_down":{"get_rules":{}}}`
+	// CmdDeleteAllRules    = `{"smartlife.iot.common.count_down":{"delete_all_rules":{}}}`
+	// CmdAddCountdownRule  = `{"smartlife.iot.common.count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}`
 
 	CmdCloudUnbind    = `{"cnCloud":{"unbind":null}}`
-	CmdSetServerUrl   = `{"cnCloud":{"set_server_url":{"server":"%s"}}}`          // bare hostname, no protocol spec
+	CmdSetServerURL   = `{"cnCloud":{"set_server_url":{"server":"%s"}}}`          // bare hostname, no protocol spec
 	CmdSetServerCreds = `{"cnCloud":{"bind":{"username":"%s", "password":"%s"}}}` // alice@home.com / mikeisagoat
 )

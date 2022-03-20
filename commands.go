@@ -79,7 +79,7 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 }
 
 // GetEmeter returns emeter data from the device
-func (d *Device) GetEmeter() (*emeterRealtime, error) {
+func (d *Device) GetEmeter() (*EmeterRealtime, error) {
 	res, err := d.sendTCP(CmdGetEmeter)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -104,7 +104,7 @@ func (d *Device) GetEmeter() (*emeterRealtime, error) {
 }
 
 // GetEmeterMonth returns a single month's emeter data from the device
-func (d *Device) GetEmeterMonth(month, year int) (*emeterDaystat, error) {
+func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 	q := fmt.Sprintf(CmdEmeterGetMonth, month, year)
 
 	res, err := d.sendTCP(q)
@@ -231,7 +231,7 @@ func (d *Device) GetRules() (string, error) {
 }
 
 // GetCountdownRules returns a list of the countdown timers on a device
-func (d *Device) GetCountdownRules() (*[]rule, error) {
+func (d *Device) GetCountdownRules() (*[]Rule, error) {
 	res, err := d.sendTCP(CmdGetCountdownRules)
 	if err != nil {
 		klogger.Println(err.Error())
