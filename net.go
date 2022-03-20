@@ -50,7 +50,6 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 		klogger.Printf(err.Error())
 		return nil, err
 	}
-	conn.Close()
 
 	return Unscramble(data), nil
 }
