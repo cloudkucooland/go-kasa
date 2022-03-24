@@ -54,6 +54,46 @@ func (d *Device) SetBrightness(newval int) error {
 	return nil
 }
 
+func (d *Device) SetFadeOffTime(newval int) error {
+	cmd := fmt.Sprintf(CmdSetFadeOffTime, newval)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (d *Device) SetFadeOnTime(newval int) error {
+	cmd := fmt.Sprintf(CmdSetFadeOnTime, newval)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (d *Device) SetGentleOffTime(newval int) error {
+	cmd := fmt.Sprintf(CmdSetGentleOffTime, newval)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (d *Device) SetGentleOnTime(newval int) error {
+	cmd := fmt.Sprintf(CmdSetGentleOnTime, newval)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
 // GetSettings gets the device sys info
 func (d *Device) GetSettings() (*Sysinfo, error) {
 	res, err := d.sendTCP(CmdGetSysinfo)
@@ -196,7 +236,7 @@ func (d *Device) SetMode(m string) error {
 		klogger.Println(err.Error())
 		return err
 	}
-	klogger.Println(string(res))
+	klogger.Println("SetMode: ", string(res))
 	return nil
 }
 
@@ -211,13 +251,18 @@ func (d *Device) GetWIFIStatus() (string, error) {
 }
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
-func (d *Device) GetDimmerParameters() (string, error) {
+func (d *Device) GetDimmerParameters() (*DimmerParameters, error) {
 	res, err := d.sendTCP(CmdGetDimmer)
 	if err != nil {
 		klogger.Println(err.Error())
-		return "", err
+		return nil, err
 	}
-	return string(res), nil
+	var kd KasaDevice
+	if err := json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	return &kd.Dimmer.Parameters, nil
 }
 
 // GetRules returns the rule information from a device

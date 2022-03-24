@@ -298,7 +298,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(res)
+		fmt.Printf("%+v\n", res)
 	case "getalldimmer":
 		m, err := kasa.BroadcastDimmerParameters(*timeout, *repeats)
 		if err != nil {
@@ -363,12 +363,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-    case "addcountdown":
-        if host == "" {
+	case "addcountdown":
+		if host == "" {
 			fmt.Println("usage: kasa addcountdown [host] [duration] [True|False]")
 			return
-        }
-        dur, err := strconv.Atoi(value)
+		}
+		dur, err := strconv.Atoi(value)
 		if err != nil {
 			panic(err)
 		}
@@ -379,7 +379,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-        if err := k.AddCountdownRule(dur, b, "auto"); err != nil {
+		if err := k.AddCountdownRule(dur, b, "auto"); err != nil {
 			panic(err)
 		}
 	default:

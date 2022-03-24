@@ -25,8 +25,12 @@ const (
 	CmdSetRelayStateChild = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. "00"), 0/1
 	CmdChildAlias         = `{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}` // index (e.g. "01"), name
 
-	CmdGetDimmer     = `{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`
-	CmdSetBrightness = `{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}` // 0-100
+	CmdGetDimmer        = `{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`
+	CmdSetBrightness    = `{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`    // 0-100
+	CmdSetFadeOffTime   = `{"smartlife.iot.dimmer":{"set_fade_off_time":{"fadeTime":%d}}}`   // ms
+	CmdSetFadeOnTime    = `{"smartlife.iot.dimmer":{"set_fade_on_time":{"fadeTime":%d}}}`    // ms
+	CmdSetGentleOffTime = `{"smartlife.iot.dimmer":{"set_gentle_off_time":{"fadeTime":%d}}}` // ms
+	CmdSetGentleOnTime  = `{"smartlife.iot.dimmer":{"set_gentle_on_time":{"fadeTime":%d}}}`  // ms
 
 	CmdGetRules = `{"smartlife.iot.common.schedule":{"get_rules":{}}}`
 
