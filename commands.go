@@ -3,6 +3,7 @@ package kasa
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // SetRelayState changes the relay state of the device -- for multi-relay devices use SetRelayStateChild
@@ -35,6 +36,42 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 		state = 1
 	}
 	cmd := fmt.Sprintf(CmdSetRelayStateChild, childID, state)
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
+// SetRelayStateChildMulti adjusts a multiple relays on a multi-relay device
+func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) error {
+	if d.Debug {
+		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
+	}
+
+	state := 0
+	if newstate {
+		state = 1
+	}
+
+	var cc strings.Builder
+	first := true
+	for _, child := range children {
+		if first {
+			cc.WriteRune(44) // ,
+			first = false
+		}
+		cc.WriteRune(34) // "
+		cc.WriteString(child)
+		cc.WriteRune(34) // "
+	}
+
+	if d.Debug {
+		klogger.Printf("relays [%s]", cc.String())
+	}
+
+	cmd := fmt.Sprintf(CmdSetRelayStateChildMulti, cc.String(), state)
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())

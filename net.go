@@ -41,14 +41,19 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	// we could leave the connection open and send subsequent requests
 	// but for one-shot, this is enough
 	data := make([]byte, size)
-	n, err = conn.Read(data)
-	if err != nil {
-		return nil, err
-	}
-	if n != int(size) {
+	totalread := 0
+	for {
+		n, err = conn.Read(data[totalread:])
+		if err != nil {
+			return nil, err
+		}
+		totalread = totalread + n
+
+		if totalread >= int(size) {
+			break
+		}
 		err := fmt.Errorf("not all bytes read from host %s: %d/%d, %s", d.parsed, n, size, Unscramble(data))
 		klogger.Printf(err.Error())
-		return nil, err
 	}
 
 	return Unscramble(data), nil

@@ -22,8 +22,9 @@ const (
 
 	CmdWifiStainfo = `{"netif":{"get_stainfo":{}}}`
 
-	CmdSetRelayStateChild = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. "00"), 0/1
-	CmdChildAlias         = `{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}` // index (e.g. "01"), name
+	CmdSetRelayStateChild      = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. "00"), 0/1
+	CmdSetRelayStateChildMulti = `{"context":{"child_ids":[%s]},"system":{"set_relay_state":{"state":%d}}}`   // indexes (e.g. `"00","03"`), 0/1
+	CmdChildAlias              = `{"context":{"child_ids":["%s"]},"system":{"set_dev_alias":{"alias":"%s"}}}` // index (e.g. "01"), name
 
 	CmdGetDimmer        = `{"smartlife.iot.dimmer":{"get_dimmer_parameters":{}}}`
 	CmdSetBrightness    = `{"smartlife.iot.dimmer":{"set_brightness":{"brightness":%d}}}`    // 0-100
