@@ -46,7 +46,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 		return nil, err
 	}
 	if n != int(size) {
-		err := fmt.Errorf("not all bytes read: %d/%d, %s", n, size, data)
+		err := fmt.Errorf("not all bytes read from host %s: %d/%d, %s", d.parsed, n, size, Unscramble(data))
 		klogger.Printf(err.Error())
 		return nil, err
 	}
