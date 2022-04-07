@@ -59,8 +59,9 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 	first := true
 	for _, child := range children {
 		if first {
-			cc.WriteRune(44) // ,
 			first = false
+		} else {
+			cc.WriteRune(44) // ,
 		}
 		cc.WriteRune(34) // "
 		cc.WriteString(child)
