@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cloudkucooland/go-kasa"
 	"os"
 	"sort"
 	"strconv"
+	"strings"
+
+	"github.com/cloudkucooland/go-kasa"
 )
 
 func main() {
@@ -127,6 +129,20 @@ func main() {
 		} else {
 			err = k.SetRelayState(b)
 		}
+		if err != nil {
+			panic(err)
+		}
+	case "switchmulti":
+		if host == "" || value == "" || *child == "" {
+			fmt.Println("usage: kasa -c [fullID]01,[fullID]02... switchmulti [host] [true|false]")
+			return
+		}
+		b, err := strconv.ParseBool(value)
+		if err != nil {
+			panic(err)
+		}
+		c := strings.Split(*child, ",")
+		err = k.SetRelayStateChildMulti(b, c...)
 		if err != nil {
 			panic(err)
 		}
