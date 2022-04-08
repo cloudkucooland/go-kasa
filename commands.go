@@ -8,10 +8,6 @@ import (
 
 // SetRelayState changes the relay state of the device -- for multi-relay devices use SetRelayStateChild
 func (d *Device) SetRelayState(newstate bool) error {
-	if d.Debug {
-		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
-	}
-
 	state := 0
 	if newstate {
 		state = 1
@@ -27,10 +23,6 @@ func (d *Device) SetRelayState(newstate bool) error {
 
 // SetRelayStateChild adjusts a single relay on a multi-relay device
 func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
-	if d.Debug {
-		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
-	}
-
 	state := 0
 	if newstate {
 		state = 1
@@ -46,10 +38,6 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 
 // SetRelayStateChildMulti adjusts a multiple relays on a multi-relay device
 func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) error {
-	if d.Debug {
-		klogger.Printf("setting kasa hardware state for [%s] to [%t]", d.IP, newstate)
-	}
-
 	state := 0
 	if newstate {
 		state = 1
@@ -67,12 +55,8 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 		cc.WriteString(child)
 		cc.WriteRune(34) // "
 	}
-
-	if d.Debug {
-		klogger.Printf("relays [%s]", cc.String())
-	}
-
 	cmd := fmt.Sprintf(CmdSetRelayStateChildMulti, cc.String(), state)
+
 	err := d.sendUDP(cmd)
 	if err != nil {
 		klogger.Println(err.Error())
@@ -140,19 +124,12 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Println(res)
-	}
-
 	var kd KasaDevice
 	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Printf("%+v\n", kd)
-	}
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 
@@ -164,19 +141,11 @@ func (d *Device) GetEmeter() (*EmeterRealtime, error) {
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Println(res)
-	}
-
 	var k KasaDevice
 	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
 		return nil, err
-	}
-
-	if d.Debug {
-		klogger.Printf("%+v\n", k)
 	}
 	return &k.Emeter.Realtime, nil
 }
@@ -191,10 +160,6 @@ func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Println(res)
-	}
-
 	var k KasaDevice
 	if err = json.Unmarshal(res, &k); err != nil {
 		klogger.Println(err.Error())
@@ -202,9 +167,6 @@ func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Printf("%+v\n", k)
-	}
 	return &k.Emeter.DayStat, nil
 }
 
@@ -321,18 +283,10 @@ func (d *Device) GetCountdownRules() (*[]Rule, error) {
 		return nil, err
 	}
 
-	if d.Debug {
-		klogger.Println(res)
-	}
-
 	var c KasaDevice
 	if err = json.Unmarshal(res, &c); err != nil {
 		klogger.Println(err.Error())
 		return nil, err
-	}
-
-	if d.Debug {
-		klogger.Printf("%+v\n", c)
 	}
 	return &c.Countdown.GetRules.RuleList, nil
 }
