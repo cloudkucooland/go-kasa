@@ -6,12 +6,14 @@ import (
 	"net"
 )
 
+// things to read to learn the protocol:
 // http://rat.admin.lv/wp-content/uploads/2018/08/TR17_fgont_-iot_tp_link_hacking.pdf
 // https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/#TP-Link%20Smart%20Home%20Protocol
 // https://medium.com/@hu3vjeen/reverse-engineering-tp-link-kc100-bac4641bf1cd
 // https://machinekoder.com/controlling-tp-link-hs100110-smart-plugs-with-machinekit/
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
 // https://github.com/p-doyle/Python-KasaSmartPowerStrip
+// https://community.hubitat.com/t/release-tp-link-kasa-plug-switch-and-bulb-integration/1675/482
 
 // Device is the primary type, commands are called from the device
 type Device struct {
