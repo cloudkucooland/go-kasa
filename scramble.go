@@ -27,7 +27,7 @@ func ScrambleTCP(plaintext string) []byte {
 	return buf.Bytes()
 }
 
-// Scramble is simplier. UDP doesn't require the length header, just allocates and write to a slice.
+// Scramble is simpler. UDP doesn't require the length header, just allocates and write to a slice.
 func Scramble(plaintext string) []byte {
 	n := len(plaintext)
 	payload := make([]byte, n)
