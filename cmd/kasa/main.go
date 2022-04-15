@@ -237,7 +237,15 @@ func main() {
 		}
 
 		if month == 0 {
-			em, err := k.GetEmeter()
+			var em *kasa.EmeterRealtime
+			// em, err := k.GetEmeter()
+
+			if *child != "" {
+				em, err = k.GetEmeterChild(*child)
+			} else {
+				em, err = k.GetEmeter()
+			}
+
 			if err != nil {
 				panic(err)
 			}

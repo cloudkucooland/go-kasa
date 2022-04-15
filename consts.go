@@ -20,6 +20,8 @@ const (
 	CmdEmeterGetYear       = `{"emeter":{"get_monthstat":{"year":%d}}}`                     // 4-digit-year
 	CmdEmeterErase         = `{"emeter":{"erase_emeter_stat":null}}`
 
+	CmdGetEmeterChild = `{"context":{"child_ids":["%s"]},"emeter":{"get_realtime":{}}}`
+
 	CmdWifiStainfo = `{"netif":{"get_stainfo":{}}}`
 
 	CmdSetRelayStateChild      = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. "00"), 0/1

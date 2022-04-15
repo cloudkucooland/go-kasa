@@ -170,6 +170,25 @@ func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 	return &k.Emeter.DayStat, nil
 }
 
+// GetEmeter returns emeter data from the device
+func (d *Device) GetEmeterChild(child string) (*EmeterRealtime, error) {
+	q := fmt.Sprintf(CmdGetEmeterChild, child)
+
+	res, err := d.sendTCP(q)
+	if err != nil {
+		klogger.Println(err.Error())
+		return nil, err
+	}
+
+	var k KasaDevice
+	if err = json.Unmarshal(res, &k); err != nil {
+		klogger.Println(err.Error())
+		klogger.Println(res)
+		return nil, err
+	}
+	return &k.Emeter.Realtime, nil
+}
+
 // DisableCloud sets the device to "local only" mode.
 // TODO: forget any cloud settings
 func (d *Device) DisableCloud() error {
