@@ -36,7 +36,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 	return nil
 }
 
-// SetRelayStateChildMulti adjusts a multiple relays on a multi-relay device
+// SetRelayStateChildMulti adjusts multiple relays on a multi-relay device
 func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) error {
 	state := 0
 	if newstate {
@@ -62,6 +62,16 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 		klogger.Println(err.Error())
 		return err
 	}
+	return nil
+}
+
+func (d *Device) SendRawCommand(cmd string) error {
+	res, err := d.sendTCP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	klogger.Println(string(res))
 	return nil
 }
 

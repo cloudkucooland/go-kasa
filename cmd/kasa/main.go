@@ -406,6 +406,10 @@ func main() {
 		if err := k.AddCountdownRule(dur, b, "auto"); err != nil {
 			panic(err)
 		}
+	case "raw":
+		if err := k.SendRawCommand(value); err != nil {
+			panic(err)
+		}
 	default:
 		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown", "addcountdown")
 	}
