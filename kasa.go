@@ -157,6 +157,7 @@ type EmeterSub struct {
 
 // EmeterRealtime is defined by kasa devices
 type EmeterRealtime struct {
+	Slot      uint8  `json:"slot_id"`
 	CurrentMA uint   `json:"current_ma"`
 	VoltageMV uint   `json:"voltage_mv"`
 	PowerMW   uint   `json:"power_mw"`
