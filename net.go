@@ -8,7 +8,7 @@ import (
 )
 
 func (d *Device) sendTCP(cmd string) ([]byte, error) {
-	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: d.parsed, Port: 9999})
+	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: d.parsed, Port: d.Port})
 	if err != nil {
 		klogger.Printf("Cannot connnect to device: %s", err.Error())
 		return nil, err
@@ -58,7 +58,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 }
 
 func (d *Device) sendUDP(cmd string) error {
-	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.parsed, Port: 9999})
+	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.parsed, Port: d.Port})
 	if err != nil {
 		return err
 	}

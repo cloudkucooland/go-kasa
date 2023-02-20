@@ -19,6 +19,7 @@ import (
 type Device struct {
 	IP     string
 	parsed net.IP
+	Port   int
 	Debug  bool
 }
 
@@ -35,6 +36,8 @@ type kasalogger interface {
 func NewDevice(ip string) (*Device, error) {
 	d := Device{IP: ip}
 	d.parsed = net.ParseIP(ip)
+	d.Port = 9999
+
 	if d.parsed == nil {
 		addrs, err := net.LookupHost(ip)
 		if err != nil {

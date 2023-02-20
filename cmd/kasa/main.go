@@ -17,6 +17,7 @@ func main() {
 	timeout := flag.Int("t", 2, "timeout")
 	child := flag.String("c", "", "child")
 	debug := flag.Bool("d", false, "debug")
+	port := flag.Int("p", 9999, "port")
 
 	flag.Parse()
 	args := flag.Args()
@@ -45,6 +46,7 @@ func main() {
 			panic(err)
 		}
 		k.Debug = *debug
+		k.Port = *port
 	}
 
 	switch command {
