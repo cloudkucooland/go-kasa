@@ -12,7 +12,7 @@ It uses UDP rather than TCP where possible for better performance.
 This is still a work-in-progress, but works for most operations.
 
 ## If you need to control your Kasa devices from Apple HomeKit, I have built a bridge which works well.
-https://github.com/cloudkucooland/HomeKitBrigdges/
+[https://github.com/cloudkucooland/HomeKitBrigdges/](https://github.com/cloudkucooland/HomeKitBridges)
 
 ## CLI examples
 discover devices on the local subnets
