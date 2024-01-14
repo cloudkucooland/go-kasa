@@ -270,13 +270,17 @@ func (d *Device) SetMode(m string) error {
 }
 
 // GetWIFIStatus returns the WiFi station info
-func (d *Device) GetWIFIStatus() (string, error) {
+func (d *Device) GetWIFIStatus() (*StaInfo, error) {
 	res, err := d.sendTCP(CmdWifiStainfo)
 	if err != nil {
 		klogger.Println(err.Error())
-		return "", err
+		return nil, err
 	}
-	return string(res), nil
+    var ksta StaInfo
+    if err := json.Unmarshal(res, &ksta); err != nil {
+        return nil, err
+    }
+	return &ksta, nil
 }
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
