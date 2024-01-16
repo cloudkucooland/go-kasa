@@ -276,10 +276,10 @@ func (d *Device) GetWIFIStatus() (*StaInfo, error) {
 		klogger.Println(err.Error())
 		return nil, err
 	}
-    var ksta StaInfo
-    if err := json.Unmarshal(res, &ksta); err != nil {
-        return nil, err
-    }
+	var ksta StaInfo
+	if err := json.Unmarshal(res, &ksta); err != nil {
+		return nil, err
+	}
 	return &ksta, nil
 }
 

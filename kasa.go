@@ -133,7 +133,7 @@ type Preset struct {
 }
 
 // NetIf is defined by kasa devices
-//{"netif":{"get_stainfo":{"ssid":"IoT8417","key_type":3,"rssi":-61,"err_code":0}}}
+// {"netif":{"get_stainfo":{"ssid":"IoT8417","key_type":3,"rssi":-61,"err_code":0}}}
 type NetIf struct {
 	StaInfo StaInfo `json:"get_stainfo"`
 	ErrCode int8    `json:"err_code"`
