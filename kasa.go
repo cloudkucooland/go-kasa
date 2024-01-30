@@ -156,6 +156,8 @@ type StaInfo struct {
 type EmeterSub struct {
 	Realtime EmeterRealtime `json:"get_realtime"`
 	DayStat  EmeterDaystat  `json:"get_daystat"`
+	ErrCode  int8           `json:"err_code"`
+	ErrMsg   string         `json:"err_msg"`
 }
 
 // EmeterRealtime is defined by kasa devices

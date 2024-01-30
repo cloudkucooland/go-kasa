@@ -3,6 +3,7 @@ package kasa
 import (
 	"encoding/json"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -165,8 +166,8 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
 }
 
 // BroadcastEmeter pulls all devices on all attached subnets for emeter data
-func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
-	m := make(map[string]string)
+func BroadcastEmeter(timeout, probes int) (map[string]KasaDevice, error) {
+	m := make(map[string]KasaDevice)
 
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
@@ -201,20 +202,24 @@ func BroadcastEmeter(timeout, probes int) (map[string]string, error) {
 		}
 		res := Unscramble(buffer[:n])
 
-		klogger.Printf("%s\n", res)
+		if strings.Contains(string(res), "module not support") {
+			continue
+		}
+
+		// 192.168.12.180: {"emeter":{"get_realtime":{"current_ma":48,"voltage_mv":126368,"power_mw":4211,"total_wh":3190,"err_code":0}}}
+		// 192.168.12.168: {"emeter":{"get_realtime":{"slot_id":0,"current_ma":119,"voltage_mv":125533,"power_mw":9389,"total_wh":4150,"err_code":0}}}
 
 		// I don't have anything to test with yet -- I do now, I need to write this
-		/* var kd KasaDevice
+		var kd KasaDevice
 		if err = json.Unmarshal(res, &kd); err != nil {
 			klogger.Printf("unmarshal: %s\n", err.Error())
 			continue
 		}
-		if kd.Dimmer.ErrCode != 0 {
-			// klogger.Printf("%s\n", kd.Dimmer.ErrMsg)
+		if kd.Emeter.ErrCode != 0 || kd.Emeter.Realtime.ErrCode != 0 {
+			klogger.Printf("+v\n", string(res), kd.Emeter)
 			continue
 		}
-		klogger.Printf("%+v\n", kd.Dimmer.Parameters) */
-		m[addr.IP.String()] = string(res)
+		m[addr.IP.String()] = kd
 	}
 	return m, nil
 }
