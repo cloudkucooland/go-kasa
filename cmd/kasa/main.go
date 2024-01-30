@@ -341,7 +341,11 @@ func main() {
 			panic(err)
 		}
 		for k, v := range m {
-			fmt.Printf("%s: %+v\n", k, v)
+			fmt.Printf("%s slot %d\n", k, v.Emeter.Realtime.Slot)
+			fmt.Printf("Current:\t%dmA\n", v.Emeter.Realtime.CurrentMA)
+			fmt.Printf("Voltage:\t%2.2fV\n", float64(v.Emeter.Realtime.VoltageMV)/1000)
+			fmt.Printf("Power:\t\t%2.2fW\n", float64(v.Emeter.Realtime.PowerMW)/1000)
+			fmt.Printf("Total:\t\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
 		}
 	case "getallwifi":
 		m, err := kasa.BroadcastWifiParameters(*timeout, *repeats)
