@@ -11,6 +11,15 @@ It uses UDP rather than TCP where possible for better performance.
 ## Includes a small cli tool
 This is still a work-in-progress, but works for most operations.
 
+## CLI install
+Make sure you have Go version 1.18 or newer installed on your system. See [The Go install instructions](https://go.dev/doc/install) for details.
+
+In your shell (terminal on macOS, PowerShell on Windows, lots of options on Linux and UNIX systems...) 
+``go install github.com/cloudkucooland/go-kasa/cmd/kasa@latest``
+
+This will place the ``kasa`` binary in ``~/go/bin/kasa`` 
+Make sure ``~/go/bin`` is in your shell's path and 
+
 ## If you need to control your Kasa devices from Apple HomeKit, I have built a bridge which works well.
 [https://github.com/cloudkucooland/HomeKitBrigdges/](https://github.com/cloudkucooland/HomeKitBridges)
 
