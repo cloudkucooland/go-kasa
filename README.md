@@ -18,7 +18,7 @@ In your shell (terminal on macOS, PowerShell on Windows, lots of options on Linu
 ``go install github.com/cloudkucooland/go-kasa/cmd/kasa@latest``
 
 This will place the ``kasa`` binary in ``~/go/bin/kasa`` 
-Make sure ``~/go/bin`` is in your shell's path and 
+Make sure ``~/go/bin`` is in your [shell's path](https://janelbrandon.medium.com/understanding-the-path-variable-6eae0936e976#:~:text=PATH%20environment%20variable,referenced%20by%20your%20operating%20environment.)
 
 ## If you need to control your Kasa devices from Apple HomeKit, I have built a bridge which works well.
 [https://github.com/cloudkucooland/HomeKitBrigdges/](https://github.com/cloudkucooland/HomeKitBridges)
