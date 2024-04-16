@@ -210,6 +210,18 @@ func (d *Device) DisableCloud() error {
 	return nil
 }
 
+// Enable/Configure Cloud
+func (d *Device) EnableCloud(username, password string) error {
+	cmd := fmt.Sprintf(CmdSetServerCreds, username, password)
+
+	err := d.sendUDP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
 // Reboot instructs the device to reboot
 func (d *Device) Reboot() error {
 	err := d.sendUDP(CmdReboot)
