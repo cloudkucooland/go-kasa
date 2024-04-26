@@ -116,8 +116,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-    case "cloud":
-		if host == "" || value == "" || v2 == ""{
+	case "cloud":
+		if host == "" || value == "" || v2 == "" {
 			fmt.Println("usage: kasa cloud [host] [username] [password]")
 			return
 		}

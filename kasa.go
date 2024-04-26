@@ -83,7 +83,7 @@ type Sysinfo struct {
 	MIC            string   `json:"mic_type"`
 	Feature        string   `json:"feature"`
 	MAC            string   `json:"mac"`
-	Updating       uint8    `json""updating"`
+	Updating       uint8    `json:"updating"`
 	LEDOff         uint8    `json:"led_off"`
 	RelayState     uint8    `json:"relay_state"`
 	Brightness     uint8    `json:"brightness"`
