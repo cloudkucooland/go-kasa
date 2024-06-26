@@ -396,11 +396,20 @@ func main() {
 		if err := k.AddCountdownRule(dur, b, "auto"); err != nil {
 			panic(err)
 		}
+	case "setwifi":
+		if host == "" {
+			fmt.Println("usage: kasa setwifi [host] ssid key")
+			return
+		}
+		_, err := k.SetWIFI(value, v2)
+		if err != nil {
+			panic(err)
+		}
 	case "raw":
 		if err := k.SendRawCommand(value); err != nil {
 			panic(err)
 		}
 	default:
-		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown", "addcountdown")
+		fmt.Println("Valid commands: info, status, brightness, nocloud, switch, ledoff, discover, reboot, alias, wifistatus, getdimmer, getalldimmer, getrules, getcountdown, getallwifi, setmode, emeter, getallemeter, clearcountdown", "addcountdown", "setwifi")
 	}
 }

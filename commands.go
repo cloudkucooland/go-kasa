@@ -295,6 +295,22 @@ func (d *Device) GetWIFIStatus() (*StaInfo, error) {
 	return &ksta, nil
 }
 
+// SetWIFI configures the WiFi station info
+func (d *Device) SetWIFI(ssid string, key string) (*StaInfo, error) {
+	cmd := fmt.Sprintf(CmdWifiSetStainfo, ssid, key, 3)
+	res, err := d.sendTCP(cmd)
+	if err != nil {
+		klogger.Println(err.Error())
+		return nil, err
+	}
+	klogger.Println(string(res))
+	var ksta StaInfo
+	if err := json.Unmarshal(res, &ksta); err != nil {
+		return nil, err
+	}
+	return &ksta, nil
+}
+
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
 func (d *Device) GetDimmerParameters() (*DimmerParameters, error) {
 	res, err := d.sendTCP(CmdGetDimmer)

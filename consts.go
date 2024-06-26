@@ -22,7 +22,8 @@ const (
 
 	CmdGetEmeterChild = `{"context":{"child_ids":["%s"]},"emeter":{"get_realtime":{}}}`
 
-	CmdWifiStainfo = `{"netif":{"get_stainfo":{}}}`
+	CmdWifiStainfo    = `{"netif":{"get_stainfo":{}}}`
+	CmdWifiSetStainfo = `{"netif":{"set_stainfo":{"ssid":"%s","password":"%s","key_type":%d}}}` // string, string, int
 
 	CmdSetRelayStateChild      = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. ".....00"), 0/1
 	CmdSetRelayStateChildMulti = `{"context":{"child_ids":[%s]},"system":{"set_relay_state":{"state":%d}}}`   // indexes (e.g. `"....00","....03"`), 0/1
