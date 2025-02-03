@@ -2,7 +2,9 @@ package kasa
 
 import (
 	"encoding/json"
+	"errors"
 	"net"
+	"os"
 	"strings"
 	"time"
 )
@@ -41,6 +43,9 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
+		if errors.Is(err, os.ErrDeadlineExceeded) {
+			break
+		}
 		if err != nil {
 			klogger.Println(err.Error())
 			break
@@ -90,6 +95,9 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameter
 	// klogger.Printf("probing %d times in %d seconds (rate: %d)\n", probes, timeout, timeout / (probes + 1) )
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
+		if errors.Is(err, os.ErrDeadlineExceeded) {
+			break
+		}
 		if err != nil {
 			klogger.Println(err.Error())
 			break
@@ -142,6 +150,9 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
 	buffer := make([]byte, bufsize)
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
+		if errors.Is(err, os.ErrDeadlineExceeded) {
+			break
+		}
 		if err != nil {
 			klogger.Println(err.Error())
 			break
@@ -196,6 +207,9 @@ func BroadcastEmeter(timeout, probes int) (map[string]KasaDevice, error) {
 	buffer := make([]byte, bufsize)
 	for {
 		n, addr, err := conn.ReadFromUDP(buffer)
+		if errors.Is(err, os.ErrDeadlineExceeded) {
+			break
+		}
 		if err != nil {
 			klogger.Println(err.Error())
 			break
