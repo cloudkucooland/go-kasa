@@ -14,6 +14,7 @@ import (
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
 // https://github.com/p-doyle/Python-KasaSmartPowerStrip
 // https://community.hubitat.com/t/release-tp-link-kasa-plug-switch-and-bulb-integration/1675/482
+// https://github.com/whitslack/kasa/blob/master/API.md
 
 // Device is the primary type, commands are called from the device
 type Device struct {
@@ -28,8 +29,8 @@ var klogger kasalogger = log.Default()
 
 // Any log interface that has Println and Printf will do
 type kasalogger interface {
-	Println(...interface{})
-	Printf(string, ...interface{})
+	Println(...any)
+	Printf(string, ...any)
 }
 
 // NewDevice sets up a new Kasa device for polling
