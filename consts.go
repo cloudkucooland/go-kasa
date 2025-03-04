@@ -1,6 +1,7 @@
 package kasa
 
 // https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
+// https://github.com/whitslack/kasa/blob/master/API.md
 
 // Request strings
 const (
