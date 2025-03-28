@@ -537,6 +537,86 @@ func main() {
 				},
 			},
 			{
+				Name:      "setfadeontime",
+				Usage:     "set fade on time",
+				ArgsUsage: "time in ms",
+				Arguments: []cli.Argument{
+					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					k, err := getKasaDevice(cmd)
+					if err != nil {
+						return err
+					}
+					fade, err := strconv.Atoi(value)
+					if err != nil {
+						return err
+					}
+					return k.SetFadeOnTime(fade)
+				},
+			},
+			{
+				Name:      "setfadeoofftime",
+				Usage:     "set fade off time",
+				ArgsUsage: "time in ms",
+				Arguments: []cli.Argument{
+					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					k, err := getKasaDevice(cmd)
+					if err != nil {
+						return err
+					}
+					fade, err := strconv.Atoi(value)
+					if err != nil {
+						return err
+					}
+					return k.SetFadeOffTime(fade)
+				},
+			},
+			{
+				Name:      "setgentleontime",
+				Usage:     "set gentle on time",
+				ArgsUsage: "time in ms",
+				Arguments: []cli.Argument{
+					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					k, err := getKasaDevice(cmd)
+					if err != nil {
+						return err
+					}
+					fade, err := strconv.Atoi(value)
+					if err != nil {
+						return err
+					}
+					return k.SetGentleOnTime(fade)
+				},
+			},
+			{
+				Name:      "setgentleoofftime",
+				Usage:     "set gentle off time",
+				ArgsUsage: "time in ms",
+				Arguments: []cli.Argument{
+					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					k, err := getKasaDevice(cmd)
+					if err != nil {
+						return err
+					}
+					fade, err := strconv.Atoi(value)
+					if err != nil {
+						return err
+					}
+					return k.SetGentleOffTime(fade)
+				},
+			},
+			{
 				Name:      "emeter",
 				Usage:     "check energy usage",
 				ArgsUsage: "host month year",
