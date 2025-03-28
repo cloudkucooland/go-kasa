@@ -557,7 +557,7 @@ func main() {
 				},
 			},
 			{
-				Name:      "setfadeoofftime",
+				Name:      "setfadeofftime",
 				Usage:     "set fade off time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
@@ -597,7 +597,7 @@ func main() {
 				},
 			},
 			{
-				Name:      "setgentleoofftime",
+				Name:      "setgentleofftime",
 				Usage:     "set gentle off time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
