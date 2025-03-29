@@ -184,7 +184,7 @@ func main() {
 			{
 				Name:      "switch",
 				Usage:     "toggle a relay's state",
-				ArgsUsage: "host",
+				ArgsUsage: "[-c child ID] host true|false",
 				Arguments: []cli.Argument{
 					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
 					&cli.StringArg{Name: "state", Min: 1, Max: 1, Destination: &value},
@@ -208,7 +208,7 @@ func main() {
 			{
 				Name:      "ledoff",
 				Usage:     "disable status LED",
-				ArgsUsage: "host",
+				ArgsUsage: "host true|false",
 				Arguments: []cli.Argument{
 					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
 					&cli.StringArg{Name: "state", Min: 1, Max: 1, Destination: &value},
