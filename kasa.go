@@ -129,8 +129,13 @@ type Child struct {
 
 // Preset is defined by kasa devices
 type Preset struct {
-	Index      uint8 `json:"index"`
-	Brightness uint8 `json:"brightness"`
+	OnOff      int    `json:"on_off"`
+	Index      uint8  `json:"index"`
+	Brightness uint8  `json:"brightness"`
+	Mode       string `json:"mode"`
+	Hue        int    `json:"hue"`
+	Saturation int    `json:"saturation"`
+	ColorTemp  int    `json:"color_temp"`
 }
 
 // NetIf is defined by kasa devices
