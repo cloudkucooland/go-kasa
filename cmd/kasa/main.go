@@ -61,7 +61,7 @@ func main() {
 				UsageText: "kasa info host",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -100,7 +100,7 @@ func main() {
 				UsageText: "kasa status host",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -127,8 +127,8 @@ func main() {
 				UsageText: "kasa brightness host (value: 0-100)",
 				ArgsUsage: "host brightness",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "brightness", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "brightness", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -155,7 +155,7 @@ func main() {
 				UsageText: "kasa nocloud host",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -171,7 +171,7 @@ func main() {
 				UsageText: "kasa cloud host username password",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -186,8 +186,8 @@ func main() {
 				Usage:     "toggle a relay's state",
 				ArgsUsage: "[-c child ID] host true|false",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "state", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "state", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					b, err := strconv.ParseBool(value)
@@ -210,8 +210,8 @@ func main() {
 				Usage:     "disable status LED",
 				ArgsUsage: "host true|false",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "state", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "state", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					b, err := strconv.ParseBool(value)
@@ -260,8 +260,8 @@ func main() {
 				Usage:     "adjust device countdowns",
 				ArgsUsage: "host [delete]",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "delete", Min: 0, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "delete", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -286,7 +286,7 @@ func main() {
 				Usage:     "reboot device",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -302,8 +302,8 @@ func main() {
 				Usage:     "update device name (alias)",
 				ArgsUsage: "host new-name",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "newname", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "newname", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -322,8 +322,8 @@ func main() {
 				Usage:     "send raw command",
 				ArgsUsage: "host command",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "command", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "command", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -338,9 +338,9 @@ func main() {
 				Usage:     "configure wifi",
 				ArgsUsage: "host ssid key",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "ssid", Min: 1, Max: 1, Destination: &value},
-					&cli.StringArg{Name: "key", Min: 1, Max: 1, Destination: &secondary},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "ssid", Destination: &value},
+					&cli.StringArg{Name: "key", Destination: &secondary},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -356,7 +356,7 @@ func main() {
 				Usage:     "check device wifi status",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -376,9 +376,9 @@ func main() {
 				Usage:     "add device countdown",
 				ArgsUsage: "host duration True|False",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "duration", Min: 1, Max: 1, Destination: &value},
-					&cli.StringArg{Name: "target", Min: 1, Max: 1, Destination: &secondary},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "duration", Destination: &value},
+					&cli.StringArg{Name: "target", Destination: &secondary},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -404,7 +404,7 @@ func main() {
 				Usage:     "remove coundown rules",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -418,7 +418,7 @@ func main() {
 				Name:      "getcountdown",
 				Usage:     "view countdown rules",
 				ArgsUsage: "host",
-				Arguments: []cli.Argument{&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host}},
+				Arguments: []cli.Argument{&cli.StringArg{Name: "host", Destination: &host}},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
 					if err != nil {
@@ -437,7 +437,7 @@ func main() {
 				Usage:     "check dimmer parameters",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -457,7 +457,7 @@ func main() {
 				Usage:     "check running rules",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
+					&cli.StringArg{Name: "host", Destination: &host},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -477,8 +477,8 @@ func main() {
 				Usage:     "set operating mode",
 				ArgsUsage: "host mode",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "mode", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "mode", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -541,8 +541,8 @@ func main() {
 				Usage:     "set fade on time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "time", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -561,8 +561,8 @@ func main() {
 				Usage:     "set fade off time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "time", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -581,8 +581,8 @@ func main() {
 				Usage:     "set gentle on time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "time", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -601,8 +601,8 @@ func main() {
 				Usage:     "set gentle off time",
 				ArgsUsage: "time in ms",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "time", Min: 1, Max: 1, Destination: &value},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "time", Destination: &value},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
@@ -621,9 +621,9 @@ func main() {
 				Usage:     "check energy usage",
 				ArgsUsage: "host month year",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Min: 1, Max: 1, Destination: &host},
-					&cli.StringArg{Name: "month", Min: 0, Max: 1, Destination: &value},
-					&cli.StringArg{Name: "year", Min: 0, Max: 1, Destination: &secondary},
+					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "month", Destination: &value},
+					&cli.StringArg{Name: "year", Destination: &secondary},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					k, err := getKasaDevice(cmd)
