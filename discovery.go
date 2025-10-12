@@ -21,7 +21,9 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 		return m, err
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+	if err := conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout))); err != nil {
+		klogger.Println(err.Error())
+	}
 
 	go func() {
 		payload := Scramble(CmdGetSysinfo)
@@ -73,7 +75,9 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameter
 		return m, err
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+	if err := conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout))); err != nil {
+		klogger.Println(err.Error())
+	}
 
 	go func() {
 		payload := Scramble(CmdGetDimmer)
@@ -130,7 +134,9 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
 		return m, err
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+	if err := conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout))); err != nil {
+		klogger.Println(err.Error())
+	}
 
 	go func() {
 		payload := Scramble(CmdWifiStainfo)
@@ -186,7 +192,9 @@ func BroadcastEmeter(timeout, probes int) (map[string]KasaDevice, error) {
 		return m, err
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
+	if err := conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout))); err != nil {
+		klogger.Println(err.Error())
+	}
 
 	go func() {
 		payload := Scramble(CmdGetEmeter)

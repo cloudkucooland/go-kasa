@@ -13,7 +13,9 @@ func ScrambleTCP(plaintext string) []byte {
 	buf.Grow(n + 4)
 
 	// write the length as a 32-bit big-endian uint
-	binary.Write(&buf, binary.BigEndian, uint32(n))
+	if err := binary.Write(&buf, binary.BigEndian, uint32(n)); err != nil {
+		klogger.Printf(err.Error())
+	}
 
 	key := byte(0xAB)
 	for i := 0; i < n; i++ {

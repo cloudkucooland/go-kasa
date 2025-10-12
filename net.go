@@ -15,7 +15,10 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	}
 	defer conn.Close()
 	// assume we are on the same LAN, one second is enough
-	conn.SetReadDeadline(time.Now().Add(time.Second))
+	if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+		klogger.Println(err.Error())
+		// keep going
+	}
 
 	// send the command with the uint32 "header"
 	payload := ScrambleTCP(cmd)
