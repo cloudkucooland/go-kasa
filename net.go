@@ -8,22 +8,24 @@ import (
 )
 
 func (d *Device) sendTCP(cmd string) ([]byte, error) {
-	conn, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: d.parsed, Port: d.Port})
+	dialer := &net.Dialer{
+		Timeout:  1 * time.Second,
+		Deadline: time.Now().Add(2 * time.Second),
+	}
+
+	addr := fmt.Sprintf("%s:%d", d.IP, d.Port)
+
+	conn, err := dialer.Dial("tcp4", addr)
 	if err != nil {
-		klogger.Printf("Cannot connnect to device: %s", err.Error())
+		klogger.Printf("cannot connnect to device: %s", err.Error())
 		return nil, err
 	}
 	defer conn.Close()
-	// assume we are on the same LAN, one second is enough
-	if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
-		klogger.Println(err.Error())
-		// keep going
-	}
 
 	// send the command with the uint32 "header"
 	payload := ScrambleTCP(cmd)
 	if _, err = conn.Write(payload); err != nil {
-		klogger.Printf("Cannot send command to device: %s", err.Error())
+		klogger.Printf("cannot send command to device: %s", err.Error())
 		return nil, err
 	}
 
