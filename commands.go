@@ -1,7 +1,7 @@
 package kasa
 
 import (
-    "context"
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -141,6 +141,10 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 		return nil, err
 	}
 
+	if err := kd.GetSysinfo.Sysinfo.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 
@@ -152,13 +156,17 @@ func (d *Device) GetEmeter() (*EmeterRealtime, error) {
 		return nil, err
 	}
 
-	var k KasaDevice
-	if err = json.Unmarshal(res, &k); err != nil {
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
-		klogger.Println(res)
 		return nil, err
 	}
-	return &k.Emeter.Realtime, nil
+
+	if err := kd.Emeter.Realtime.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Emeter.Realtime, nil
 }
 
 // GetEmeterMonth returns a single month's emeter data from the device
@@ -171,14 +179,18 @@ func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 		return nil, err
 	}
 
-	var k KasaDevice
-	if err = json.Unmarshal(res, &k); err != nil {
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
 		return nil, err
 	}
 
-	return &k.Emeter.DayStat, nil
+	if err := kd.Emeter.DayStat.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Emeter.DayStat, nil
 }
 
 // GetEmeter returns emeter data from the device
@@ -191,13 +203,18 @@ func (d *Device) GetEmeterChild(child string) (*EmeterRealtime, error) {
 		return nil, err
 	}
 
-	var k KasaDevice
-	if err = json.Unmarshal(res, &k); err != nil {
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
 		klogger.Println(err.Error())
 		klogger.Println(res)
 		return nil, err
 	}
-	return &k.Emeter.Realtime, nil
+
+	if err := kd.Emeter.Realtime.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Emeter.Realtime, nil
 }
 
 // DisableCloud sets the device to "local only" mode.
@@ -279,6 +296,9 @@ func (d *Device) SetMode(m string) error {
 		return err
 	}
 	klogger.Println("SetMode: ", string(res))
+
+	// if err := kd....KasaErr.OK(); err != nil { return nil, err }
+
 	return nil
 }
 
@@ -293,6 +313,7 @@ func (d *Device) GetWIFIStatus() (*StaInfo, error) {
 	if err := json.Unmarshal(res, &ksta); err != nil {
 		return nil, err
 	}
+
 	return &ksta, nil
 }
 
@@ -309,6 +330,7 @@ func (d *Device) SetWIFI(ssid string, key string) (*StaInfo, error) {
 	if err := json.Unmarshal(res, &ksta); err != nil {
 		return nil, err
 	}
+
 	return &ksta, nil
 }
 

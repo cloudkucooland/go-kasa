@@ -26,7 +26,7 @@ func BroadcastAddresses() ([]net.IP, error) {
 			case *net.IPNet:
 				// skip non-IPv4 and loopback
 				v4 := a.IP.To4()
-				if v4 == nil || v4[0] == 127 {
+				if v4 == nil || v4.IsLoopback() {
 					continue
 				}
 
