@@ -1,6 +1,7 @@
 package kasa
 
 import (
+    "context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -13,7 +14,7 @@ func (d *Device) SetRelayState(newstate bool) error {
 		state = 1
 	}
 	cmd := fmt.Sprintf(CmdSetRelayState, state)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -28,7 +29,7 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 		state = 1
 	}
 	cmd := fmt.Sprintf(CmdSetRelayStateChild, childID, state)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -57,7 +58,7 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 	}
 	cmd := fmt.Sprintf(CmdSetRelayStateChildMulti, cc.String(), state)
 
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -66,7 +67,7 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 }
 
 func (d *Device) SendRawCommand(cmd string) error {
-	res, err := d.sendTCP(cmd)
+	res, err := d.sendTCP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -78,7 +79,7 @@ func (d *Device) SendRawCommand(cmd string) error {
 // SetBrightness adjust the brightness setting on a dimmer-capable device (1-100)
 func (d *Device) SetBrightness(newval int) error {
 	cmd := fmt.Sprintf(CmdSetBrightness, newval)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -88,7 +89,7 @@ func (d *Device) SetBrightness(newval int) error {
 
 func (d *Device) SetFadeOffTime(newval int) error {
 	cmd := fmt.Sprintf(CmdSetFadeOffTime, newval)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -98,7 +99,7 @@ func (d *Device) SetFadeOffTime(newval int) error {
 
 func (d *Device) SetFadeOnTime(newval int) error {
 	cmd := fmt.Sprintf(CmdSetFadeOnTime, newval)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -108,7 +109,7 @@ func (d *Device) SetFadeOnTime(newval int) error {
 
 func (d *Device) SetGentleOffTime(newval int) error {
 	cmd := fmt.Sprintf(CmdSetGentleOffTime, newval)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -118,7 +119,7 @@ func (d *Device) SetGentleOffTime(newval int) error {
 
 func (d *Device) SetGentleOnTime(newval int) error {
 	cmd := fmt.Sprintf(CmdSetGentleOnTime, newval)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -128,7 +129,7 @@ func (d *Device) SetGentleOnTime(newval int) error {
 
 // GetSettings gets the device sys info
 func (d *Device) GetSettings() (*Sysinfo, error) {
-	res, err := d.sendTCP(CmdGetSysinfo)
+	res, err := d.sendTCP(context.Background(), CmdGetSysinfo)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -145,7 +146,7 @@ func (d *Device) GetSettings() (*Sysinfo, error) {
 
 // GetEmeter returns emeter data from the device
 func (d *Device) GetEmeter() (*EmeterRealtime, error) {
-	res, err := d.sendTCP(CmdGetEmeter)
+	res, err := d.sendTCP(context.Background(), CmdGetEmeter)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -164,7 +165,7 @@ func (d *Device) GetEmeter() (*EmeterRealtime, error) {
 func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 	q := fmt.Sprintf(CmdEmeterGetMonth, month, year)
 
-	res, err := d.sendTCP(q)
+	res, err := d.sendTCP(context.Background(), q)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -184,7 +185,7 @@ func (d *Device) GetEmeterMonth(month, year int) (*EmeterDaystat, error) {
 func (d *Device) GetEmeterChild(child string) (*EmeterRealtime, error) {
 	q := fmt.Sprintf(CmdGetEmeterChild, child)
 
-	res, err := d.sendTCP(q)
+	res, err := d.sendTCP(context.Background(), q)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -202,7 +203,7 @@ func (d *Device) GetEmeterChild(child string) (*EmeterRealtime, error) {
 // DisableCloud sets the device to "local only" mode.
 // TODO: forget any cloud settings
 func (d *Device) DisableCloud() error {
-	err := d.sendUDP(CmdCloudUnbind)
+	err := d.sendUDP(context.Background(), CmdCloudUnbind)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -214,7 +215,7 @@ func (d *Device) DisableCloud() error {
 func (d *Device) EnableCloud(username, password string) error {
 	cmd := fmt.Sprintf(CmdSetServerCreds, username, password)
 
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -224,7 +225,7 @@ func (d *Device) EnableCloud(username, password string) error {
 
 // Reboot instructs the device to reboot
 func (d *Device) Reboot() error {
-	err := d.sendUDP(CmdReboot)
+	err := d.sendUDP(context.Background(), CmdReboot)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -239,7 +240,7 @@ func (d *Device) SetLEDOff(t bool) error {
 		off = 1
 	}
 	cmd := fmt.Sprintf(CmdLEDOff, off)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -250,7 +251,7 @@ func (d *Device) SetLEDOff(t bool) error {
 // SetAlias sets a device name
 func (d *Device) SetAlias(s string) error {
 	cmd := fmt.Sprintf(CmdDeviceAlias, s)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -261,7 +262,7 @@ func (d *Device) SetAlias(s string) error {
 // SetChildAlias sets the name of an individual relay on a multi-relay device, I don't think this works
 func (d *Device) SetChildAlias(childID, s string) error {
 	cmd := fmt.Sprintf(CmdChildAlias, childID, s)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -272,7 +273,7 @@ func (d *Device) SetChildAlias(childID, s string) error {
 // SetMode sets the target mode of the system
 func (d *Device) SetMode(m string) error {
 	cmd := fmt.Sprintf(CmdSetMode, m)
-	res, err := d.sendTCP(cmd)
+	res, err := d.sendTCP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -283,7 +284,7 @@ func (d *Device) SetMode(m string) error {
 
 // GetWIFIStatus returns the WiFi station info
 func (d *Device) GetWIFIStatus() (*StaInfo, error) {
-	res, err := d.sendTCP(CmdWifiStainfo)
+	res, err := d.sendTCP(context.Background(), CmdWifiStainfo)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -298,7 +299,7 @@ func (d *Device) GetWIFIStatus() (*StaInfo, error) {
 // SetWIFI configures the WiFi station info
 func (d *Device) SetWIFI(ssid string, key string) (*StaInfo, error) {
 	cmd := fmt.Sprintf(CmdWifiSetStainfo, ssid, key, 3)
-	res, err := d.sendTCP(cmd)
+	res, err := d.sendTCP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -313,7 +314,7 @@ func (d *Device) SetWIFI(ssid string, key string) (*StaInfo, error) {
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices
 func (d *Device) GetDimmerParameters() (*DimmerParameters, error) {
-	res, err := d.sendTCP(CmdGetDimmer)
+	res, err := d.sendTCP(context.Background(), CmdGetDimmer)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -328,7 +329,7 @@ func (d *Device) GetDimmerParameters() (*DimmerParameters, error) {
 
 // GetRules returns the rule information from a device
 func (d *Device) GetRules() (string, error) {
-	res, err := d.sendTCP(CmdGetRules)
+	res, err := d.sendTCP(context.Background(), CmdGetRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return "", err
@@ -338,7 +339,7 @@ func (d *Device) GetRules() (string, error) {
 
 // GetCountdownRules returns a list of the countdown timers on a device
 func (d *Device) GetCountdownRules() (*[]Rule, error) {
-	res, err := d.sendTCP(CmdGetCountdownRules)
+	res, err := d.sendTCP(context.Background(), CmdGetCountdownRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return nil, err
@@ -354,7 +355,7 @@ func (d *Device) GetCountdownRules() (*[]Rule, error) {
 
 // ClearCountdownRules resets all countdown rules on the device
 func (d *Device) ClearCountdownRules() error {
-	err := d.sendUDP(CmdDeleteAllRules)
+	err := d.sendUDP(context.Background(), CmdDeleteAllRules)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err
@@ -370,7 +371,7 @@ func (d *Device) AddCountdownRule(dur int, target bool, name string) error {
 	}
 
 	cmd := fmt.Sprintf(CmdAddCountdownRule, dur, state, name)
-	err := d.sendUDP(cmd)
+	err := d.sendUDP(context.Background(), cmd)
 	if err != nil {
 		klogger.Println(err.Error())
 		return err

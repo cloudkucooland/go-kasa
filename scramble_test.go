@@ -1,4 +1,5 @@
 // Look ma! using chatgpt to write unit tests!
+// of course it was only 90% of the way there, but what the heck
 
 package kasa_test
 

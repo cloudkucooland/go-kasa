@@ -1,13 +1,14 @@
 package kasa
 
 import (
+    "context"
 	"encoding/binary"
 	"fmt"
 	"net"
 	"time"
 )
 
-func (d *Device) sendTCP(cmd string) ([]byte, error) {
+func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 	dialer := &net.Dialer{
 		Timeout:  1 * time.Second,
 		Deadline: time.Now().Add(2 * time.Second),
@@ -15,7 +16,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 
 	addr := fmt.Sprintf("%s:%d", d.IP, d.Port)
 
-	conn, err := dialer.Dial("tcp4", addr)
+	conn, err := dialer.DialContext(ctx, "tcp4", addr)
 	if err != nil {
 		klogger.Printf("cannot connnect to device: %s", err.Error())
 		return nil, err
@@ -62,7 +63,7 @@ func (d *Device) sendTCP(cmd string) ([]byte, error) {
 	return Unscramble(data), nil
 }
 
-func (d *Device) sendUDP(cmd string) error {
+func (d *Device) sendUDP(ctx context.Context, cmd string) error {
 	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.parsed, Port: d.Port})
 	if err != nil {
 		return err
