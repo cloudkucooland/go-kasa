@@ -275,7 +275,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					for _, r := range *rules {
+					for _, r := range rules {
 						fmt.Printf("%+v\n", r)
 					}
 					return nil
