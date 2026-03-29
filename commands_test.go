@@ -1,4 +1,4 @@
-package kasa_test
+package kasa
 
 import (
 	"context"
@@ -6,14 +6,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/cloudkucooland/go-kasa"
 )
 
-// ---- Mock Device ----
-
 type mockDevice struct {
-	kasa.Device
+	Device
 	sendTCPFunc func(ctx context.Context, cmd string) ([]byte, error)
 	sendUDPFunc func(ctx context.Context, cmd string) error
 }
@@ -41,9 +37,9 @@ func TestSetRelayStateCtx(t *testing.T) {
 		wantCmd   string
 		shouldErr bool
 	}{
-		{"turn on", true, fmt.Sprintf(kasa.CmdSetRelayState, 1), false},
-		{"turn off", false, fmt.Sprintf(kasa.CmdSetRelayState, 0), false},
-		{"udp error", true, fmt.Sprintf(kasa.CmdSetRelayState, 1), true},
+		{"turn on", true, fmt.Sprintf(CmdSetRelayState, 1), false},
+		{"turn off", false, fmt.Sprintf(CmdSetRelayState, 0), false},
+		{"udp error", true, fmt.Sprintf(CmdSetRelayState, 1), true},
 	}
 
 	for _, tt := range tests {
@@ -120,7 +116,7 @@ func TestGetSettingsCtx(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &mockDevice{
 				sendTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
-					if cmd != kasa.CmdGetSysinfo {
+					if cmd != CmdGetSysinfo {
 						t.Fatalf("unexpected cmd: %s", cmd)
 					}
 					return []byte(tt.response), nil
@@ -187,7 +183,7 @@ func TestGetEmeterCtx(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &mockDevice{
 				sendTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
-					if cmd != kasa.CmdGetEmeter {
+					if cmd != CmdGetEmeter {
 						t.Fatalf("unexpected cmd: %s", cmd)
 					}
 					return []byte(tt.response), nil
