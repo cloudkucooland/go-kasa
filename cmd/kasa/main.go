@@ -702,7 +702,6 @@ func getKasaDevice(cmd *cli.Command) (*kasa.Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	k.Debug = cmd.Bool("debug")
 	k.Port = int(cmd.Int("port"))
 	return k, nil
 }
