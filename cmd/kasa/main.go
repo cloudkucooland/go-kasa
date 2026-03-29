@@ -69,7 +69,7 @@ func main() {
 						return err
 					}
 
-					s, err := k.GetSettings()
+					s, err := k.GetSettingsCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -107,7 +107,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					s, err := k.GetSettings()
+					s, err := k.GetSettingsCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -146,7 +146,7 @@ func main() {
 					if b > 100 {
 						b = 100
 					}
-					return k.SetBrightness(b)
+					return k.SetBrightnessCtx(ctx, b)
 				},
 			},
 			{
@@ -162,7 +162,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.DisableCloud()
+					return k.DisableCloudCtx(ctx)
 				},
 			},
 			{
@@ -178,7 +178,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.EnableCloud(cmd.Args().Get(1), cmd.Args().Get(2))
+					return k.EnableCloudCtx(ctx, cmd.Args().Get(1), cmd.Args().Get(2))
 				},
 			},
 			{
@@ -200,9 +200,9 @@ func main() {
 					}
 					child := cmd.String("child")
 					if child != "" {
-						return k.SetRelayStateChild(child, b)
+						return k.SetRelayStateChildCtx(ctx, child, b)
 					}
-					return k.SetRelayState(b)
+					return k.SetRelayStateCtx(ctx, b)
 				},
 			},
 			{
@@ -222,7 +222,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetLEDOff(b)
+					return k.SetLEDOffCtx(ctx, b)
 				},
 			},
 			{
@@ -269,9 +269,9 @@ func main() {
 						return err
 					}
 					if value == "delete" {
-						return k.ClearCountdownRules()
+						return k.ClearCountdownRulesCtx(ctx)
 					}
-					rules, err := k.GetCountdownRules()
+					rules, err := k.GetCountdownRulesCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -293,7 +293,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.Reboot()
+					return k.RebootCtx(ctx)
 					// return nil
 				},
 			},
@@ -312,7 +312,7 @@ func main() {
 					}
 					child := cmd.String("child")
 					if child != "" {
-						return k.SetChildAlias(child, value)
+						return k.SetChildAliasCtx(ctx, child, value)
 					}
 					return k.SetAlias(value)
 				},
@@ -330,7 +330,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SendRawCommand(value)
+					return k.SendRawCommandCtx(ctx, value)
 				},
 			},
 			{
@@ -347,7 +347,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					_, err = k.SetWIFI(value, secondary)
+					_, err = k.SetWIFICtx(ctx, value, secondary)
 					return err
 				},
 			},
@@ -363,7 +363,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					res, err := k.GetWIFIStatus()
+					res, err := k.GetWIFIStatusCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -396,7 +396,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.AddCountdownRule(dur, b, "auto")
+					return k.AddCountdownRuleCtx(ctx, dur, b, "auto")
 				},
 			},
 			{
@@ -411,7 +411,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.ClearCountdownRules()
+					return k.ClearCountdownRulesCtx(ctx)
 				},
 			},
 			{
@@ -424,7 +424,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					res, err := k.GetCountdownRules()
+					res, err := k.GetCountdownRulesCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -444,7 +444,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					res, err := k.GetDimmerParameters()
+					res, err := k.GetDimmerParametersCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -464,7 +464,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					res, err := k.GetRules()
+					res, err := k.GetRulesCtx(ctx)
 					if err != nil {
 						return err
 					}
@@ -485,7 +485,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetMode(value)
+					return k.SetModeCtx(ctx, value)
 				},
 			},
 			{
@@ -497,7 +497,20 @@ func main() {
 						return err
 					}
 					for k, v := range m {
-						fmt.Printf("%s: %+v\n", k, v)
+						kd, err := kasa.NewDevice(k)
+						if err != nil {
+							return err
+						}
+						s, err := kd.GetSettingsCtx(ctx)
+						if err != nil {
+							return err
+						}
+
+						fmt.Printf("[%s]\t", k)
+						fmt.Printf("SSID: %s\t", v.SSID)
+						fmt.Printf("Key Type: %d\t", v.KeyType)
+						fmt.Printf("RSSI: %d\t", v.RSSI)
+						fmt.Printf("%s\n", s.Alias)
 					}
 					return nil
 				},
@@ -510,13 +523,48 @@ func main() {
 					if err != nil {
 						return err
 					}
+					var tma uint
+					var tw float64
 					for k, v := range m {
-						fmt.Printf("%s slot %d\n", k, v.Emeter.Realtime.Slot)
-						fmt.Printf("Current:\t%dmA\n", v.Emeter.Realtime.CurrentMA)
-						fmt.Printf("Voltage:\t%2.2fV\n", float64(v.Emeter.Realtime.VoltageMV)/1000)
-						fmt.Printf("Power:\t\t%2.2fW\n", float64(v.Emeter.Realtime.PowerMW)/1000)
-						fmt.Printf("Total:\t\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
+						kd, err := kasa.NewDevice(k)
+						if err != nil {
+							return err
+						}
+						s, err := kd.GetSettingsCtx(ctx)
+						if err != nil {
+							return err
+						}
+						fmt.Printf("[%s]\n", s.Alias)
+
+						if s.NumChildren > 0 {
+							var ma uint
+							var w float64
+							for _, c := range s.Children {
+								cv, err := kd.GetEmeterChildCtx(ctx, c.ID)
+								if err != nil {
+									return err
+								}
+								ma += cv.CurrentMA
+								w += float64(cv.PowerMW) / 1000
+								fmt.Printf("[%s]\t", c.Alias)
+								fmt.Printf("Current:\t%dmA\t", cv.CurrentMA)
+								fmt.Printf("Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
+								fmt.Printf("Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
+								fmt.Printf("Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+							}
+							fmt.Printf("Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
+							tma += ma
+							tw += w
+						} else {
+							fmt.Printf("Current:\t%dmA\n", v.Emeter.Realtime.CurrentMA)
+							fmt.Printf("Voltage:\t%2.2fV\n", float64(v.Emeter.Realtime.VoltageMV)/1000)
+							fmt.Printf("Power:\t\t%2.2fW\n", float64(v.Emeter.Realtime.PowerMW)/1000)
+							fmt.Printf("Total:\t\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
+							tma += v.Emeter.Realtime.CurrentMA
+							tw += float64(v.Emeter.Realtime.PowerMW) / 1000
+						}
 					}
+					fmt.Printf("Total House Current:\t%dmA\tPower:\t%2.2fW\n", tma, tw)
 					return nil
 				},
 			},
@@ -528,9 +576,25 @@ func main() {
 					if err != nil {
 						return err
 					}
+
 					for k, v := range m {
 						if v.ErrCode == 0 {
-							fmt.Printf("%s: %+v\n", k, v)
+							kd, err := kasa.NewDevice(k)
+							if err != nil {
+								return err
+							}
+							s, err := kd.GetSettingsCtx(ctx)
+							if err != nil {
+								return err
+							}
+
+							fmt.Printf("[%s] %s\n", k, s.Alias)
+							fmt.Printf("Min Threshold: %d\t", v.MinThreshold)
+							fmt.Printf("Fade On: %dms\t\t", v.FadeOnTime)
+							fmt.Printf("Fade Off: %dms\n", v.FadeOffTime)
+							fmt.Printf("Gentle On: %dms\t", v.GentleOnTime)
+							fmt.Printf("Gentle Off: %dms\t", v.GentleOffTime)
+							fmt.Printf("Ramp Rate: %dms\n", v.RampRate)
 						}
 					}
 					return nil
@@ -553,7 +617,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetFadeOnTime(fade)
+					return k.SetFadeOnTimeCtx(ctx, fade)
 				},
 			},
 			{
@@ -573,7 +637,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetFadeOffTime(fade)
+					return k.SetFadeOffTimeCtx(ctx, fade)
 				},
 			},
 			{
@@ -593,7 +657,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetGentleOnTime(fade)
+					return k.SetGentleOnTimeCtx(ctx, fade)
 				},
 			},
 			{
@@ -613,7 +677,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return k.SetGentleOffTime(fade)
+					return k.SetGentleOffTimeCtx(ctx, fade)
 				},
 			},
 			{
@@ -655,9 +719,9 @@ func main() {
 						var em *kasa.EmeterRealtime
 
 						if cmd.String("child") != "" {
-							em, err = k.GetEmeterChild(cmd.String("child"))
+							em, err = k.GetEmeterChildCtx(ctx, cmd.String("child"))
 						} else {
-							em, err = k.GetEmeter()
+							em, err = k.GetEmeterCtx(ctx)
 						}
 
 						if err != nil {
@@ -675,7 +739,7 @@ func main() {
 						year = 2025 // make this auto-determine the current year
 					}
 					// get month/year date range
-					em, err := k.GetEmeterMonth(month, year)
+					em, err := k.GetEmeterMonthCtx(ctx, month, year)
 					if err != nil {
 						return err
 					}

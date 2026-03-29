@@ -4,7 +4,7 @@
 package kasa
 
 import (
-	// "binary"
+	"encoding/binary"
 	"testing"
 )
 
@@ -137,10 +137,10 @@ func TestScrambleAndUnscramble(t *testing.T) {
 			}
 
 			// Check TCP header length
-			/* headerLen := binary.BigEndian.Uint32(tcp[:4])
+			headerLen := binary.BigEndian.Uint32(tcp[:4])
 			if int(headerLen) != len(tt.text) {
 				t.Fatalf("TCP header length mismatch, got %d, want %d", headerLen, len(tt.text))
-			} */
+			}
 
 			// Unscramble UDP
 			copyBuf := make([]byte, len(udp))
@@ -196,8 +196,8 @@ func TestScrambleTCPHeaderIntegrity(t *testing.T) {
 		t.Fatal("TCP buffer too short")
 	}
 
-	/* headerLen := binary.BigEndian.Uint32(tcp[:4])
+	headerLen := binary.BigEndian.Uint32(tcp[:4])
 	if int(headerLen) != len(text) {
 		t.Errorf("TCP header length mismatch, got %d, want %d", headerLen, len(text))
-	} */
+	}
 }
