@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -20,7 +21,7 @@ var secondary string
 func main() {
 	cmd := &cli.Command{
 		Name:      "kasa",
-		Version:   "v0.2.0",
+		Version:   "v0.3.0",
 		Copyright: "(c) 2025 Scot Bontrager",
 		Usage:     "control TP-Link kasa devices",
 		UsageText: "kasa command",
@@ -401,7 +402,7 @@ func main() {
 			},
 			{
 				Name:      "cleancountdown",
-				Usage:     "remove coundown rules",
+				Usage:     "remove countdown rules",
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
 					&cli.StringArg{Name: "host", Destination: &host},
@@ -736,7 +737,7 @@ func main() {
 					}
 
 					if year == 0 {
-						year = 2025 // make this auto-determine the current year
+						year = time.Now().Year()
 					}
 					// get month/year date range
 					em, err := k.GetEmeterMonthCtx(ctx, month, year)
@@ -752,7 +753,10 @@ func main() {
 		},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cmd.Int("timeout"))*time.Second)
+	defer cancel()
+
+	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
