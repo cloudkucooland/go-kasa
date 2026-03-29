@@ -121,66 +121,9 @@ func main() {
 					return nil
 				},
 			},
-			{
-				Name:      "brightness",
-				Usage:     "set brightness",
-				UsageText: "kasa brightness host (value: 0-100)",
-				ArgsUsage: "host brightness",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "brightness", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-
-					b, err := strconv.Atoi(value)
-					if err != nil {
-						return err
-					}
-					if b < 1 {
-						b = 1
-					}
-					if b > 100 {
-						b = 100
-					}
-					return k.SetBrightnessCtx(ctx, b)
-				},
-			},
-			{
-				Name:      "nocloud",
-				Usage:     "disable the TP-Link cloud connection",
-				UsageText: "kasa nocloud host",
-				ArgsUsage: "host",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					return k.DisableCloudCtx(ctx)
-				},
-			},
-			{
-				Name:      "cloud",
-				Usage:     "configure the TP-Link cloud connection",
-				UsageText: "kasa cloud host username password",
-				ArgsUsage: "host",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					return k.EnableCloudCtx(ctx, cmd.Args().Get(1), cmd.Args().Get(2))
-				},
-			},
+			brightness,
+			nocloud,
+			cloud,
 			{
 				Name:      "switch",
 				Usage:     "toggle a relay's state",
@@ -205,27 +148,8 @@ func main() {
 					return k.SetRelayStateCtx(ctx, b)
 				},
 			},
-			{
-				Name:      "ledoff",
-				Usage:     "disable status LED",
-				ArgsUsage: "host true|false",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "state", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					b, err := strconv.ParseBool(value)
-					if err != nil {
-						return err
-					}
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					return k.SetLEDOffCtx(ctx, b)
-				},
-			},
-            discover,
+			ledoff,
+			discover,
 			{
 				Name:      "countdown",
 				Usage:     "adjust device countdowns",
@@ -252,61 +176,12 @@ func main() {
 					return nil
 				},
 			},
-			{
-				Name:      "reboot",
-				Usage:     "reboot device",
-				ArgsUsage: "host",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					return k.RebootCtx(ctx)
-					// return nil
-				},
-			},
-			{
-				Name:      "alias",
-				Usage:     "update device name (alias)",
-				ArgsUsage: "host new-name",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "newname", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					child := cmd.String("child")
-					if child != "" {
-						return k.SetChildAliasCtx(ctx, child, value)
-					}
-					return k.SetAlias(value)
-				},
-			},
-			{
-				Name:      "raw",
-				Usage:     "send raw command",
-				ArgsUsage: "host command",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "command", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					return k.SendRawCommandCtx(ctx, value)
-				},
-			},
-            setwifi,
-            wifistatus,
-            getallwifi,
+			reboot,
+			alias,
+			raw,
+			setwifi,
+			wifistatus,
+			getallwifi,
 			{
 				Name:      "addcountdown",
 				Usage:     "add device countdown",
@@ -368,26 +243,7 @@ func main() {
 					return nil
 				},
 			},
-			{
-				Name:      "getdimmer",
-				Usage:     "check dimmer parameters",
-				ArgsUsage: "host",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					res, err := k.GetDimmerParametersCtx(ctx)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%+v\n", res)
-					return nil
-				},
-			},
+			getdimmer,
 			{
 				Name:      "getrules",
 				Usage:     "check running rules",
@@ -424,120 +280,13 @@ func main() {
 					return k.SetModeCtx(ctx, value)
 				},
 			},
-            getallemeter,
-			{
-				Name:  "getalldimmer",
-				Usage: "get dimmer status for all devices",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					m, err := kasa.BroadcastDimmerParameters(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
-					if err != nil {
-						return err
-					}
-
-					for k, v := range m {
-						if v.ErrCode == 0 {
-							kd, err := kasa.NewDevice(k)
-							if err != nil {
-								return err
-							}
-							s, err := kd.GetSettingsCtx(ctx)
-							if err != nil {
-								return err
-							}
-
-							fmt.Printf("[%s] %s\n", k, s.Alias)
-							fmt.Printf("Min Threshold: %d\t", v.MinThreshold)
-							fmt.Printf("Fade On: %dms\t\t", v.FadeOnTime)
-							fmt.Printf("Fade Off: %dms\n", v.FadeOffTime)
-							fmt.Printf("Gentle On: %dms\t", v.GentleOnTime)
-							fmt.Printf("Gentle Off: %dms\t", v.GentleOffTime)
-							fmt.Printf("Ramp Rate: %dms\n", v.RampRate)
-						}
-					}
-					return nil
-				},
-			},
-			{
-				Name:      "setfadeontime",
-				Usage:     "set fade on time",
-				ArgsUsage: "time in ms",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "time", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					fade, err := strconv.Atoi(value)
-					if err != nil {
-						return err
-					}
-					return k.SetFadeOnTimeCtx(ctx, fade)
-				},
-			},
-			{
-				Name:      "setfadeofftime",
-				Usage:     "set fade off time",
-				ArgsUsage: "time in ms",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "time", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					fade, err := strconv.Atoi(value)
-					if err != nil {
-						return err
-					}
-					return k.SetFadeOffTimeCtx(ctx, fade)
-				},
-			},
-			{
-				Name:      "setgentleontime",
-				Usage:     "set gentle on time",
-				ArgsUsage: "time in ms",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "time", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					fade, err := strconv.Atoi(value)
-					if err != nil {
-						return err
-					}
-					return k.SetGentleOnTimeCtx(ctx, fade)
-				},
-			},
-			{
-				Name:      "setgentleofftime",
-				Usage:     "set gentle off time",
-				ArgsUsage: "time in ms",
-				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "time", Destination: &value},
-				},
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
-					fade, err := strconv.Atoi(value)
-					if err != nil {
-						return err
-					}
-					return k.SetGentleOffTimeCtx(ctx, fade)
-				},
-			},
-            emeter,
+			getallemeter,
+			getalldimmer,
+			setfadeontime,
+			setfadeofftime,
+			setgentleontime,
+			setgentleofftime,
+			emeter,
 		},
 	}
 
