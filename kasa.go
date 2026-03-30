@@ -52,6 +52,14 @@ func NewDevice(ip string) (*Device, error) {
 	return &d, nil
 }
 
+func NewDeviceIP(ip net.IP) (*Device, error) {
+	d := Device{
+		IP:   ip,
+		Port: 9999,
+	}
+	return &d, nil
+}
+
 func (d *Device) Addr() string {
 	return net.JoinHostPort(d.IP.String(), fmt.Sprintf("%d", d.Port))
 }
