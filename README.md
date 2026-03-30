@@ -82,12 +82,31 @@ adjust the brightness on a dimmer switch
 
 show dimmer status and timeings for all dimmer-enabled devices (this needs to be prettier...)
 ```
-% kasa getalldimmer
-read udp [::]:58322: i/o timeout
-192.168.1.172: &{MinThreshold:0 FadeOnTime:2000 FadeOffTime:2000 GentleOnTime:3000 GentleOffTime:10000 RampRate:30 BulbType:1 ErrCode:0 ErrMsg:}
-192.168.1.163: &{MinThreshold:1 FadeOnTime:1000 FadeOffTime:2000 GentleOnTime:3000 GentleOffTime:60000 RampRate:30 BulbType:1 ErrCode:0 ErrMsg:}
-192.168.1.144: &{MinThreshold:9 FadeOnTime:1000 FadeOffTime:1000 GentleOnTime:3000 GentleOffTime:10000 RampRate:30 BulbType:0 ErrCode:0 ErrMsg:}
-192.168.1.164: &{MinThreshold:0 FadeOnTime:1000 FadeOffTime:2000 GentleOnTime:3000 GentleOffTime:30000 RampRate:30 BulbType:1 ErrCode:0 ErrMsg:}
+ % kasa getalldimmer    
+[192.168.100.46] Entrance Chandiler
+Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
+[192.168.100.44] Scot’s Office Overhead Light
+Min Threshold: 11	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
+[192.168.100.60] Master Bathroom Closet
+Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
+[192.168.100.62] Jen’s Office Light
+Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
+[192.168.100.73] Master Bedroom Light
+Min Threshold: 0	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
+[192.168.100.24] Fireplace Can Dimmer
+Min Threshold: 9	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
+[192.168.100.69] Master Bathroom Shower Lights
+Min Threshold: 1	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 60000ms	Ramp Rate: 30ms
+[192.168.100.51] Master Bathroom Can Lights
+Min Threshold: 0	Fade On: 1500ms		Fade Off: 5000ms
+Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
 ```
 
 details about a single device
@@ -116,11 +135,161 @@ PowerMW:	175494
 TotalWH:	2097
 ```
 
-Get daily stats for a month (Feb 2021)
+Get daily stats for a month (Feb)
 ```
-% kasa emeter 192.168.1.203 02 2021
+% kasa emeter 192.168.1.203 02
 2021-02-06 Total WH:	842
 2021-02-07 Total WH:	1257
+```
+
+Get daily stats for a month (March) on a multi-plug strip
+```
+ % kasa emeter 192.168.100.27 03     
+[1]
+2026-03-28:	66Wh
+2026-03-29:	66Wh
+2026-03-09:	65Wh
+2026-03-10:	66Wh
+2026-03-11:	66Wh
+2026-03-12:	66Wh
+2026-03-13:	66Wh
+2026-03-14:	66Wh
+2026-03-15:	67Wh
+2026-03-16:	67Wh
+2026-03-17:	68Wh
+2026-03-18:	67Wh
+2026-03-19:	67Wh
+2026-03-20:	66Wh
+2026-03-21:	67Wh
+2026-03-22:	67Wh
+2026-03-23:	65Wh
+2026-03-24:	66Wh
+2026-03-25:	66Wh
+2026-03-26:	64Wh
+2026-03-27:	66Wh
+2026-03-01:	66Wh
+2026-03-02:	66Wh
+2026-03-03:	67Wh
+2026-03-04:	64Wh
+2026-03-05:	66Wh
+2026-03-30:	47Wh
+	Plug Total:	1766Wh
+[2]
+2026-03-25:	551Wh
+2026-03-26:	1096Wh
+2026-03-27:	803Wh
+2026-03-28:	920Wh
+2026-03-29:	1178Wh
+2026-03-01:	1058Wh
+2026-03-02:	1046Wh
+2026-03-03:	1074Wh
+2026-03-04:	572Wh
+2026-03-05:	1035Wh
+2026-03-06:	1070Wh
+2026-03-07:	1107Wh
+2026-03-08:	941Wh
+2026-03-09:	1108Wh
+2026-03-10:	1067Wh
+2026-03-11:	1099Wh
+2026-03-12:	1121Wh
+2026-03-13:	918Wh
+2026-03-14:	893Wh
+2026-03-15:	1057Wh
+2026-03-16:	907Wh
+2026-03-17:	923Wh
+2026-03-18:	1025Wh
+2026-03-19:	1008Wh
+2026-03-20:	1055Wh
+2026-03-21:	884Wh
+2026-03-22:	964Wh
+2026-03-23:	927Wh
+2026-03-24:	914Wh
+2026-03-30:	391Wh
+	Plug Total:	28712Wh
+[3]
+2026-03-21:	263Wh
+2026-03-22:	261Wh
+2026-03-23:	256Wh
+2026-03-24:	258Wh
+2026-03-25:	232Wh
+2026-03-26:	261Wh
+2026-03-27:	253Wh
+2026-03-28:	258Wh
+2026-03-29:	266Wh
+2026-03-01:	269Wh
+2026-03-02:	270Wh
+2026-03-03:	272Wh
+2026-03-04:	233Wh
+2026-03-05:	265Wh
+2026-03-06:	265Wh
+2026-03-07:	251Wh
+2026-03-08:	256Wh
+2026-03-09:	269Wh
+2026-03-10:	268Wh
+2026-03-11:	276Wh
+2026-03-12:	278Wh
+2026-03-13:	259Wh
+2026-03-14:	259Wh
+2026-03-15:	283Wh
+2026-03-16:	262Wh
+2026-03-17:	272Wh
+2026-03-18:	267Wh
+2026-03-19:	268Wh
+2026-03-20:	267Wh
+2026-03-30:	166Wh
+	Plug Total:	7783Wh
+[4]
+2026-03-07:	233Wh
+2026-03-08:	185Wh
+2026-03-09:	235Wh
+2026-03-10:	250Wh
+2026-03-11:	251Wh
+2026-03-12:	270Wh
+2026-03-13:	196Wh
+2026-03-14:	170Wh
+2026-03-15:	278Wh
+2026-03-16:	201Wh
+2026-03-17:	181Wh
+2026-03-18:	225Wh
+2026-03-19:	210Wh
+2026-03-20:	225Wh
+2026-03-21:	164Wh
+2026-03-22:	195Wh
+2026-03-23:	182Wh
+2026-03-24:	194Wh
+2026-03-25:	41Wh
+2026-03-26:	250Wh
+2026-03-27:	134Wh
+2026-03-28:	174Wh
+2026-03-29:	274Wh
+2026-03-01:	228Wh
+2026-03-02:	243Wh
+2026-03-03:	243Wh
+2026-03-04:	60Wh
+2026-03-05:	216Wh
+2026-03-06:	240Wh
+2026-03-30:	29Wh
+	Plug Total:	5977Wh
+[5]
+2026-03-15:	6Wh
+2026-03-30:	0Wh
+	Plug Total:	6Wh
+[6]
+2026-03-30:	0Wh
+	Plug Total:	0Wh
+	Strip Total:	44244Wh
+```
+
+Emeter status on multi-plug power-strip
+ ```
+ % kasa emeter 192.168.100.27   
+[1]	Current:	39mA	Voltage:	125.12V	Power:	2.83W	Total:	0.15kWh
+[2]	Current:	329mA	Voltage:	124.92V	Power:	23.10W	Total:	2.29kWh
+[3]	Current:	187mA	Voltage:	125.06V	Power:	9.88W	Total:	0.60kWh
+[4]	Current:	32mA	Voltage:	125.08V	Power:	1.72W	Total:	0.46kWh
+[5]	Current:	0mA	Voltage:	125.00V	Power:	0.00W	Total:	0.00kWh
+[6]	Current:	0mA	Voltage:	125.24V	Power:	0.00W	Total:	0.00kWh
+Total	Current:	587mA	Power:	37.52W
 ```
 
 Get Countdown Rules (needs to be prettier)
@@ -136,13 +305,21 @@ Clear Countdown rules
 # If you are researching TP-Link Kasa devices, here are some resources
 
 https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
+
 https://github.com/whitslack/kasa/blob/master/API.md
+
 http://rat.admin.lv/wp-content/uploads/2018/08/TR17_fgont_-iot_tp_link_hacking.pdf
+
 https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/#TP-Link%20Smart%20Home%20Protocol
+
 https://medium.com/@hu3vjeen/reverse-engineering-tp-link-kc100-bac4641bf1cd
+
 https://machinekoder.com/controlling-tp-link-hs100110-smart-plugs-with-machinekit
+
 https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
+
 https://github.com/p-doyle/Python-KasaSmartPowerStrip
+
 https://community.hubitat.com/t/release-tp-link-kasa-plug-switch-and-bulb-integration/1675/482
 
 
