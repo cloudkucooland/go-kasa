@@ -114,7 +114,7 @@ var emeter = &cli.Command{
 
 		if month == 0 {
 			if cmd.String("child") == "" && s.NumChildren > 0 {
-				var ma, tma uint
+				var ma uint
 				var w float64
 				for _, c := range s.Children {
 					cv, err := k.GetEmeterChildCtx(ctx, c.ID)
@@ -131,7 +131,6 @@ var emeter = &cli.Command{
 					fmt.Printf("Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
 				}
 				fmt.Printf("Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
-				tma += ma
 			} else {
 				var em *kasa.EmeterRealtime
 
