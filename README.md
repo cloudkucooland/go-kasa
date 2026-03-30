@@ -302,6 +302,26 @@ Clear Countdown rules
 ```
 % kasa countdown 192.168.1.206 delete
 ```
+
+# Provisioning a new device without the cloud
+
+. Connect to the device's WiFi network
+. Set the device name name
+```
+kasa alias 192.168.0.1 "New Dev Name" 
+```
+. Turn off cloud
+```
+kasa nocloud 192.168.0.1
+```
+. Set the WiFi net
+```
+kasa setwifi 192.168.0.1 "MySecureSSID" "securenetpw!"
+```
+
+===
+
+
 # If you are researching TP-Link Kasa devices, here are some resources
 
 https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
@@ -322,5 +342,6 @@ https://github.com/p-doyle/Python-KasaSmartPowerStrip
 
 https://community.hubitat.com/t/release-tp-link-kasa-plug-switch-and-bulb-integration/1675/482
 
+https://www.wiredtron.com/2023/11/28/setting-up-tp-link-kasa-devices-without-smart-home-app.html
 
 [![GoDoc](https://godoc.org/github.com/cloudkucooland/go-kasa?status.svg)](https://godoc.org/github.com/cloudkucooland/go-kasa)
