@@ -67,6 +67,7 @@ var getalldimmer = &cli.Command{
 		if err != nil {
 			return err
 		}
+		// ctx already canceled
 
 		for k, v := range m {
 			if v.ErrCode == 0 {
@@ -74,7 +75,7 @@ var getalldimmer = &cli.Command{
 				if err != nil {
 					return err
 				}
-				s, err := kd.GetSettingsCtx(ctx)
+				s, err := kd.GetSettingsCtx(context.Background())
 				if err != nil {
 					return err
 				}

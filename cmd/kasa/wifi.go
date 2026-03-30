@@ -56,13 +56,16 @@ var getallwifi = &cli.Command{
 			return err
 		}
 		for k, v := range m {
+			nctx := context.Background()
+
 			kd, err := kasa.NewDevice(k)
 			if err != nil {
 				return err
 			}
-			s, err := kd.GetSettingsCtx(ctx)
+			s, err := kd.GetSettingsCtx(nctx)
 			if err != nil {
-				return err
+				continue
+				// return err
 			}
 
 			fmt.Printf("[%s]\t", k)

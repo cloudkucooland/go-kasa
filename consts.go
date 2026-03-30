@@ -21,7 +21,8 @@ const (
 	CmdEmeterGetYear       = `{"emeter":{"get_monthstat":{"year":%d}}}`                     // 4-digit-year
 	CmdEmeterErase         = `{"emeter":{"erase_emeter_stat":null}}`
 
-	CmdGetEmeterChild = `{"context":{"child_ids":["%s"]},"emeter":{"get_realtime":{}}}`
+	CmdGetEmeterChild      = `{"context":{"child_ids":["%s"]},"emeter":{"get_realtime":{}}}`
+	CmdGetEmeterMonthChild = `{"context":{"child_ids":["%s"]},"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
 
 	CmdWifiStainfo    = `{"netif":{"get_stainfo":{}}}`
 	CmdWifiSetStainfo = `{"netif":{"set_stainfo":{"ssid":"%s","password":"%s","key_type":%d}}}` // string, string, int
