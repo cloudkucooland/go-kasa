@@ -244,3 +244,39 @@ type AddRule struct {
 	ID string `json:"id"`
 	KasaErr
 }
+
+// { "smartlife.iot.LAS": { "get_config": { "devs": [ { "hw_id": 0, "enable": 1, "dark_index": 0, "min_adc": 0, "max_adc": 2450, "level_array": [ { "name": "cloudy", "adc": 390, "value": 15 } ] } ], "ver": "1.0", "err_code": 0 } } }
+// { "smartlife.iot.LAS": { "get_current_brt": { "value": 0, "err_code": 0 } } }
+
+type LightSensor struct {
+	GetConfig     LightSensorConfig     `json:"get_config"`
+	GetBrightness LightSensorBrightness `json:"get_current_brt"`
+}
+
+type LightSensorConfig struct {
+	Devs    []LightSensorDev `json:"devs"`
+	Version string           `json:"ver"`
+	KasaErr
+}
+
+type LightSensorDev struct {
+	ID        string             `json:"hw_id"`
+	Enable    uint               `json:"enable"`
+	DarkIndex uint               `json:"dark_index"`
+	MinADC    uint               `json:"min_adc"`
+	MaxADC    uint               `json:"max_adc"`
+	Levels    []LightSensorLevel `json:"level_array"`
+}
+
+type LightSensorLevel struct {
+	Name  string `json:"name"`
+	ADC   uint   `json:"adc"`
+	Value uint   `json:"value"`
+}
+
+type LightSensorBrightness struct {
+	Value uint `json:"value"`
+	KasaErr
+}
+
+// { "smartlife.iot.PIR": { "get_config": { "enable": 1, "version": "1.0", "trigger_index": 1, "cold_time": 60000, "min_adc": 0, "max_adc": 4095, "array": [80, 50, 20, 0], "err_code": 0 } } }

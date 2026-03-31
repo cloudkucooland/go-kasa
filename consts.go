@@ -51,4 +51,14 @@ const (
 	CmdCloudUnbind    = `{"cnCloud":{"unbind":null}}`
 	CmdSetServerURL   = `{"cnCloud":{"set_server_url":{"server":"%s"}}}`          // bare hostname, no protocol spec
 	CmdSetServerCreds = `{"cnCloud":{"bind":{"username":"%s", "password":"%s"}}}` // alice@home.com / mikeisagoat
+
+	CmdGetLightSensorConfig = `{"smartlife.iot.LAS":{"get_config":{}}}`
+	CmdGetCurrentBrightness = `{"smartlife.iot.LAS":{"get_current_brt":{}}}`
+	CmdSetBrightnessLevel   = `{"smartlife.iot.LAS":{"set_brt_level":{"index": %d,"value": %d}}}` // int, int
+	CmdSetDarkIndex         = `{smartlife.iot.LAS":{"set_dark_index":{"dark_index": %d}}}`        // int
+	CmdSetLightSensorEnable = `{"smartlife.iot.LAS":{"set_enable":{"enable": %d}}}`               // 0/1
+	CmdGetPIRConfig         = `{"smartlife.iot.PIR":{"get_config": {}}}`
+	CmdSetPIRColdTime       = `{"smartlife.iot.PIR":{"set_cold_time":{"cold_time": %d}}}`          // int
+	CmdSetPIREnable         = `{"smartlife.iot.PIR":{"set_enable":{"enable": %d}}}`                // 0/1
+	CmdSetPIRSensitivity    = `{"smartlife.iot.PIR":{"set_trigger_sens":{"index":%d,"value":%d}}}` // int, int (~decimeters)
 )
