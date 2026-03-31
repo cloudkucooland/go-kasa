@@ -23,7 +23,7 @@ func TestSetRelayStateCtx(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &Device{
-				testUDPFunc: func(ctx context.Context, cmd string) error {
+				OverrideUDP: func(ctx context.Context, cmd string) error {
 					if tt.shouldErr {
 						return errors.New("udp error")
 					}
@@ -83,7 +83,7 @@ func TestGetSettingsCtx(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &Device{
-				testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+				OverrideTCP: func(ctx context.Context, cmd string) ([]byte, error) {
 					return []byte(tt.response), nil
 				},
 			}
@@ -147,7 +147,7 @@ func TestGetEmeterCtx(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &Device{
-				testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+				OverrideTCP: func(ctx context.Context, cmd string) ([]byte, error) {
 					return []byte(tt.response), nil
 				},
 			}
@@ -189,7 +189,7 @@ func TestSetRelayStateChildMultiCtx(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := &Device{
-				testUDPFunc: func(ctx context.Context, cmd string) error {
+				OverrideUDP: func(ctx context.Context, cmd string) error {
 					for _, c := range tt.children {
 						if !strings.Contains(cmd, c) {
 							t.Fatalf("expected child %q in cmd %q", c, cmd)
@@ -209,10 +209,10 @@ func TestSetRelayStateChildMultiCtx(t *testing.T) {
 
 func TestSendRawCommandCtx(t *testing.T) {
 	md := &Device{
-		testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+		OverrideTCP: func(ctx context.Context, cmd string) ([]byte, error) {
 			return []byte(`ok`), nil
 		},
-		testUDPFunc: func(ctx context.Context, cmd string) error {
+		OverrideUDP: func(ctx context.Context, cmd string) error {
 			return nil
 		},
 	}
