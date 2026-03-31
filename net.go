@@ -9,9 +9,9 @@ import (
 )
 
 func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
-    if d.OverrideTCP != nil {
-        return d.OverrideTCP(ctx, cmd)
-    }
+	if d.OverrideTCP != nil {
+		return d.OverrideTCP(ctx, cmd)
+	}
 
 	dialer := &net.Dialer{
 		Timeout:  1 * time.Second,
@@ -66,9 +66,9 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 }
 
 func (d *Device) sendUDP(ctx context.Context, cmd string) error {
-    if d.OverrideUDP != nil {
-        return d.OverrideUDP(ctx, cmd)
-    }
+	if d.OverrideUDP != nil {
+		return d.OverrideUDP(ctx, cmd)
+	}
 
 	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.IP, Port: d.Port})
 	if err != nil {

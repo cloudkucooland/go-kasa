@@ -30,6 +30,7 @@ func BroadcastAddresses() ([]net.IP, error) {
 					continue
 				}
 
+				// TODO test with v4 = v4.Mask(a.Mask)
 				for j := 0; j < 4; j++ {
 					v4[j] = v4[j] | ^a.Mask[j]
 				}

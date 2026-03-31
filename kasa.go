@@ -1,7 +1,7 @@
 package kasa
 
 import (
-    "context"
+	"context"
 	"fmt"
 	"net"
 )
@@ -21,7 +21,7 @@ type Device struct {
 	IP   net.IP
 	Port int
 
-   	OverrideTCP func(ctx context.Context, cmd string) ([]byte, error)
+	OverrideTCP func(ctx context.Context, cmd string) ([]byte, error)
 	OverrideUDP func(ctx context.Context, cmd string) error
 }
 
