@@ -1,6 +1,7 @@
 package kasa
 
 import (
+    "context"
 	"fmt"
 	"net"
 )
@@ -19,6 +20,9 @@ import (
 type Device struct {
 	IP   net.IP
 	Port int
+
+   	testTCPFunc func(ctx context.Context, cmd string) ([]byte, error)
+	testUDPFunc func(ctx context.Context, cmd string) error
 }
 
 // NewDevice sets up a new Kasa device for polling

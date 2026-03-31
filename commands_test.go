@@ -8,22 +8,6 @@ import (
 	"testing"
 )
 
-type mockDevice struct {
-	Device
-	sendTCPFunc func(ctx context.Context, cmd string) ([]byte, error)
-	sendUDPFunc func(ctx context.Context, cmd string) error
-}
-
-func (m *mockDevice) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
-	fmt.Println("mock sendTCP")
-	return m.sendTCPFunc(ctx, cmd)
-}
-
-func (m *mockDevice) sendUDP(ctx context.Context, cmd string) error {
-	fmt.Println("mock sendUDP")
-	return m.sendUDPFunc(ctx, cmd)
-}
-
 func TestSetRelayStateCtx(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -38,8 +22,8 @@ func TestSetRelayStateCtx(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := &mockDevice{
-				sendUDPFunc: func(ctx context.Context, cmd string) error {
+			md := &Device{
+				testUDPFunc: func(ctx context.Context, cmd string) error {
 					if tt.shouldErr {
 						return errors.New("udp error")
 					}
@@ -98,8 +82,8 @@ func TestGetSettingsCtx(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := &mockDevice{
-				sendTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+			md := &Device{
+				testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
 					return []byte(tt.response), nil
 				},
 			}
@@ -162,8 +146,8 @@ func TestGetEmeterCtx(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := &mockDevice{
-				sendTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+			md := &Device{
+				testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
 					return []byte(tt.response), nil
 				},
 			}
@@ -204,8 +188,8 @@ func TestSetRelayStateChildMultiCtx(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := &mockDevice{
-				sendUDPFunc: func(ctx context.Context, cmd string) error {
+			md := &Device{
+				testUDPFunc: func(ctx context.Context, cmd string) error {
 					for _, c := range tt.children {
 						if !strings.Contains(cmd, c) {
 							t.Fatalf("expected child %q in cmd %q", c, cmd)
@@ -224,11 +208,11 @@ func TestSetRelayStateChildMultiCtx(t *testing.T) {
 }
 
 func TestSendRawCommandCtx(t *testing.T) {
-	md := &mockDevice{
-		sendTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
+	md := &Device{
+		testTCPFunc: func(ctx context.Context, cmd string) ([]byte, error) {
 			return []byte(`ok`), nil
 		},
-		sendUDPFunc: func(ctx context.Context, cmd string) error {
+		testUDPFunc: func(ctx context.Context, cmd string) error {
 			return nil
 		},
 	}

@@ -9,6 +9,10 @@ import (
 )
 
 func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
+    if d.testTCPFunc != nil {
+        return d.testTCPFunc(ctx, cmd)
+    }
+
 	dialer := &net.Dialer{
 		Timeout:  1 * time.Second,
 		Deadline: time.Now().Add(2 * time.Second),
@@ -62,6 +66,10 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 }
 
 func (d *Device) sendUDP(ctx context.Context, cmd string) error {
+    if d.testUDPFunc != nil {
+        return d.testUDPFunc(ctx, cmd)
+    }
+
 	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: d.IP, Port: d.Port})
 	if err != nil {
 		return err
