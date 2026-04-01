@@ -3,6 +3,7 @@ package kasa
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -428,3 +429,57 @@ func (d *Device) AddCountdownRuleCtx(ctx context.Context, dur int, target bool, 
 	cmd := fmt.Sprintf(CmdAddCountdownRule, dur, boolToInt(target), name)
 	return d.sendUDP(ctx, cmd)
 }
+
+func (d *Device) GetLightSensorConfig() (*LightSensorConfig, error) {
+	return d.GetLightSensorConfigCtx(context.Background())
+}
+
+func (d *Device) GetLightSensorConfigCtx(ctx context.Context) (*LightSensorConfig, error) {
+	res, err := d.sendTCP(ctx, CmdGetLightSensorConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	var ls LightSensor
+	if err = json.Unmarshal(res, &ls); err != nil {
+		return nil, err
+	}
+	if err := ls.GetConfig.OK(); err != nil {
+		return nil, err
+	}
+	if ls.GetConfig.Version == "" {
+		return nil, errors.New("light sensor module not present")
+	}
+	return &ls.GetConfig, nil
+}
+
+func (d *Device) GetCurrentBrightness() (uint, error) {
+	return d.GetCurrentBrightnessCtx(context.Background())
+}
+
+func (d *Device) GetCurrentBrightnessCtx(ctx context.Context) (uint, error) {
+	res, err := d.sendTCP(ctx, CmdGetCurrentBrightness)
+	if err != nil {
+		return 0, err
+	}
+
+	var ls LightSensor
+	if err = json.Unmarshal(res, &ls); err != nil {
+		return 0, err
+	}
+
+	if err := ls.GetBrightness.OK(); err != nil {
+		return 0, err
+	}
+	return ls.GetBrightness.Value, nil
+}
+
+/*
+   CmdSetBrightnessLevel   = `{"smartlife.iot.LAS":{"set_brt_level":{"index":%d,"value":%d}}}` // int, int
+   CmdSetDarkIndex         = `{"smartlife.iot.LAS":{"set_dark_index":{"dark_index":%d}}}`        // int
+   CmdSetLightSensorEnable = `{"smartlife.iot.LAS":{"set_enable":{"enable":%d}}}`               // 0/1
+   CmdGetPIRConfig         = `{"smartlife.iot.PIR":{"get_config":{}}}`
+   CmdSetPIRColdTime       = `{"smartlife.iot.PIR":{"set_cold_time":{"cold_time":%d}}}`          // int
+   CmdSetPIREnable         = `{"smartlife.iot.PIR":{"set_enable":{"enable":%d}}}`                // 0/1
+   CmdSetPIRSensitivity    = `{"smartlife.iot.PIR":{"set_trigger_sens":{"index":%d,"value":%d}}}` // int, int (~decimeters)
+*/

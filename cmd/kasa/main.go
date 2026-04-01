@@ -169,6 +169,8 @@ func main() {
 			getcountdown,
 			getrules,
 			setmode,
+			getlightsensorbrightness,
+			getlightsensorconfig,
 			raw,
 		},
 	}
