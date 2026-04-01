@@ -108,7 +108,7 @@ type Sysinfo struct {
 	Alias          string   `json:"alias"`
 	Status         string   `json:"status"`
 	MIC            string   `json:"mic_type"`
-	Feature        string   `json:"feature"`
+	Feature        string   `json:"feature"` // "TIM" "TIM:ENE"
 	MAC            string   `json:"mac"`
 	Updating       uint     `json:"updating"`
 	LEDOff         uint     `json:"led_off"`
@@ -276,6 +276,21 @@ type LightSensorLevel struct {
 
 type LightSensorBrightness struct {
 	Value uint `json:"value"`
+	KasaErr
+}
+
+type PIRSensor struct {
+	GetConfig PIRSensorConfig `json:"get_config"`
+}
+
+type PIRSensorConfig struct {
+	Enable       uint   `json:"enable"`
+	Version      string `json:"version"`
+	TriggerIndex uint   `json:"trigger_index"`
+	ColdTime     uint   `json:"cold_time"`
+	MinADC       uint   `json:"min_adc"`
+	MaxADC       uint   `json:"max_adc"`
+	Data         []uint `json:"array"`
 	KasaErr
 }
 
