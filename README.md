@@ -292,6 +292,78 @@ Emeter status on multi-plug power-strip
 Total	Current:	587mA	Power:	37.52W
 ```
 
+Every active emeter device
+```
+ % kasa getallemeter
+[Counter Fish Tank]                                                               
+[C00]                       Current: 0mA    Voltage: 123.36V Power: 0.00W  Today: 2.71kWh
+[C01]                       Current: 153mA  Voltage: 123.32V Power: 7.36W  Today: 14.90kWh
+[C02]                       Current: 0mA    Voltage: 123.39V Power: 0.00W  Today: 0.00kWh
+[C03]                       Current: 0mA    Voltage: 123.20V Power: 0.00W  Today: 0.00kWh
+[C04]                       Current: 0mA    Voltage: 123.22V Power: 0.00W  Today: 1.13kWh
+[C05]                       Current: 15mA   Voltage: 123.28V Power: 0.78W  Today: 18.14kWh
+Total                       Current: 168mA                   Power: 8.13W  Total: 36.88kWh
+[Living Room Entertainment]                                                       
+[1]                         Current: 0mA    Voltage: 123.35V Power: 0.00W  Today: 0.41kWh
+[2]                         Current: 348mA  Voltage: 123.17V Power: 22.32W Today: 5.59kWh
+[3]                         Current: 0mA    Voltage: 123.29V Power: 0.00W  Today: 1.28kWh
+[4]                         Current: 34mA   Voltage: 123.36V Power: 1.71W  Today: 1.36kWh
+[5]                         Current: 0mA    Voltage: 123.26V Power: 0.00W  Today: 0.00kWh
+[6]                         Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.00kWh
+Total                       Current: 382mA                   Power: 24.03W Total: 8.64kWh
+[Plant Stand 2]                                                                   
+[Plug 1]                    Current: 0mA    Voltage: 122.70V Power: 0.00W  Today: 0.00kWh
+[Plug 2]                    Current: 0mA    Voltage: 122.76V Power: 0.00W  Today: 0.00kWh
+[Plug 3]                    Current: 0mA    Voltage: 123.14V Power: 0.00W  Today: 0.00kWh
+[Plug 4]                    Current: 121mA  Voltage: 122.72V Power: 9.01W  Today: 1.63kWh
+[Plug 5]                    Current: 0mA    Voltage: 122.46V Power: 0.00W  Today: 0.01kWh
+[Plug 6]                    Current: 518mA  Voltage: 122.81V Power: 59.20W Today: 10.27kWh
+Total                       Current: 639mA                   Power: 68.21W Total: 11.91kWh
+[Conservatory AV]                                                                 
+[B00]                       Current: 0mA    Voltage: 122.88V Power: 0.00W  Today: 0.18kWh
+[B01]                       Current: 0mA    Voltage: 123.14V Power: 0.00W  Today: 0.00kWh
+[B02]                       Current: 74mA   Voltage: 123.24V Power: 4.79W  Today: 5.16kWh
+[B03]                       Current: 280mA  Voltage: 123.24V Power: 32.88W Today: 4.36kWh
+[B04]                       Current: 0mA    Voltage: 123.95V Power: 0.00W  Today: 0.07kWh
+[B05]                       Current: 0mA    Voltage: 123.42V Power: 0.00W  Today: 1.27kWh
+Total                       Current: 354mA                   Power: 37.67W Total: 11.04kWh
+[Potting Bench]                                                                   
+[A00]                       Current: 0mA    Voltage: 121.91V Power: 0.00W  Today: 0.00kWh
+[A01]                       Current: 0mA    Voltage: 121.93V Power: 0.00W  Today: 0.00kWh
+[A02]                       Current: 0mA    Voltage: 122.00V Power: 0.00W  Today: 0.00kWh
+[A03]                       Current: 0mA    Voltage: 122.01V Power: 0.00W  Today: 0.00kWh
+[A04]                       Current: 287mA  Voltage: 122.16V Power: 34.81W Today: 8.49kWh
+[A05]                       Current: 0mA    Voltage: 122.04V Power: 0.00W  Today: 1.88kWh
+Total                       Current: 287mA                   Power: 34.81W Total: 10.36kWh
+[Unused Plug]                                                                     
+                            Current: 0mA    Voltage: 122.56V Power: 0.00W  Today: 0.00kWh
+[Plant Stand 1]                                                                   
+[Plug 1]                    Current: 0mA    Voltage: 122.73V Power: 0.00W  Today: 0.00kWh
+[Plug 2]                    Current: 0mA    Voltage: 122.81V Power: 0.00W  Today: 0.00kWh
+[Plug 3]                    Current: 0mA    Voltage: 122.94V Power: 0.00W  Today: 0.00kWh
+[Plug 4]                    Current: 122mA  Voltage: 121.78V Power: 8.96W  Today: 0.67kWh
+[Plug 5]                    Current: 0mA    Voltage: 122.89V Power: 0.00W  Today: 0.00kWh
+[Plug 6]                    Current: 519mA  Voltage: 122.82V Power: 59.41W Today: 4.41kWh
+Total                       Current: 641mA                   Power: 68.37W Total: 5.07kWh
+[Garage]                                                                          
+[800]                       Current: 14mA   Voltage: 122.62V Power: 0.67W  Today: 0.50kWh
+[801]                       Current: 0mA    Voltage: 123.35V Power: 0.00W  Today: 0.05kWh
+[802]                       Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.18kWh
+[803]                       Current: 0mA    Voltage: 123.47V Power: 0.00W  Today: 0.13kWh
+[804]                       Current: 0mA    Voltage: 122.98V Power: 0.00W  Today: 0.00kWh
+[805]                       Current: 0mA    Voltage: 123.43V Power: 0.00W  Today: 0.00kWh
+Total                       Current: 14mA                    Power: 0.67W  Total: 0.86kWh
+[Frog Tank]                                                                       
+[800]                       Current: 74mA   Voltage: 122.85V Power: 8.75W  Today: 1.89kWh
+[801]                       Current: 0mA    Voltage: 124.11V Power: 0.00W  Today: 1.26kWh
+[802]                       Current: 0mA    Voltage: 123.49V Power: 0.00W  Today: 3.83kWh
+[803]                       Current: 0mA    Voltage: 123.33V Power: 0.00W  Today: 5.25kWh
+[804]                       Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.00kWh
+[805]                       Current: 0mA    Voltage: 123.17V Power: 0.00W  Today: 0.00kWh
+Total                       Current: 74mA                    Power: 8.75W  Total: 12.24kWh
+Total House                 Current: 2559mA                  Power: 97.00W Total: 0.00kWh
+```
+
 Get Countdown Rules (needs to be prettier)
 ```
 % kasa countdown 192.168.1.206
