@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
+	"text/tabwriter"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -24,19 +26,31 @@ var discover = &cli.Command{
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
 		fmt.Printf("found %d devices\n", len(m))
+
+		fmt.Fprintf(tabwrite, "Device\tIP/ID:\tModel\tState\tBrightness\n")
+
 		for _, k := range keys {
 			v := m[k]
 			if len(v.Children) == 0 {
-				fmt.Printf("%15s: %s %32s [state: %d] [brightness: %3d]\n", k, v.Model, v.Alias, v.RelayState, v.Brightness)
+				fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t\t%3d\n", v.Alias, k, v.Model, i2o(v.RelayState), v.Brightness)
 			} else {
-				fmt.Printf("%15s: %s %s\n", k, v.Model, v.Alias)
+				fmt.Fprintf(tabwrite, "%s\t%s\t%s\t\t\n", v.Alias, k, v.Model)
 				for _, c := range v.Children {
-					fmt.Printf("    ID: %40s%s %26s [state: %d]\n", v.DeviceID, c.ID, c.Alias, c.RelayState)
+					fmt.Fprintf(tabwrite, "%s/%s\t%s%s\t\t%s\t\n", v.Alias, c.Alias, v.DeviceID, c.ID, i2o(c.RelayState))
 				}
 			}
 		}
+		tabwrite.Flush()
 		return nil
 	},
+}
+
+func i2o(o uint) string {
+	if o > 0 {
+		return "On"
+	}
+	return "Off"
 }
