@@ -1,8 +1,31 @@
 package kasa
 
 import (
-	"log"
+    "log"
+	// "log/slog"
+    // "sync/atomic"
 )
+
+/*
+var klogger atomic.Pointer[kasalogger]
+
+func init() {
+    var defaultLog kasalogger = log.Default()
+    klogger.Store(&defaultLog)
+}
+
+func SetLogger(l kasalogger) {
+    klogger.Store(&l)
+}
+
+// Internal helper to get the logger safely
+func getLogger() kasalogger {
+    return *klogger.Load()
+} */
+
+type NoopLogger struct{}
+func (n NoopLogger) Println(...any) {}
+func (n NoopLogger) Printf(string, ...any) {}
 
 // by default, use the standard logger, can be overwritten using kasa.SetLogger(l)
 var klogger kasalogger = log.Default()

@@ -1,32 +1,26 @@
 package kasa
 
 import (
-	"bytes"
+	// "bytes"
 	"encoding/binary"
 )
 
 // ScrambleTCP is for TCP, It writes the length in the first byte. It uses a binary buffer and writer.
 func ScrambleTCP(plaintext string) []byte {
-	var buf bytes.Buffer
-
 	n := len(plaintext)
-	buf.Grow(n + 4)
+	// Pre-allocate the entire buffer: 4 bytes for length + payload
+	buf := make([]byte, n+4)
 
-	// write the length as a 32-bit big-endian uint
-	if err := binary.Write(&buf, binary.BigEndian, uint32(n)); err != nil {
-		klogger.Printf(err.Error())
-	}
+	// Write length header
+	binary.BigEndian.PutUint32(buf[:4], uint32(n))
 
 	key := byte(0xAB)
 	for i := 0; i < n; i++ {
 		key = plaintext[i] ^ key
-		if err := buf.WriteByte(key); err != nil {
-			klogger.Printf(err.Error())
-			break
-		}
+		buf[i+4] = key
 	}
 
-	return buf.Bytes()
+	return buf
 }
 
 // Scramble is simpler. UDP doesn't require the length header, just allocates and write to a slice.

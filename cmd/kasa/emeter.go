@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
+	"text/tabwriter"
 	"time"
 
 	"github.com/cloudkucooland/go-kasa"
@@ -15,12 +17,12 @@ var getallemeter = &cli.Command{
 	Name:  "getallemeter",
 	Usage: "get emeter stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		m, err := kasa.BroadcastEmeter(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		var tma uint
-		var tw float64
+		var tma, twh, tw uint // total MA, Wh, W and
 		for k, v := range m {
 			// ctx is already cancelled by now
 			nctx := context.Background()
@@ -34,11 +36,10 @@ var getallemeter = &cli.Command{
 				continue
 				// return err
 			}
-			fmt.Printf("[%s]\n", s.Alias)
+			fmt.Fprintf(tabwrite, "[%s]\t\t\t\t\t\t\t\t\n", s.Alias)
 
 			if s.NumChildren > 0 {
-				var ma uint
-				var w float64
+				var ma, w, todaytwh uint
 				for _, c := range s.Children {
 					cv, err := kd.GetEmeterChildCtx(nctx, c.ID)
 					if err != nil {
@@ -46,26 +47,29 @@ var getallemeter = &cli.Command{
 						// return err
 					}
 					ma += cv.CurrentMA
-					w += float64(cv.PowerMW) / 1000
-					fmt.Printf("[%s]\t", c.Alias)
-					fmt.Printf("Current:\t%dmA\t", cv.CurrentMA)
-					fmt.Printf("Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
-					fmt.Printf("Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
-					fmt.Printf("Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+					w += cv.PowerMW
+					fmt.Fprintf(tabwrite, "[%s]\t", c.Alias)
+					fmt.Fprintf(tabwrite, "Current:\t%dmA\t", cv.CurrentMA)
+					fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
+					fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
+					fmt.Fprintf(tabwrite, "Today:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+					todaytwh += cv.TotalWH
 				}
-				fmt.Printf("Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
+				fmt.Fprintf(tabwrite, "Total\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tTotal:\t%2.2fkWh\n", ma, float64(w)/1000, float64(todaytwh)/1000)
 				tma += ma
-				tw += w
+				tw += todaytwh
 			} else {
-				fmt.Printf("Current:\t%dmA\n", v.Emeter.Realtime.CurrentMA)
-				fmt.Printf("Voltage:\t%2.2fV\n", float64(v.Emeter.Realtime.VoltageMV)/1000)
-				fmt.Printf("Power:\t\t%2.2fW\n", float64(v.Emeter.Realtime.PowerMW)/1000)
-				fmt.Printf("Total:\t\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
+				fmt.Fprintf(tabwrite, "\tCurrent:\t%dmA\t", v.Emeter.Realtime.CurrentMA)
+				fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(v.Emeter.Realtime.VoltageMV)/1000)
+				fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(v.Emeter.Realtime.PowerMW)/1000)
+				fmt.Fprintf(tabwrite, "Today:\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
 				tma += v.Emeter.Realtime.CurrentMA
-				tw += float64(v.Emeter.Realtime.PowerMW) / 1000
+				tw += v.Emeter.Realtime.PowerMW
+				twh += v.Emeter.Realtime.TotalWH
 			}
 		}
-		fmt.Printf("Total House Current:\t%dmA\tPower:\t%2.2fW\n", tma, tw)
+		fmt.Fprintf(tabwrite, "Total House\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tTotal:\t%2.2fkWh\n", tma, float64(tw/1000), float64(twh/1000))
+		tabwrite.Flush()
 		return nil
 	},
 }
@@ -80,6 +84,7 @@ var emeter = &cli.Command{
 		&cli.StringArg{Name: "year", Destination: &secondary},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		k, err := getKasaDevice(cmd)
 		if err != nil {
 			return err
@@ -124,13 +129,13 @@ var emeter = &cli.Command{
 					}
 					ma += cv.CurrentMA
 					w += float64(cv.PowerMW) / 1000
-					fmt.Printf("[%s]\t", c.Alias)
-					fmt.Printf("Current:\t%dmA\t", cv.CurrentMA)
-					fmt.Printf("Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
-					fmt.Printf("Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
-					fmt.Printf("Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+					fmt.Fprintf(tabwrite, "[%s]\t", c.Alias)
+					fmt.Fprintf(tabwrite, "Current:\t%dmA\t", cv.CurrentMA)
+					fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
+					fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
+					fmt.Fprintf(tabwrite, "Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
 				}
-				fmt.Printf("Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
+				fmt.Fprintf(tabwrite, "Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
 			} else {
 				var em *kasa.EmeterRealtime
 
@@ -142,10 +147,10 @@ var emeter = &cli.Command{
 				if err != nil {
 					return err
 				}
-				fmt.Printf("Current:\t%dmA\n", em.CurrentMA)
-				fmt.Printf("Voltage:\t%2.2fV\n", float64(em.VoltageMV)/1000)
-				fmt.Printf("Power:\t\t%2.2fW\n", float64(em.PowerMW)/1000)
-				fmt.Printf("Total:\t\t%2.2fkWh\n", float64(em.TotalWH)/1000)
+				fmt.Fprintf(tabwrite, "Current:\t%dmA\t", em.CurrentMA)
+				fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(em.VoltageMV)/1000)
+				fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(em.PowerMW)/1000)
+				fmt.Fprintf(tabwrite, "Total:\t%2.2fkWh\n", float64(em.TotalWH)/1000)
 			}
 			return nil
 		}
@@ -154,7 +159,7 @@ var emeter = &cli.Command{
 		if s.NumChildren > 0 {
 			var stripTotal uint
 			for _, c := range s.Children {
-				fmt.Printf("[%s]\n", c.Alias)
+				fmt.Fprintf(tabwrite, "[%s]\t\n", c.Alias)
 				em, err := k.GetEmeterChildMonthCtx(ctx, month, year, c.ID)
 				if err != nil {
 					// continue
@@ -162,22 +167,23 @@ var emeter = &cli.Command{
 				}
 				var plugTotal uint
 				for _, v := range em.List {
-					fmt.Printf("%d-%02d-%02d:\t%dWh\n", v.Year, v.Month, v.Day, v.WH)
+					fmt.Fprintf(tabwrite, "%d-%02d-%02d:\t%dWh\n", v.Year, v.Month, v.Day, v.WH)
 					plugTotal += v.WH
 				}
-				fmt.Printf("\tPlug Total:\t%dWh\n", plugTotal)
+				fmt.Fprintf(tabwrite, "Plug Total:\t%dWh\n", plugTotal)
 				stripTotal += plugTotal
 			}
-			fmt.Printf("\tStrip Total:\t%dWh\n", stripTotal)
+			fmt.Fprintf(tabwrite, "Strip Total:\t%dWh\n", stripTotal)
 		} else {
 			em, err := k.GetEmeterMonthCtx(ctx, month, year)
 			if err != nil {
 				return err
 			}
 			for _, v := range em.List {
-				fmt.Printf("%d-%02d-%02d:\t%dWh\n", v.Year, v.Month, v.Day, v.WH)
+				fmt.Fprintf(tabwrite, "%d-%02d-%02d:\t%dWh\n", v.Year, v.Month, v.Day, v.WH)
 			}
 		}
+		tabwrite.Flush()
 		return nil
 	},
 }

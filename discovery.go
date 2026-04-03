@@ -28,6 +28,19 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	return result, err
 }
 
+/*
+func BroadcastDiscoveryCtx(ctx context.Context, probes int) (map[string]*Sysinfo, error) {
+	result := make(map[string]*Sysinfo)
+	err := discover(ctx, probes, CmdGetSysinfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
+		if err := kd.GetSysinfo.Sysinfo.OK(); err == nil {
+			info := kd.GetSysinfo.Sysinfo
+			result[addr.IP.String()] = &info
+		}
+		return nil
+	})
+	return result, err
+} */
+
 // BroadcastDimmerParameters  queries all devices on all attached subnets for dimmer state
 func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameters, error) {
 	result := make(map[string]*DimmerParameters)

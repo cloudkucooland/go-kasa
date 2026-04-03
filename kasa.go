@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+    "strconv"
 )
 
 // things to read to learn the protocol:
@@ -33,9 +34,10 @@ func NewDevice(ip string) (*Device, error) {
 
 	// if not an IP address, it might be a hostname, try looking it up
 	if d.IP == nil {
-		ips, err := net.LookupIP(ip)
+		// ips, err := net.DefaultResolver.LookupIP(ctx, "ip4", ip)
+        ips, err := net.LookupIP(ip)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("lookup failed for host %q: %w", ip, err)
 		}
 
 		for _, ip := range ips {
@@ -65,7 +67,7 @@ func NewDeviceIP(ip net.IP) (*Device, error) {
 }
 
 func (d *Device) Addr() string {
-	return net.JoinHostPort(d.IP.String(), fmt.Sprintf("%d", d.Port))
+	return net.JoinHostPort(d.IP.String(), strconv.Itoa(d.Port))
 }
 
 type KasaErr struct {
