@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
+	"text/tabwriter"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -69,6 +71,9 @@ var getalldimmer = &cli.Command{
 		}
 		// ctx already canceled
 
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+		fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
+
 		for k, v := range m {
 			if v.ErrCode == 0 {
 				kd, err := kasa.NewDevice(k)
@@ -80,15 +85,10 @@ var getalldimmer = &cli.Command{
 					return err
 				}
 
-				fmt.Printf("[%s] %s\n", k, s.Alias)
-				fmt.Printf("Min Threshold: %d\t", v.MinThreshold)
-				fmt.Printf("Fade On: %dms\t\t", v.FadeOnTime)
-				fmt.Printf("Fade Off: %dms\n", v.FadeOffTime)
-				fmt.Printf("Gentle On: %dms\t", v.GentleOnTime)
-				fmt.Printf("Gentle Off: %dms\t", v.GentleOffTime)
-				fmt.Printf("Ramp Rate: %dms\n", v.RampRate)
+				fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", s.Alias, k, v.MinThreshold, v.FadeOnTime, v.FadeOffTime, v.GentleOnTime, v.GentleOffTime, v.RampRate)
 			}
 		}
+		tabwrite.Flush()
 		return nil
 	},
 }
