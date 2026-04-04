@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"text/tabwriter"
+	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -65,11 +66,12 @@ var getalldimmer = &cli.Command{
 	Name:  "getalldimmer",
 	Usage: "get dimmer status for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		m, err := kasa.BroadcastDimmerParameters(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
+		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		m, err := kasa.BroadcastDimmerParameters(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		// ctx already canceled
+		defer cancel()
 
 		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
@@ -80,7 +82,7 @@ var getalldimmer = &cli.Command{
 				if err != nil {
 					return err
 				}
-				s, err := kd.GetSettingsCtx(context.Background())
+				s, err := kd.GetSettingsCtx(ctx)
 				if err != nil {
 					return err
 				}

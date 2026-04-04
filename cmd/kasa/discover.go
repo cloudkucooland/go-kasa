@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 	"text/tabwriter"
+	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -16,10 +17,12 @@ var discover = &cli.Command{
 	Name:  "discover",
 	Usage: "discover local devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		m, err := kasa.BroadcastDiscovery(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
+		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		m, err := kasa.BroadcastDiscovery(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
+		defer cancel()
 
 		keys := make([]string, 0, len(m))
 		for key := range m {

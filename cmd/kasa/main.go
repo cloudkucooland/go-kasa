@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -26,6 +25,7 @@ func main() {
 		UsageText: "kasa command",
 
 		UseShortOptionHandling: true,
+        EnableShellCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "child",
@@ -175,9 +175,7 @@ func main() {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cmd.Int("timeout"))*time.Second)
-	defer cancel()
-
+	ctx := context.Background()
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -27,6 +28,7 @@ var setwifi = &cli.Command{
 		return err
 	},
 }
+
 var wifistatus = &cli.Command{
 	Name:      "wifistatus",
 	Usage:     "check device wifi status",
@@ -47,22 +49,24 @@ var wifistatus = &cli.Command{
 		return nil
 	},
 }
+
 var getallwifi = &cli.Command{
 	Name:  "getallwifi",
 	Usage: "get wifi stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		m, err := kasa.BroadcastWifiParameters(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
+		bctx, cancel := context.WithTimeout(context.Background(), time.Duration(cmd.Int("timeout"))*time.Second)
+		m, err := kasa.BroadcastWifiParameters(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		for k, v := range m {
-			nctx := context.Background()
+		defer cancel()
 
+		for k, v := range m {
 			kd, err := kasa.NewDevice(k)
 			if err != nil {
 				return err
 			}
-			s, err := kd.GetSettingsCtx(nctx)
+			s, err := kd.GetSettingsCtx(ctx)
 			if err != nil {
 				continue
 				// return err

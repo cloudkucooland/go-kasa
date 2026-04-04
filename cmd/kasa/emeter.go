@@ -18,20 +18,21 @@ var getallemeter = &cli.Command{
 	Usage: "get emeter stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		m, err := kasa.BroadcastEmeter(int(cmd.Int("timeout")), int(cmd.Int("repeats")))
+
+		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		m, err := kasa.BroadcastEmeter(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
+		defer cancel()
+
 		var tma, twh, tw uint // total MA, Wh, W and
 		for k, v := range m {
-			// ctx is already cancelled by now
-			nctx := context.Background()
-
 			kd, err := kasa.NewDevice(k)
 			if err != nil {
 				return err
 			}
-			s, err := kd.GetSettingsCtx(nctx)
+			s, err := kd.GetSettingsCtx(ctx)
 			if err != nil {
 				continue
 				// return err
@@ -41,7 +42,7 @@ var getallemeter = &cli.Command{
 			if s.NumChildren > 0 {
 				var ma, w, todaytwh uint
 				for _, c := range s.Children {
-					cv, err := kd.GetEmeterChildCtx(nctx, c.ID)
+					cv, err := kd.GetEmeterChildCtx(ctx, c.ID)
 					if err != nil {
 						continue
 						// return err
