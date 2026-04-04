@@ -48,7 +48,7 @@ func dbwriter(ctx context.Context, r <-chan emeterdata) error {
 
 		batch.Add(p)
 		if batch.Ready() {
-			err := client.WritePoints(context.Background(), batch.Emit())
+			err := client.WritePoints(ctx, batch.Emit())
 			if err != nil {
 				continue
 			}
