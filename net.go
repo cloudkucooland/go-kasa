@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"time"
 )
@@ -25,6 +26,10 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 	}
 	defer conn.Close()
 
+	if d, ok := ctx.Deadline(); ok {
+		conn.SetDeadline(d)
+	}
+
 	// send the command with the uint32 "header"
 	payload := ScrambleTCP(cmd)
 	if _, err = conn.Write(payload); err != nil {
@@ -34,32 +39,14 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 
 	// read the uint32 "header" to get the size of the rest of the block
 	header := make([]byte, 4)
-	n, err := conn.Read(header)
-	if err != nil {
-		return nil, err
-	}
-	if n != 4 {
-		err := fmt.Errorf("header not 32 bits (4 bytes): %d", n)
-		klogger.Printf(err.Error())
-		return nil, err
+	if _, err := io.ReadFull(conn, header); err != nil {
+		return nil, fmt.Errorf("failed to read header: %w", err)
 	}
 	size := binary.BigEndian.Uint32(header)
 
-	// read the entire rest of the block, then close the connection
-	// we could leave the connection open and send subsequent requests
-	// but for one-shot, this is enough
 	data := make([]byte, size)
-	totalread := 0
-	for {
-		n, err = conn.Read(data[totalread:])
-		if err != nil {
-			return nil, err
-		}
-		totalread = totalread + n
-
-		if totalread >= int(size) {
-			break
-		}
+	if _, err := io.ReadFull(conn, data); err != nil {
+		return nil, fmt.Errorf("failed to read body: %w", err)
 	}
 
 	return Unscramble(data), nil

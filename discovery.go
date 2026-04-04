@@ -124,10 +124,10 @@ func discover(ctx context.Context, probes int, cmd string, handler func(addr *ne
 		probes = 1
 	}
 
-    remaining := time.Duration(10000);
-    if deadline, ok := ctx.Deadline(); ok {
-        remaining = time.Until(deadline);
-    }
+	remaining := 2 * time.Second // default if ctx doesn't have it set
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining = time.Until(deadline)
+	}
 
 	interval := remaining / time.Duration(probes)
 

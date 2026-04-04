@@ -43,12 +43,12 @@ func BroadcastAddresses() ([]net.IP, error) {
 				bcast[j] = v4[j] | ^ipNet.Mask[j]
 			}
 
-            var key [4]byte
-            copy(key[:], v4)
-            if _, exists := seen[key]; !exists {
-                seen[key] = struct{}{}
-                broadcasts = append(broadcasts, bcast)
-            }
+			var key [4]byte
+			copy(key[:], v4)
+			if _, exists := seen[key]; !exists {
+				seen[key] = struct{}{}
+				broadcasts = append(broadcasts, bcast)
+			}
 		}
 	}
 	return broadcasts, nil

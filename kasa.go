@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
-    "strconv"
+	"strconv"
 )
 
 // things to read to learn the protocol:
@@ -35,7 +35,7 @@ func NewDevice(ip string) (*Device, error) {
 	// if not an IP address, it might be a hostname, try looking it up
 	if d.IP == nil {
 		// ips, err := net.DefaultResolver.LookupIP(ctx, "ip4", ip)
-        ips, err := net.LookupIP(ip)
+		ips, err := net.LookupIP(ip)
 		if err != nil {
 			return nil, fmt.Errorf("lookup failed for host %q: %w", ip, err)
 		}

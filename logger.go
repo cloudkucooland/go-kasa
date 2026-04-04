@@ -1,9 +1,9 @@
 package kasa
 
 import (
-    "log"
+	"log"
 	// "log/slog"
-    // "sync/atomic"
+	// "sync/atomic"
 )
 
 /*
@@ -24,7 +24,8 @@ func getLogger() kasalogger {
 } */
 
 type NoopLogger struct{}
-func (n NoopLogger) Println(...any) {}
+
+func (n NoopLogger) Println(...any)        {}
 func (n NoopLogger) Printf(string, ...any) {}
 
 // by default, use the standard logger, can be overwritten using kasa.SetLogger(l)
