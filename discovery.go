@@ -11,10 +11,10 @@ import (
 const bufsize = 2048 // 6-outlet strips cross the 1k mark, double to 2k
 
 // BroadcastDiscovery pulls every attached subnet for kasa devices and returns whatever is discovered
-func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
+func BroadcastDiscovery(ctx context.Context, probes int) (map[string]*Sysinfo, error) {
 	result := make(map[string]*Sysinfo)
 
-	err := discover(timeout, probes, CmdGetSysinfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
+	err := discover(ctx, probes, CmdGetSysinfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
 		if err := kd.GetSysinfo.Sysinfo.KasaErr.OK(); err != nil {
 			klogger.Println(err)
 			return nil
@@ -28,24 +28,11 @@ func BroadcastDiscovery(timeout, probes int) (map[string]*Sysinfo, error) {
 	return result, err
 }
 
-/*
-func BroadcastDiscoveryCtx(ctx context.Context, probes int) (map[string]*Sysinfo, error) {
-	result := make(map[string]*Sysinfo)
-	err := discover(ctx, probes, CmdGetSysinfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
-		if err := kd.GetSysinfo.Sysinfo.OK(); err == nil {
-			info := kd.GetSysinfo.Sysinfo
-			result[addr.IP.String()] = &info
-		}
-		return nil
-	})
-	return result, err
-} */
-
 // BroadcastDimmerParameters  queries all devices on all attached subnets for dimmer state
-func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameters, error) {
+func BroadcastDimmerParameters(ctx context.Context, probes int) (map[string]*DimmerParameters, error) {
 	result := make(map[string]*DimmerParameters)
 
-	err := discover(timeout, probes, CmdGetDimmer, func(addr *net.UDPAddr, kd *KasaDevice) error {
+	err := discover(ctx, probes, CmdGetDimmer, func(addr *net.UDPAddr, kd *KasaDevice) error {
 		if err := kd.Dimmer.KasaErr.OK(); err != nil {
 			klogger.Println(err)
 			return nil
@@ -59,10 +46,10 @@ func BroadcastDimmerParameters(timeout, probes int) (map[string]*DimmerParameter
 }
 
 // BroadcastWifiParameters polls all devices on all attached subnets for wifi status. This is handy when you have one device that never wants to respond, seeing how its wifi status changes over time
-func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
+func BroadcastWifiParameters(ctx context.Context, probes int) (map[string]*StaInfo, error) {
 	result := make(map[string]*StaInfo)
 
-	err := discover(timeout, probes, CmdWifiStainfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
+	err := discover(ctx, probes, CmdWifiStainfo, func(addr *net.UDPAddr, kd *KasaDevice) error {
 		if err := kd.NetIf.KasaErr.OK(); err != nil {
 			klogger.Println(err)
 			return nil
@@ -75,10 +62,10 @@ func BroadcastWifiParameters(timeout, probes int) (map[string]*StaInfo, error) {
 }
 
 // BroadcastEmeter pulls all devices on all attached subnets for emeter data
-func BroadcastEmeter(timeout, probes int) (map[string]*KasaDevice, error) {
+func BroadcastEmeter(ctx context.Context, probes int) (map[string]*KasaDevice, error) {
 	result := make(map[string]*KasaDevice)
 
-	err := discover(timeout, probes, CmdGetEmeter, func(addr *net.UDPAddr, kd *KasaDevice) error {
+	err := discover(ctx, probes, CmdGetEmeter, func(addr *net.UDPAddr, kd *KasaDevice) error {
 		if err := kd.Emeter.KasaErr.OK(); err != nil {
 			klogger.Println(err)
 			return nil
@@ -123,7 +110,7 @@ func sendBroadcasts(ctx context.Context, cmd string, conn *net.UDPConn, interval
 	}
 }
 
-func discover(timeout, probes int, cmd string, handler func(addr *net.UDPAddr, kd *KasaDevice) error) error {
+func discover(ctx context.Context, probes int, cmd string, handler func(addr *net.UDPAddr, kd *KasaDevice) error) error {
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{IP: nil, Port: 0})
 	if err != nil {
 		klogger.Printf("unable to start listener: %s", err.Error())
@@ -136,9 +123,13 @@ func discover(timeout, probes int, cmd string, handler func(addr *net.UDPAddr, k
 	if probes <= 0 {
 		probes = 1
 	}
-	interval := time.Duration(timeout) * time.Second / time.Duration(probes)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	defer cancel()
+
+    remaining := time.Duration(10000);
+    if deadline, ok := ctx.Deadline(); ok {
+        remaining = time.Until(deadline);
+    }
+
+	interval := remaining / time.Duration(probes)
 
 	go sendBroadcasts(ctx, cmd, conn, interval)
 
@@ -159,8 +150,6 @@ func discover(timeout, probes int, cmd string, handler func(addr *net.UDPAddr, k
 		}
 
 		res := Unscramble(buffer[:n])
-
-		// might cause some problems, need to test
 		if bytes.Contains(res, []byte("module not support")) {
 			continue
 		}
