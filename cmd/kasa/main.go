@@ -25,7 +25,7 @@ func main() {
 		UsageText: "kasa command",
 
 		UseShortOptionHandling: true,
-        EnableShellCompletion: true,
+		EnableShellCompletion:  true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "child",
@@ -175,7 +175,7 @@ func main() {
 		},
 	}
 
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}

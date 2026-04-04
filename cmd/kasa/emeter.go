@@ -10,6 +10,7 @@ import (
 
 	"github.com/cloudkucooland/go-kasa"
 
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,36 +41,38 @@ var getallemeter = &cli.Command{
 			fmt.Fprintf(tabwrite, "[%s]\t\t\t\t\t\t\t\t\n", s.Alias)
 
 			if s.NumChildren > 0 {
-				var ma, w, todaytwh uint
+				var ma, w, tsr uint
 				for _, c := range s.Children {
 					cv, err := kd.GetEmeterChildCtx(ctx, c.ID)
 					if err != nil {
 						continue
 						// return err
 					}
+
 					ma += cv.CurrentMA
 					w += cv.PowerMW
 					fmt.Fprintf(tabwrite, "[%s]\t", c.Alias)
 					fmt.Fprintf(tabwrite, "Current:\t%dmA\t", cv.CurrentMA)
-					fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
+					fmt.Fprintf(tabwrite, "Voltage:\t%s\t", colorVolts(cv.VoltageMV))
 					fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
-					fmt.Fprintf(tabwrite, "Today:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
-					todaytwh += cv.TotalWH
+					fmt.Fprintf(tabwrite, "Since Reset:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+					tsr += cv.TotalWH
 				}
-				fmt.Fprintf(tabwrite, "Total\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tTotal:\t%2.2fkWh\n", ma, float64(w)/1000, float64(todaytwh)/1000)
+				fmt.Fprintf(tabwrite, "Total\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tSince Reset:\t%2.2fkWh\n", ma, float64(w)/1000, float64(tsr)/1000)
 				tma += ma
-				tw += todaytwh
+				twh += tsr
+				tw += w
 			} else {
 				fmt.Fprintf(tabwrite, "\tCurrent:\t%dmA\t", v.Emeter.Realtime.CurrentMA)
-				fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(v.Emeter.Realtime.VoltageMV)/1000)
+				fmt.Fprintf(tabwrite, "Voltage:\t%s\t", colorVolts(v.Emeter.Realtime.VoltageMV))
 				fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(v.Emeter.Realtime.PowerMW)/1000)
-				fmt.Fprintf(tabwrite, "Today:\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
+				fmt.Fprintf(tabwrite, "Since Reset:\t%2.2fkWh\n", float64(v.Emeter.Realtime.TotalWH)/1000)
 				tma += v.Emeter.Realtime.CurrentMA
 				tw += v.Emeter.Realtime.PowerMW
 				twh += v.Emeter.Realtime.TotalWH
 			}
 		}
-		fmt.Fprintf(tabwrite, "Total House\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tTotal:\t%2.2fkWh\n", tma, float64(tw/1000), float64(twh/1000))
+		fmt.Fprintf(tabwrite, "Total House\tCurrent:\t%dmA\t\t\tPower:\t%2.2fW\tTotal:\t%2.2fkWh\n", tma, float64(tw)/1000, float64(twh)/1000)
 		tabwrite.Flush()
 		return nil
 	},
@@ -96,7 +99,7 @@ var emeter = &cli.Command{
 		}
 
 		month := 0
-		year := 0
+		year := time.Now().Year()
 
 		if value != "" {
 			month, err = strconv.Atoi(value)
@@ -114,34 +117,32 @@ var emeter = &cli.Command{
 			if err != nil {
 				return err
 			}
-		} else {
-			year = time.Now().Year()
 		}
 
 		if month == 0 {
-			if cmd.String("child") == "" && s.NumChildren > 0 {
+			child := cmd.String("child")
+			if child == "" {
 				var ma uint
 				var w float64
 				for _, c := range s.Children {
 					cv, err := k.GetEmeterChildCtx(ctx, c.ID)
 					if err != nil {
 						continue
-						// return err
 					}
 					ma += cv.CurrentMA
 					w += float64(cv.PowerMW) / 1000
 					fmt.Fprintf(tabwrite, "[%s]\t", c.Alias)
 					fmt.Fprintf(tabwrite, "Current:\t%dmA\t", cv.CurrentMA)
-					fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(cv.VoltageMV)/1000)
+					fmt.Fprintf(tabwrite, "Voltage:\t%s\t", colorVolts(cv.VoltageMV))
 					fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(cv.PowerMW)/1000)
-					fmt.Fprintf(tabwrite, "Total:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
+					fmt.Fprintf(tabwrite, "Since Reset:\t%2.2fkWh\n", float64(cv.TotalWH)/1000)
 				}
 				fmt.Fprintf(tabwrite, "Total\tCurrent:\t%dmA\tPower:\t%2.2fW\n", ma, w)
 			} else {
 				var em *kasa.EmeterRealtime
 
-				if cmd.String("child") != "" {
-					em, err = k.GetEmeterChildCtx(ctx, cmd.String("child"))
+				if child != "" {
+					em, err = k.GetEmeterChildCtx(ctx, child)
 				} else {
 					em, err = k.GetEmeterCtx(ctx)
 				}
@@ -149,10 +150,11 @@ var emeter = &cli.Command{
 					return err
 				}
 				fmt.Fprintf(tabwrite, "Current:\t%dmA\t", em.CurrentMA)
-				fmt.Fprintf(tabwrite, "Voltage:\t%2.2fV\t", float64(em.VoltageMV)/1000)
+				fmt.Fprintf(tabwrite, "Voltage:\t%s\t", colorVolts(em.VoltageMV))
 				fmt.Fprintf(tabwrite, "Power:\t%2.2fW\t", float64(em.PowerMW)/1000)
-				fmt.Fprintf(tabwrite, "Total:\t%2.2fkWh\n", float64(em.TotalWH)/1000)
+				fmt.Fprintf(tabwrite, "Since Reset:\t%2.2fkWh\n", float64(em.TotalWH)/1000)
 			}
+			tabwrite.Flush()
 			return nil
 		}
 
@@ -163,8 +165,7 @@ var emeter = &cli.Command{
 				fmt.Fprintf(tabwrite, "[%s]\t\n", c.Alias)
 				em, err := k.GetEmeterChildMonthCtx(ctx, month, year, c.ID)
 				if err != nil {
-					// continue
-					return err
+					continue
 				}
 				var plugTotal uint
 				for _, v := range em.List {
@@ -187,4 +188,23 @@ var emeter = &cli.Command{
 		tabwrite.Flush()
 		return nil
 	},
+}
+
+func colorVolts(mv uint) string {
+	vVolts := float64(mv) / 1000.0
+	vStr := fmt.Sprintf("%2.2fV", vVolts)
+	coloredVolt := ""
+	switch {
+	case vVolts > 127.0:
+		coloredVolt = color.RedString(vStr) // High Voltage Alarm
+	case (vVolts > 124.0 && vVolts <= 127.0):
+		coloredVolt = color.YellowString(vStr)
+	case vVolts < 114.0:
+		coloredVolt = color.RedString(vStr) // Sag/Under-voltage
+	case (vVolts < 116.0 && vVolts >= 114.0):
+		coloredVolt = color.YellowString(vStr)
+	default:
+		coloredVolt = color.GreenString(vStr) // Nominal
+	}
+	return coloredVolt
 }
