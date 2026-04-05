@@ -65,7 +65,7 @@ var getallwifi = &cli.Command{
 
 		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
-		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\tKey Type\tRSSI\n")
+		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
 		for k, v := range m {
 			kd, err := kasa.NewDevice(k)
 			if err != nil {
