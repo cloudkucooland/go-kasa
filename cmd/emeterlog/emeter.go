@@ -55,7 +55,6 @@ func queryall(ctx context.Context) error {
 					R:        &v.Emeter.Realtime,
 				}
 			}
-			return
 		})
 	}
 	wg.Wait()
