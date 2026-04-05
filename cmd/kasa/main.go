@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -175,7 +177,8 @@ func main() {
 		},
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
