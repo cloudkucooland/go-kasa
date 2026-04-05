@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"text/tabwriter"
 	"time"
 
 	"github.com/cloudkucooland/go-kasa"
-
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 )
 
@@ -61,6 +63,9 @@ var getallwifi = &cli.Command{
 		}
 		defer cancel()
 
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+
+		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\tKey Type\tRSSI\n")
 		for k, v := range m {
 			kd, err := kasa.NewDevice(k)
 			if err != nil {
@@ -69,15 +74,36 @@ var getallwifi = &cli.Command{
 			s, err := kd.GetSettingsCtx(ctx)
 			if err != nil {
 				continue
-				// return err
 			}
 
-			fmt.Printf("[%s]\t", k)
-			fmt.Printf("SSID: %s\t", v.SSID)
-			fmt.Printf("Key Type: %d\t", v.KeyType)
-			fmt.Printf("RSSI: %d\t", v.RSSI)
-			fmt.Printf("%s\n", s.Alias)
+			fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", s.Alias, k, v.SSID, keyType(v.KeyType), colorRSSI(v.RSSI))
 		}
+		tabwrite.Flush()
 		return nil
 	},
+}
+
+func colorRSSI(rssi int) string {
+	s := fmt.Sprintf("%ddB", rssi)
+	colored := ""
+	switch {
+	case rssi < -96.0:
+		colored = color.RedString(s)
+	case (rssi > -96.0 && rssi <= -85):
+		colored = color.YellowString(s)
+	default:
+		colored = color.GreenString(s)
+	}
+	return colored
+}
+
+func keyType(t int) string {
+	switch t {
+	case 3:
+		return color.GreenString("WPA3")
+	case 2:
+		return color.YellowString("WEP")
+	default:
+		return color.RedString("Unknown")
+	}
 }
