@@ -1,0 +1,52 @@
+services:
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+      - "8082:8082"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password1234
+      - DOCKER_INFLUXDB_INIT_ORG=myhouse
+      - DOCKER_INFLUXDB_INIT_BUCKET=energy
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-token-123
+    container_name: influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    user: "472" # Recommended: ensures Grafana has permission to write to the volume
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    container_name: grafana
+    network_mode: "host" 
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=password1234
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+
+  emeter-logger:
+    build:
+      context: ../../.
+      dockerfile: cmd/emeterlog/Dockerfile
+    network_mode: "host"
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUX_HOST=http://localhost:8086
+      - INFLUX_URL=http://localhost:8086
+      - INFLUX_TOKEN=my-super-secret-token-123
+      - INFLUX_ORG=myhouse
+      - INFLUX_BUCKET=energy
+      - INFLUX_DATABASE=energy
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:
+  grafana_data:
