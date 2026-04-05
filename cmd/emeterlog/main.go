@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var log slog.Logger
+var emlog *slog.Logger
 
 func main() {
 	cmd := &cli.Command{
@@ -34,10 +34,10 @@ func main() {
 		},
 	}
 
-	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	emlog = slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		log.Error("error", err.Error())
+		emlog.Error("error", err.Error())
 	}
 }

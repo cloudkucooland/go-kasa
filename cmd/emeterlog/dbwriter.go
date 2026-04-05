@@ -23,14 +23,14 @@ func setupdb(ctx context.Context, cmd *cli.Command) error {
 	var err error
 
 	if h := os.Getenv("INFLUX_HOST"); h != "" {
-		log.InfoContext(ctx, "INFLUX_HOST", h)
+		emlog.InfoContext(ctx, "INFLUX_HOST", h)
 	} else {
-		log.InfoContext(ctx, "INFLUX_HOST not set")
+		emlog.InfoContext(ctx, "INFLUX_HOST not set")
 	}
 	if d := os.Getenv("INFLUX_DATABASE"); d != "" {
-		log.InfoContext(ctx, "INFLUX_DATABASE", d)
+		emlog.InfoContext(ctx, "INFLUX_DATABASE", d)
 	} else {
-		log.InfoContext(ctx, "INFLUX_DATABASE not set")
+		emlog.InfoContext(ctx, "INFLUX_DATABASE not set")
 	}
 
 	client, err = influxdb3.NewFromEnv()
@@ -41,35 +41,36 @@ func setupdb(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func dbwriter(ctx context.Context, r <-chan emeterdata) error {
+func startDBWriter(ctx context.Context, r <-chan emeterdata) {
 	batch := batching.NewBatcher(batching.WithSize(80))
 
-	for v := range r {
-		p := influxdb3.NewPoint("emeter",
-			map[string]string{
-				"device": v.DeviceID,
-				"alias":  v.Alias,
-			},
-			map[string]any{
-				"slot":      v.R.Slot,
-				"VoltageMV": v.R.VoltageMV,
-				"CurrentMA": v.R.CurrentMA,
-				"PowerMW":   v.R.PowerMW,
-			},
-			time.Now())
+	emlog.Info("DB Writer started")
 
-		batch.Add(p)
-		if batch.Ready() {
-			err := client.WritePoints(ctx, batch.Emit())
-			if err != nil {
-				continue
+	for {
+		select {
+		case <-ctx.Done():
+			client.WritePoints(context.Background(), batch.Emit())
+			return
+		case v, ok := <-r:
+			if !ok {
+				return
+			}
+			p := influxdb3.NewPoint("emeter",
+				map[string]string{"device": v.DeviceID, "alias": v.Alias},
+				map[string]any{
+					"slot":      v.R.Slot,
+					"VoltageMV": v.R.VoltageMV,
+					"CurrentMA": v.R.CurrentMA,
+					"PowerMW":   v.R.PowerMW,
+				},
+				time.Now())
+
+			batch.Add(p)
+			if batch.Ready() {
+				if err := client.WritePoints(ctx, batch.Emit()); err != nil {
+					emlog.Error("influx write error", "err", err)
+				}
 			}
 		}
 	}
-
-	if err := client.WritePoints(ctx, batch.Emit()); err != nil {
-		return err
-	}
-
-	return nil
 }

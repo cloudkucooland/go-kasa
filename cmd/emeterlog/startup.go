@@ -14,15 +14,22 @@ var startup = &cli.Command{
 		if err := setupdb(ctx, cmd); err != nil {
 			return err
 		}
+		results := make(chan emeterdata, 100)
+		go startDBWriter(ctx, results)
 
 		ticker := time.NewTicker(30 * time.Second)
 
 		for {
 			select {
 			case <-ctx.Done():
+				close(results)
 				return nil
 			case <-ticker.C:
-				queryall(ctx)
+				// drop any lingering attempts before the next tick
+				runCtx, cancel := context.WithTimeout(ctx, 25*time.Second)
+				if err := queryall(runCtx, results); err != nil {
+					emlog.Error("query error", "err", err)
+				}
 			}
 		}
 		return nil

@@ -11,7 +11,7 @@ import (
 const timeout = 2 * time.Second
 const repeats = 1
 
-func queryall(ctx context.Context) error {
+func queryall(ctx context.Context, results chan emeterdata) error {
 	bctx, cancel := context.WithTimeout(ctx, timeout)
 	m, err := kasa.BroadcastEmeter(bctx, repeats)
 	if err != nil {
@@ -20,9 +20,6 @@ func queryall(ctx context.Context) error {
 	defer cancel()
 
 	var wg sync.WaitGroup
-
-	results := make(chan emeterdata, 5)
-	go dbwriter(ctx, results)
 
 	for k, v := range m {
 		kd, err := kasa.NewDevice(k)
@@ -58,7 +55,5 @@ func queryall(ctx context.Context) error {
 		})
 	}
 	wg.Wait()
-	close(results)
-
 	return nil
 }
