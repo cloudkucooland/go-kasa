@@ -21,8 +21,8 @@ var secondary string
 func main() {
 	cmd := &cli.Command{
 		Name:      "kasa",
-		Version:   "v0.3.0",
-		Copyright: "(c) 2025 Scot Bontrager",
+		Version:   "v0.3.5",
+		Copyright: "(c) 2026 Scot Bontrager",
 		Usage:     "control TP-Link kasa devices",
 		UsageText: "kasa command",
 
@@ -165,11 +165,9 @@ func main() {
 			nocloud,
 			cloud,
 			ledoff,
-			countdown,
 			addcountdown,
 			cleancountdown,
 			getcountdown,
-			getrules,
 			setmode,
 			getlightsensorbrightness,
 			getlightsensorconfig,

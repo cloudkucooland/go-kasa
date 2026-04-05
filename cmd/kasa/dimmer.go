@@ -57,7 +57,11 @@ var getdimmer = &cli.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%+v\n", res)
+
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+		fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
+		fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", "", k.IP, res.MinThreshold, res.FadeOnTime, res.FadeOffTime, res.GentleOnTime, res.GentleOffTime, res.RampRate)
+		tabwrite.Flush()
 		return nil
 	},
 }

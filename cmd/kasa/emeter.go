@@ -37,7 +37,6 @@ var getallemeter = &cli.Command{
 			s, err := kd.GetSettingsCtx(ctx)
 			if err != nil {
 				continue
-				// return err
 			}
 
 			if s.NumChildren > 0 {
@@ -47,7 +46,6 @@ var getallemeter = &cli.Command{
 					cv, err := kd.GetEmeterChildCtx(ctx, c.ID)
 					if err != nil {
 						continue
-						// return err
 					}
 
 					fmt.Fprintf(tabwrite, "%s\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", c.Alias, cv.CurrentMA, colorVolts(cv.VoltageMV), float64(cv.PowerMW)/1000, float64(cv.TotalWH)/1000)

@@ -3,37 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
+	"text/tabwriter"
 
 	"github.com/urfave/cli/v3"
 )
-
-var countdown = &cli.Command{
-	Name:      "countdown",
-	Usage:     "adjust device countdowns",
-	ArgsUsage: "host [delete]",
-	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "delete", Destination: &value},
-	},
-	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		if value == "delete" {
-			return k.ClearCountdownRulesCtx(ctx)
-		}
-		rules, err := k.GetCountdownRulesCtx(ctx)
-		if err != nil {
-			return err
-		}
-		for _, r := range rules {
-			fmt.Printf("%+v\n", r)
-		}
-		return nil
-	},
-}
 
 var addcountdown = &cli.Command{
 	Name:      "addcountdown",
@@ -94,28 +69,13 @@ var getcountdown = &cli.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println(res)
-		return nil
-	},
-}
 
-var getrules = &cli.Command{
-	Name:      "getrules",
-	Usage:     "check running rules",
-	ArgsUsage: "host",
-	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-	},
-	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintf(tabwrite, "ID\tName\tEnable\tDelay\tActive\tRemaining\n")
+		for _, r := range res {
+			fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%d\t%d\t%d\n", "", r.ID, r.Name, r.Enable, r.Delay, r.Active, r.Remaining)
 		}
-		res, err := k.GetRulesCtx(ctx)
-		if err != nil {
-			return err
-		}
-		fmt.Println(res)
+		tabwrite.Flush()
 		return nil
 	},
 }

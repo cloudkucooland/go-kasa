@@ -47,7 +47,10 @@ var wifistatus = &cli.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println(res) // make this prettier
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
+		fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", "", k.IP, res.SSID, keyType(res.KeyType), colorRSSI(res.RSSI))
+		tabwrite.Flush()
 		return nil
 	},
 }

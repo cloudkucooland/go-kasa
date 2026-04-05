@@ -38,12 +38,11 @@ const (
 	CmdSetGentleOffTime = `{"smartlife.iot.dimmer":{"set_gentle_off_time":{"fadeTime":%d}}}` // ms
 	CmdSetGentleOnTime  = `{"smartlife.iot.dimmer":{"set_gentle_on_time":{"fadeTime":%d}}}`  // ms
 
-	CmdGetRules = `{"smartlife.iot.common.schedule":{"get_rules":{}}}`
-
 	CmdGetCountdownRules = `{"count_down":{"get_rules":{}}}`
 	CmdDeleteAllRules    = `{"count_down":{"delete_all_rules":{}}}`
 	CmdAddCountdownRule  = `{"count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}` // 0-3600, 0/1, string
 
+	// CmdGetRules = `{"smartlife.iot.common.schedule":{"get_rules":{}}}`
 	// CmdGetCountdownRules = `{"smartlife.iot.common.count_down":{"get_rules":{}}}`
 	// CmdDeleteAllRules    = `{"smartlife.iot.common.count_down":{"delete_all_rules":{}}}`
 	// CmdAddCountdownRule  = `{"smartlife.iot.common.count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}`

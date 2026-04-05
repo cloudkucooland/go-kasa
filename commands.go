@@ -379,14 +379,26 @@ func (d *Device) GetDimmerParametersCtx(ctx context.Context) (*DimmerParameters,
 }
 
 // GetRules returns the rule information from a device
+/*
 func (d *Device) GetRules() (string, error) {
 	return d.GetRulesCtx(context.Background())
 }
 
 func (d *Device) GetRulesCtx(ctx context.Context) (string, error) {
 	res, err := d.sendTCP(ctx, CmdGetRules)
-	return string(res), err
-}
+	if err != nil {
+		return nil, err
+	}
+	var kd KasaDevice
+	if err := json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Rules.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+	return kd.Rules, err
+} */
 
 // GetCountdownRules returns a list of the countdown timers on a device
 func (d *Device) GetCountdownRules() ([]Rule, error) {
