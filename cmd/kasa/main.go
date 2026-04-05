@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"text/tabwriter"
 
 	"github.com/cloudkucooland/go-kasa"
 
@@ -76,24 +77,29 @@ func main() {
 					if err != nil {
 						return err
 					}
-					fmt.Printf("Alias:\t\t%s\n", s.Alias)
-					fmt.Printf("DevName:\t%s\n", s.DevName)
-					fmt.Printf("Model:\t\t%s [%s]\n", s.Model, s.HWVersion)
-					fmt.Printf("Device ID:\t%s\n", s.DeviceID)
-					fmt.Printf("OEM ID:\t\t%s\n", s.OEMID)
-					fmt.Printf("Hardware ID:\t%s\n", s.HWID)
-					fmt.Printf("Software:\t%s\n", s.SWVersion)
-					fmt.Printf("MIC:\t\t%s\n", s.MIC)
-					fmt.Printf("MAC:\t\t%s\n", s.MAC)
-					fmt.Printf("LED Off:\t%d\n", s.LEDOff)
-					fmt.Printf("Active Mode:\t%s\n", s.ActiveMode)
+					tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+					fmt.Fprintf(tabwrite, "Alias:\t%s\n", s.Alias)
+					fmt.Fprintf(tabwrite, "DevName:\t%s\n", s.DevName)
+					fmt.Fprintf(tabwrite, "Model:\t%s (%s)\n", s.Model, s.HWVersion)
+					fmt.Fprintf(tabwrite, "Device ID:\t%s\n", s.DeviceID)
+					fmt.Fprintf(tabwrite, "OEM ID:\t%s\n", s.OEMID)
+					fmt.Fprintf(tabwrite, "Hardware ID:\t%s\n", s.HWID)
+					fmt.Fprintf(tabwrite, "Software:\t%s\n", s.SWVersion)
+					fmt.Fprintf(tabwrite, "MIC:\t%s\n", s.MIC)
+					fmt.Fprintf(tabwrite, "MAC:\t%s\n", s.MAC)
+					fmt.Fprintf(tabwrite, "LED Off:\t%d\n", s.LEDOff)
+					fmt.Fprintf(tabwrite, "Active Mode:\t%s\n", s.ActiveMode)
+
+					fmt.Fprintf(tabwrite, "Outlet\tRelay State\tBrightness\n")
 					if s.NumChildren > 0 {
 						for _, v := range s.Children {
-							fmt.Printf("Outlet [%s]:\t%d\t\t(%s)\n", v.Alias, v.RelayState, v.ID)
+							fmt.Fprintf(tabwrite, "%s\t%d\t\n", v.Alias, v.RelayState)
 						}
 					} else {
-						fmt.Printf("Relay:\t%d\tBrightness:\t%d%%\n", s.RelayState, s.Brightness)
+						fmt.Fprintf(tabwrite, "\t%d\t%d\n", s.RelayState, s.Brightness)
 					}
+					tabwrite.Flush()
 					return nil
 				},
 			},
@@ -114,13 +120,16 @@ func main() {
 					if err != nil {
 						return err
 					}
+					tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+					fmt.Fprintf(tabwrite, "Device\tOutlet\tRelay State\tBrightness\n")
 					if s.NumChildren > 0 {
 						for _, v := range s.Children {
-							fmt.Printf("[%s].[%s]:\t%d\n", s.Alias, v.Alias, v.RelayState)
+							fmt.Fprintf(tabwrite, "%s\t%s\t%d\t\n", s.Alias, v.Alias, v.RelayState)
 						}
 					} else {
-						fmt.Printf("[%s]\tRelay:\t%d\tBrightness:\t%d%%\n", s.Alias, s.RelayState, s.Brightness)
+						fmt.Fprintf(tabwrite, "%s\t\t%d\t%d\n", s.Alias, s.RelayState, s.Brightness)
 					}
+					tabwrite.Flush()
 					return nil
 				},
 			},

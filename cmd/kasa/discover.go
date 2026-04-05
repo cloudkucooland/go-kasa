@@ -29,12 +29,9 @@ var discover = &cli.Command{
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
+
 		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-
-		fmt.Printf("found %d devices\n", len(m))
-
 		fmt.Fprintf(tabwrite, "Device\tIP/ID:\tModel\tState\tBrightness\n")
-
 		for _, k := range keys {
 			v := m[k]
 			if len(v.Children) == 0 {
@@ -47,6 +44,7 @@ var discover = &cli.Command{
 			}
 		}
 		tabwrite.Flush()
+		fmt.Fprintf(os.Stderr, "found %d devices\n", len(m))
 		return nil
 	},
 }
