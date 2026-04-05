@@ -7,31 +7,27 @@ import (
 	"strconv"
 	"text/tabwriter"
 
+	"github.com/cloudkucooland/go-kasa"
 	"github.com/urfave/cli/v3"
 )
 
 var addcountdown = &cli.Command{
 	Name:      "addcountdown",
 	Usage:     "add device countdown",
+	Before:    RequireDevice,
 	ArgsUsage: "host duration True|False",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "duration", Destination: &value},
-		&cli.StringArg{Name: "target", Destination: &secondary},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "duration"},
+		&cli.StringArg{Name: "target"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		dur, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		dur := cmd.Int("duration")
 		if dur < 1 || dur > 3600 {
 			return fmt.Errorf("invalid duration (1-3600)")
 		}
-		b, err := strconv.ParseBool(secondary)
+		b, err := strconv.ParseBool(cmd.String("target"))
 		if err != nil {
 			return err
 		}
@@ -42,15 +38,13 @@ var addcountdown = &cli.Command{
 var cleancountdown = &cli.Command{
 	Name:      "cleancountdown",
 	Usage:     "remove countdown rules",
+	Before:    RequireDevice,
 	ArgsUsage: "host",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
+		&cli.StringArg{Name: "host"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
+		k := ctx.Value("kasaDev").(*kasa.Device)
 		return k.ClearCountdownRulesCtx(ctx)
 	},
 }
@@ -58,13 +52,11 @@ var cleancountdown = &cli.Command{
 var getcountdown = &cli.Command{
 	Name:      "getcountdown",
 	Usage:     "view countdown rules",
+	Before:    RequireDevice,
 	ArgsUsage: "host",
-	Arguments: []cli.Argument{&cli.StringArg{Name: "host", Destination: &host}},
+	Arguments: []cli.Argument{&cli.StringArg{Name: "host"}},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
+		k := ctx.Value("kasaDev").(*kasa.Device)
 		res, err := k.GetCountdownRulesCtx(ctx)
 		if err != nil {
 			return err
@@ -83,16 +75,14 @@ var getcountdown = &cli.Command{
 var setmode = &cli.Command{
 	Name:      "setmode",
 	Usage:     "set operating mode",
+	Before:    RequireDevice,
 	ArgsUsage: "host mode",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "mode", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.StringArg{Name: "mode"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		return k.SetModeCtx(ctx, value)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetModeCtx(ctx, cmd.String("mode"))
 	},
 }

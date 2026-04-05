@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"text/tabwriter"
 	"time"
 
@@ -18,20 +17,15 @@ var brightness = &cli.Command{
 	Usage:     "set brightness",
 	UsageText: "kasa brightness host (value: 0-100)",
 	ArgsUsage: "host brightness",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "brightness", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "brightness"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
+		k := ctx.Value("kasaDev").(*kasa.Device)
 
-		b, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
+		b := cmd.IntArg("brightness")
 		if b < 1 {
 			b = 1
 		}
@@ -41,18 +35,21 @@ var brightness = &cli.Command{
 		return k.SetBrightnessCtx(ctx, b)
 	},
 }
+
 var getdimmer = &cli.Command{
 	Name:      "getdimmer",
 	Usage:     "check dimmer parameters",
 	ArgsUsage: "host",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
+		&cli.StringArg{Name: "host"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
+		if cmd.StringArg("host") == "" {
+			return getalldimmer.Action(ctx, cmd)
 		}
+
+		RequireDevice(ctx, cmd)
+		k := ctx.Value("kasaDev").(*kasa.Device)
 		res, err := k.GetDimmerParametersCtx(ctx)
 		if err != nil {
 			return err
@@ -98,83 +95,63 @@ var getalldimmer = &cli.Command{
 		return nil
 	},
 }
+
 var setfadeontime = &cli.Command{
 	Name:      "setfadeontime",
 	Usage:     "set fade on time",
 	ArgsUsage: "time in ms",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "time", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "time"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		fade, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
-		return k.SetFadeOnTimeCtx(ctx, fade)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetFadeOnTimeCtx(ctx, cmd.IntArg("time"))
 	},
 }
+
 var setfadeofftime = &cli.Command{
 	Name:      "setfadeofftime",
 	Usage:     "set fade off time",
 	ArgsUsage: "time in ms",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "time", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "time"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		fade, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
-		return k.SetFadeOffTimeCtx(ctx, fade)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetFadeOffTimeCtx(ctx, cmd.IntArg("time"))
 	},
 }
+
 var setgentleontime = &cli.Command{
 	Name:      "setgentleontime",
 	Usage:     "set gentle on time",
 	ArgsUsage: "time in ms",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "time", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "time"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		fade, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
-		return k.SetGentleOnTimeCtx(ctx, fade)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetGentleOnTimeCtx(ctx, cmd.IntArg("time"))
 	},
 }
+
 var setgentleofftime = &cli.Command{
 	Name:      "setgentleofftime",
 	Usage:     "set gentle off time",
 	ArgsUsage: "time in ms",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "time", Destination: &value},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "time"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		fade, err := strconv.Atoi(value)
-		if err != nil {
-			return err
-		}
-		return k.SetGentleOffTimeCtx(ctx, fade)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetGentleOffTimeCtx(ctx, cmd.IntArg("time"))
 	},
 }

@@ -16,17 +16,15 @@ var setwifi = &cli.Command{
 	Name:      "setwifi",
 	Usage:     "configure wifi",
 	ArgsUsage: "host ssid key",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "ssid", Destination: &value},
-		&cli.StringArg{Name: "key", Destination: &secondary},
+		&cli.StringArg{Name: "host"},
+		&cli.StringArg{Name: "ssid"},
+		&cli.StringArg{Name: "key"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
-		}
-		_, err = k.SetWIFICtx(ctx, value, secondary)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		_, err := k.SetWIFICtx(ctx, cmd.String("ssid"), cmd.String("key"))
 		return err
 	},
 }
@@ -36,13 +34,15 @@ var wifistatus = &cli.Command{
 	Usage:     "check device wifi status",
 	ArgsUsage: "host",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
+		&cli.StringArg{Name: "host"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
+		if cmd.StringArg("host") == "" {
+			return getallwifi.Action(ctx, cmd)
 		}
+
+		RequireDevice(ctx, cmd)
+		k := ctx.Value("kasaDev").(*kasa.Device)
 		res, err := k.GetWIFIStatusCtx(ctx)
 		if err != nil {
 			return err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"text/tabwriter"
 	"time"
 
@@ -75,42 +74,38 @@ var emeter = &cli.Command{
 	Usage:     "check energy usage",
 	ArgsUsage: "host month year",
 	Arguments: []cli.Argument{
-		&cli.StringArg{Name: "host", Destination: &host},
-		&cli.StringArg{Name: "month", Destination: &value},
-		&cli.StringArg{Name: "year", Destination: &secondary},
+		&cli.StringArg{Name: "host"},
+		&cli.IntArg{Name: "month"},
+		&cli.IntArg{Name: "year"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		k, err := getKasaDevice(cmd)
-		if err != nil {
-			return err
+		if cmd.StringArg("host") == "" {
+			return getallemeter.Action(ctx, cmd)
 		}
+
+		RequireDevice(ctx, cmd)
+		k := ctx.Value("kasaDev").(*kasa.Device)
 		s, err := k.GetSettingsCtx(ctx)
 		if err != nil {
 			return err
 		}
 
 		month := 0
-		year := time.Now().Year()
-
-		if value != "" {
-			month, err = strconv.Atoi(value)
-			if err != nil {
-				return err
-			}
-			if month < 1 || month > 12 {
+		mm := cmd.IntArg("month")
+		if mm != 0 {
+			if mm < 1 || mm > 12 {
 				return fmt.Errorf("invalid month")
 			}
+			month = mm
 		}
 
-		yy := cmd.String("year")
-		if yy != "" {
-			year, err = strconv.Atoi(yy)
-			if err != nil {
-				return err
-			}
+		year := time.Now().Year()
+		yy := cmd.IntArg("year")
+		if yy != 0 {
+			year = yy
 		}
 
+		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		if month == 0 {
 			fmt.Fprintf(tabwrite, "Device\tCurrent\t%s\tPower\tSince Reset\n", color.GreenString("Voltage"))
 			child := cmd.String("child")

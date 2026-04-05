@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strconv"
@@ -15,14 +14,10 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var host string
-var value string
-var secondary string
-
 func main() {
 	cmd := &cli.Command{
 		Name:      "kasa",
-		Version:   "v0.3.5",
+		Version:   "v0.3.6",
 		Copyright: "(c) 2026 Scot Bontrager",
 		Usage:     "control TP-Link kasa devices",
 		UsageText: "kasa command",
@@ -63,15 +58,13 @@ func main() {
 				Name:      "info",
 				Usage:     "show basic info",
 				UsageText: "kasa info host",
+				Before:    RequireDevice,
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "host"},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
+					k := ctx.Value("kasaDev").(*kasa.Device)
 
 					s, err := k.GetSettingsCtx(ctx)
 					if err != nil {
@@ -107,15 +100,13 @@ func main() {
 				Name:      "status",
 				Usage:     "current device status",
 				UsageText: "kasa status host",
+				Before:    RequireDevice,
 				ArgsUsage: "host",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
+					&cli.StringArg{Name: "host"},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
+					k := ctx.Value("kasaDev").(*kasa.Device)
 					s, err := k.GetSettingsCtx(ctx)
 					if err != nil {
 						return err
@@ -136,20 +127,18 @@ func main() {
 			{
 				Name:      "switch",
 				Usage:     "toggle a relay's state",
+				Before:    RequireDevice,
 				ArgsUsage: "[-c child ID] host true|false",
 				Arguments: []cli.Argument{
-					&cli.StringArg{Name: "host", Destination: &host},
-					&cli.StringArg{Name: "state", Destination: &value},
+					&cli.StringArg{Name: "host"},
+					&cli.StringArg{Name: "state"},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					b, err := strconv.ParseBool(value)
+					b, err := strconv.ParseBool(cmd.String("state"))
 					if err != nil {
 						return err
 					}
-					k, err := getKasaDevice(cmd)
-					if err != nil {
-						return err
-					}
+					k := ctx.Value("kasaDev").(*kasa.Device)
 					child := cmd.String("child")
 					if child != "" {
 						return k.SetRelayStateChildCtx(ctx, child, b)
@@ -187,19 +176,24 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
 	}
 }
 
-func getKasaDevice(cmd *cli.Command) (*kasa.Device, error) {
+func RequireDevice(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+	host := cmd.Args().Get(0)
+
 	if host == "" {
-		return nil, fmt.Errorf("missing host")
+		return ctx, fmt.Errorf("host argument is required for this command")
 	}
 
 	k, err := kasa.NewDevice(host)
 	if err != nil {
-		return nil, err
+		return ctx, fmt.Errorf("failed to initialize device: %w", err)
 	}
+
 	k.Port = int(cmd.Int("port"))
-	return k, nil
+
+	return context.WithValue(ctx, "kasaDev", k), nil
 }
