@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	// "github.com/cloudkucooland/go-kasa"
-
 	"github.com/urfave/cli/v3"
 )
+
+var log slog.Logger
 
 func main() {
 	cmd := &cli.Command{
@@ -34,9 +34,10 @@ func main() {
 		},
 	}
 
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		log.Fatal(err)
+		log.Error("error", err.Error())
 	}
 }

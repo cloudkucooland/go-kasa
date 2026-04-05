@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/InfluxCommunity/influxdb3-go/v2/influxdb3"
@@ -20,6 +21,17 @@ var client *influxdb3.Client
 
 func setupdb(ctx context.Context, cmd *cli.Command) error {
 	var err error
+
+	if h := os.Getenv("INFLUX_HOST"); h != "" {
+		log.InfoContext(ctx, "INFLUX_HOST", h)
+	} else {
+		log.InfoContext(ctx, "INFLUX_HOST not set")
+	}
+	if d := os.Getenv("INFLUX_DATABASE"); d != "" {
+		log.InfoContext(ctx, "INFLUX_DATABASE", d)
+	} else {
+		log.InfoContext(ctx, "INFLUX_DATABASE not set")
+	}
 
 	client, err = influxdb3.NewFromEnv()
 	if err != nil {
