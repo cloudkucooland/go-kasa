@@ -48,9 +48,12 @@ var getdimmer = &cli.Command{
 			return getalldimmer.Action(ctx, cmd)
 		}
 
-		RequireDevice(ctx, cmd)
-		k := ctx.Value("kasaDev").(*kasa.Device)
-		res, err := k.GetDimmerParametersCtx(ctx)
+		nctx, err := RequireDevice(ctx, cmd)
+		if err != nil {
+			return err
+		}
+		k := nctx.Value("kasaDev").(*kasa.Device)
+		res, err := k.GetDimmerParametersCtx(nctx)
 		if err != nil {
 			return err
 		}

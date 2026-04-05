@@ -83,9 +83,12 @@ var emeter = &cli.Command{
 			return getallemeter.Action(ctx, cmd)
 		}
 
-		RequireDevice(ctx, cmd)
-		k := ctx.Value("kasaDev").(*kasa.Device)
-		s, err := k.GetSettingsCtx(ctx)
+		nctx, err := RequireDevice(ctx, cmd)
+		if err != nil {
+			return err
+		}
+		k := nctx.Value("kasaDev").(*kasa.Device)
+		s, err := k.GetSettingsCtx(nctx)
 		if err != nil {
 			return err
 		}
