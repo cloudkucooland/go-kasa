@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/cloudkucooland/go-kasa"
@@ -84,12 +85,18 @@ var alias = &cli.Command{
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
 
-		child := cmd.StringArg("child")
-		if child != "" {
-			return k.SetChildAliasCtx(ctx, child, cmd.StringArg("newname"))
+		nn := cmd.StringArg("newname")
+		if nn == "" {
+			return fmt.Errorf("need a valid name")
 		}
 
-		return k.SetAlias(cmd.StringArg("newname"))
+		child := cmd.StringArg("child")
+		if child != "" {
+			fmt.Fprintf(os.Stderr, "using child %s", child)
+			return k.SetChildAliasCtx(ctx, child, nn)
+		}
+
+		return k.SetAlias(nn)
 	},
 }
 
@@ -108,7 +115,7 @@ var raw = &cli.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println(b)
+		fmt.Println(string(b))
 		return nil
 	},
 }

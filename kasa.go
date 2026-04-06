@@ -84,11 +84,12 @@ func (e KasaErr) OK() error {
 
 // KasaDevice is the primary type, defined by kasa devices
 type KasaDevice struct {
-	GetSysinfo GetSysinfo `json:"system"`
-	Dimmer     Dimmer     `json:"smartlife.iot.dimmer"`
-	NetIf      NetIf      `json:"netif"`
-	Countdown  Countdown  `json:"count_down"`
-	Emeter     EmeterSub  `json:"emeter"`
+	GetSysinfo  GetSysinfo  `json:"system"`
+	Dimmer      Dimmer      `json:"smartlife.iot.dimmer"`
+	NetIf       NetIf       `json:"netif"`
+	Countdown   Countdown   `json:"count_down"`
+	Emeter      EmeterSub   `json:"emeter"`
+	LightSensor LightSensor `json:"smartlife.iot.LAS"`
 }
 
 // GetSysinfo is defined by kasa devices
@@ -98,33 +99,38 @@ type GetSysinfo struct {
 
 // Sysinfo is defined by kasa devices
 type Sysinfo struct {
-	SWVersion      string   `json:"sw_ver"`
-	HWVersion      string   `json:"hw_ver"`
-	Model          string   `json:"model"`
-	DeviceID       string   `json:"deviceId"`
-	OEMID          string   `json:"oemId"`
-	HWID           string   `json:"hwId"`
-	RSSI           int      `json:"rssi"`
-	Longitude      int      `json:"longitude_i"`
-	Latitude       int      `json:"latitude_i"`
-	Alias          string   `json:"alias"`
-	Status         string   `json:"status"`
-	MIC            string   `json:"mic_type"`
-	Feature        string   `json:"feature"` // "TIM" "TIM:ENE"
-	MAC            string   `json:"mac"`
-	Updating       uint     `json:"updating"`
-	LEDOff         uint     `json:"led_off"`
-	RelayState     uint     `json:"relay_state"`
-	Brightness     uint     `json:"brightness"`
-	OnTime         int      `json:"on_time"`
-	ActiveMode     string   `json:"active_mode"`
-	DevName        string   `json:"dev_name"`
+	SWVersion  string `json:"sw_ver"`
+	HWVersion  string `json:"hw_ver"`
+	Model      string `json:"model"`
+	DeviceID   string `json:"deviceId"`
+	OEMID      string `json:"oemId"`
+	HWID       string `json:"hwId"`
+	RSSI       int    `json:"rssi"`
+	Longitude  int    `json:"longitude_i"`
+	Latitude   int    `json:"latitude_i"`
+	Alias      string `json:"alias"`
+	Status     string `json:"status"`
+	OBDSrc     string `json:"obd_src"`
+	MIC        string `json:"mic_type"`
+	Feature    string `json:"feature"` // "TIM" "TIM:ENE"
+	MAC        string `json:"mac"`
+	Updating   uint   `json:"updating"`
+	LEDOff     uint   `json:"led_off"`
+	RelayState uint   `json:"relay_state"`
+	Brightness uint   `json:"brightness"`
+	OnTime     int    `json:"on_time"`
+	IconHash   string `json:"icon_hash"`
+	ActiveMode string `json:"active_mode"`
+	DevName    string `json:"dev_name"`
+	// NextAction     ...      `json:"next_action"`
 	Children       []Child  `json:"children"`
 	NumChildren    uint     `json:"child_num"`
 	NTCState       int      `json:"ntc_state"`
 	PreferredState []Preset `json:"preferred_state"`
 	KasaErr
 }
+
+// "next_action":{"type":-1}
 
 // Dimmer is defined by kasa devices
 type Dimmer struct {
