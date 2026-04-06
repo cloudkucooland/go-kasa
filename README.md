@@ -8,8 +8,8 @@ Go library to control TP-Link Kasa devices.
 This library uses the local API, not the cloud API.
 It uses UDP rather than TCP where possible for better performance.
 
-## Includes a small cli tool
-This is still a work-in-progress, but works for most operations.
+## Includes a CLI tool
+The CLI is robust and feature-rich, including JSON output. All the commands you need to manage your Kasa environment should be covered.
 
 ## CLI install
 Make sure you have Go version 1.18 or newer installed on your system. See [The Go install instructions](https://go.dev/doc/install) for details.
@@ -22,6 +22,9 @@ Make sure ``~/go/bin`` is in your [shell's path](https://janelbrandon.medium.com
 
 ## If you need to control your Kasa devices from Apple HomeKit, I have built a bridge which works well.
 [https://github.com/cloudkucooland/HomeKitBrigdges/](https://github.com/cloudkucooland/HomeKitBridges)
+
+## Monitor your electricity usage
+If you need to monitor your Kasa devices that support emetering, this includes a daemon which feeds the emeter data into InfluxDB. A sample Grafana setup is included, all running in docker.
 
 ## CLI examples
 discover devices on the local subnets
@@ -141,7 +144,7 @@ adjust the brightness on a dimmer switch
 
 show dimmer status and timeings for all dimmer-enabled devices (this needs to be prettier...)
 ```
- % kasa dimmer
+ % kasa alldimmer
 Device                        IP             Min Fade On Fade Off Gentle On Gentle Off Ramp Rate
 Scot’s Office Overhead Light  192.168.100.54 11  1500    5000     3000      30000      30
 Fireplace Can Dimmer          192.168.100.24 9   1500    5000     3000      10000      30
@@ -173,7 +176,7 @@ Outlet       Relay State Brightness
 
 Get real-time usage
 ```
- % kasa emeter
+ % kasa allemeter
 Device                                 Current Voltage Power   Since Reset
 Conservatory AV/Peachtree Amp          0mA     122.49V 0.00W   0.00kWh
 Conservatory AV/Clearaudio Turntable   0mA     122.73V 0.00W   0.00kWh
@@ -401,7 +404,7 @@ kasa setwifi 192.168.0.1 "MySecureSSID" "securenetpw!"
 
 Run the json output through jq
 ```
- % kasa -j emeter | jq '.[] | {alias: .alias, active: [.Realtime[] | select(.power_mw > 0) | {outlet: .alias, watts: (.power_mw/1000)}]}}
+ % kasa -j allemeter | jq '.[] | {alias: .alias, active: [.Realtime[] | select(.power_mw > 0) | {outlet: .alias, watts: (.power_mw/1000)}]}}
 ```
 
 ===
@@ -428,5 +431,3 @@ https://github.com/p-doyle/Python-KasaSmartPowerStrip
 https://community.hubitat.com/t/release-tp-link-kasa-plug-switch-and-bulb-integration/1675/482
 
 https://www.wiredtron.com/2023/11/28/setting-up-tp-link-kasa-devices-without-smart-home-app.html
-
-[![GoDoc](https://godoc.org/github.com/cloudkucooland/go-kasa?status.svg)](https://godoc.org/github.com/cloudkucooland/go-kasa)
