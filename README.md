@@ -144,7 +144,7 @@ adjust the brightness on a dimmer switch
 
 show dimmer status and timeings for all dimmer-enabled devices (this needs to be prettier...)
 ```
- % kasa dimmer
+ % kasa alldimmer
 Device                        IP             Min Fade On Fade Off Gentle On Gentle Off Ramp Rate
 Scot’s Office Overhead Light  192.168.100.54 11  1500    5000     3000      30000      30
 Fireplace Can Dimmer          192.168.100.24 9   1500    5000     3000      10000      30
@@ -176,7 +176,7 @@ Outlet       Relay State Brightness
 
 Get real-time usage
 ```
- % kasa emeter
+ % kasa allemeter
 Device                                 Current Voltage Power   Since Reset
 Conservatory AV/Peachtree Amp          0mA     122.49V 0.00W   0.00kWh
 Conservatory AV/Clearaudio Turntable   0mA     122.73V 0.00W   0.00kWh
@@ -404,7 +404,7 @@ kasa setwifi 192.168.0.1 "MySecureSSID" "securenetpw!"
 
 Run the json output through jq
 ```
- % kasa -j emeter | jq '.[] | {alias: .alias, active: [.Realtime[] | select(.power_mw > 0) | {outlet: .alias, watts: (.power_mw/1000)}]}}
+ % kasa -j allemeter | jq '.[] | {alias: .alias, active: [.Realtime[] | select(.power_mw > 0) | {outlet: .alias, watts: (.power_mw/1000)}]}}
 ```
 
 ===
