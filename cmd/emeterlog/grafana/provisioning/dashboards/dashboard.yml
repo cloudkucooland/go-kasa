@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Energy Monitor'
+    orgId: 1
+    folder: 'Power Systems'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

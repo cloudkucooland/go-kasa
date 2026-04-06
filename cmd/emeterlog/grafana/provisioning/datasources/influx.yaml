@@ -2,11 +2,14 @@ apiVersion: 1
 datasources:
   - name: InfluxDB_Energy
     type: influxdb
+    uid: InfluxDB_Energy
     access: proxy
     url: http://localhost:8086
     jsonData:
       organization: myhouse
       defaultBucket: energy
       version: Flux
+      tlsSkipVerify: true
     secureJsonData:
       token: my-super-secret-token-123
+    editable: true
