@@ -50,16 +50,16 @@ func (d *Device) SetRelayStateChildMultiCtx(ctx context.Context, newstate bool, 
 	return d.sendUDP(ctx, cmd)
 }
 
-func (d *Device) SendRawCommand(cmd string) error {
+func (d *Device) SendRawCommand(cmd string) ([]byte, error) {
 	return d.SendRawCommandCtx(context.Background(), cmd)
 }
 
-func (d *Device) SendRawCommandCtx(ctx context.Context, cmd string) error {
-	_, err := d.sendTCP(ctx, cmd)
+func (d *Device) SendRawCommandCtx(ctx context.Context, cmd string) ([]byte, error) {
+	result, err := d.sendTCP(ctx, cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result, nil
 }
 
 // SetBrightness adjust the brightness setting on a dimmer-capable device (1-100)

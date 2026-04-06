@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/cloudkucooland/go-kasa"
@@ -103,6 +104,11 @@ var raw = &cli.Command{
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
-		return k.SendRawCommandCtx(ctx, cmd.StringArg("command"))
+		b, err := k.SendRawCommandCtx(ctx, cmd.StringArg("command"))
+		if err != nil {
+			return err
+		}
+		fmt.Println(b)
+		return nil
 	},
 }
