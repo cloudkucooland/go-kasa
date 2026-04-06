@@ -27,42 +27,101 @@ Make sure ``~/go/bin`` is in your [shell's path](https://janelbrandon.medium.com
 discover devices on the local subnets
 ```
 % kasa discover
-read udp [::]:48781: i/o timeout
-found 25 devices
-  192.168.1.144: HS220(US)             Fireplace Can Dimmer [state: 0] [brightness:  25]
-  192.168.1.145: HS200(US)           Dining Room Chandelier [state: 0] [brightness:   0]
-  192.168.1.161: HS200(US)            Back Porch Floodlight [state: 1] [brightness:   0]
-  192.168.1.162: HS200(US)                   Breakfast Nook [state: 0] [brightness:   0]
-  192.168.1.163: HS220(US)        Master Bath Shower Lights [state: 0] [brightness:  50]
-  192.168.1.164: HS220(US)           Master Bath Can Lights [state: 0] [brightness:  50]
-  192.168.1.165: HS200(US)              Master Bath Mirrors [state: 0] [brightness:   0]
-  192.168.1.166: HS200(US)               Front Door Pendant [state: 0] [brightness:   0]
-  192.168.1.167: HS200(US)                       Front Room [state: 0] [brightness:   0]
-  192.168.1.170: HS210(US)                  Front Hallway 1 [state: 0] [brightness:   0]
-  192.168.1.171: HS210(US)                  Front Hallway 2 [state: 0] [brightness:   0]
-  192.168.1.172: HS220(US)             Master Bedroom Light [state: 0] [brightness:  40]
-  192.168.1.175: HS200(US)               Laundry Room Light [state: 1] [brightness:   0]
-  192.168.1.176: HS200(US)       Laundry Room Extractor Fan [state: 0] [brightness:   0]
-  192.168.1.177: HS200(US)               Hallway Side Light [state: 1] [brightness:   0]
-  192.168.1.178: HS200(US)      Living Room Overhead Lights [state: 0] [brightness:   0]
-  192.168.1.179: HS200(US)                  Living Room Fan [state: 0] [brightness:   0]
-  192.168.1.180: HS200(US)               Kitchen Sink Light [state: 0] [brightness:   0]
-  192.168.1.183: KP303(US) TP-LINK_Power Strip_2BAB
-    ID: 8006D442E080440F22A89B072F2E67FB1D9B3DFE02               Guppie Light [state: 0]
-    ID: 8006D442E080440F22A89B072F2E67FB1D9B3DFE01              Guppie Heater [state: 1]
-    ID: 8006D442E080440F22A89B072F2E67FB1D9B3DFE00              Guppie Filter [state: 1]
-  192.168.1.184: KP303(US) TP-LINK_Power Strip_2C77
-    ID: 8006972A91D031658289D308866206E11D9B838A02               Edgar Heater [state: 1]
-    ID: 8006972A91D031658289D308866206E11D9B838A01              Edgar Bubbler [state: 1]
-    ID: 8006972A91D031658289D308866206E11D9B838A00               Edgar Filter [state: 1]
-  192.168.1.185: KP303(US) TP-LINK_Power Strip_34EC
-    ID: 800661DA15771003D2531C57BE527BA61D9B40E400               Gofish Light [state: 0]
-    ID: 800661DA15771003D2531C57BE527BA61D9B40E401              Gofish Heater [state: 1]
-    ID: 800661DA15771003D2531C57BE527BA61D9B40E402              Gofish Filter [state: 1]
-  192.168.1.187: HS103(US)                Living Room Spare [state: 0] [brightness:   0]
-  192.168.1.188: HS103(US)                Scot Bedside Lamp [state: 0] [brightness:   0]
-  192.168.1.189: HS103(US)                 Jen Bedside Lamp [state: 0] [brightness:   0]
-  192.168.1.193: HS103(US)              Scot’s Office Spare [state: 0] [brightness:   0]
+Device                               IP/ID:                                     Model     State Brightness
+Hallway Side Light                   192.168.100.20                             HS200(US) Off      0
+Guest Bathroom Light                 192.168.100.21                             HS200(US) Off      0
+Living Room Red Lamp                 192.168.100.22                             HS103(US) Off      0
+Outside Front Carriage Lights        192.168.100.23                             HS200(US) On       0
+Fireplace Can Dimmer                 192.168.100.24                             HS220(US) On      75
+Laundry Room Extractor Fan           192.168.100.25                             HS200(US) Off      0
+Conservatory Chandelier              192.168.100.26                             HS200(US) Off      0
+Living Room Overhead Lights          192.168.100.27                             HS200(US) Off      0
+Tea Kettle                           192.168.100.28                             KP115(US) On       0
+Jen’s Bedside Lamp                   192.168.100.29                             HS103(US) Off      0
+Garage                               192.168.100.30                             HS300(US)       
+Garage/Battery charger 1             8006F0636CA2DCC4AE3622D483F75865224A78C800           On    
+Garage/Battery charger 2             8006F0636CA2DCC4AE3622D483F75865224A78C801           On    
+Garage/Battery charger 3             8006F0636CA2DCC4AE3622D483F75865224A78C802           On    
+Garage/Unused                        8006F0636CA2DCC4AE3622D483F75865224A78C805           On    
+Garage/Hot plate                     8006F0636CA2DCC4AE3622D483F75865224A78C803           On    
+Garage/Condenser pump                8006F0636CA2DCC4AE3622D483F75865224A78C804           On    
+Kitchen Sink Light                   192.168.100.31                             HS200(US) On       0
+Master Bathroom Shower Lights        192.168.100.32                             HS220(US) On      40
+Living Room Fan                      192.168.100.33                             HS200(US) Off      0
+Master Bathroom Closet               192.168.100.34                             HS220(US) On      75
+Go Fish                              192.168.100.35                             KP303(US)       
+Go Fish/Fish tank 3 filter           800661DA15771003D2531C57BE527BA61D9B40E401           Off   
+Go Fish/Fish tank 3 light            800661DA15771003D2531C57BE527BA61D9B40E402           On    
+Go Fish/Fish tank 3 heater           800661DA15771003D2531C57BE527BA61D9B40E400           On    
+Back Porch Floodlight                192.168.100.36                             HS200(US) On       0
+Master Bathroom Can Lights           192.168.100.37                             HS220(US) Off     20
+Jen’s Office Light                   192.168.100.38                             HS220(US) Off     17
+Potting Bench                        192.168.100.39                             HS300(US)       
+Potting Bench/Fan                    800663CD078A8C16B66658BEAA8D3F981EEF3EEA00           Off   
+Potting Bench/Bench light 1          800663CD078A8C16B66658BEAA8D3F981EEF3EEA01           Off   
+Potting Bench/Bench light 2          800663CD078A8C16B66658BEAA8D3F981EEF3EEA02           Off   
+Potting Bench/Heat mat               800663CD078A8C16B66658BEAA8D3F981EEF3EEA03           Off   
+Potting Bench/Sewing machine         800663CD078A8C16B66658BEAA8D3F981EEF3EEA04           Off   
+Potting Bench/Unused                 800663CD078A8C16B66658BEAA8D3F981EEF3EEA05           Off   
+Front Hallway 1                      192.168.100.40                             HS210(US) Off      0
+Frog Tank                            192.168.100.41                             HS300(US)       
+Frog Tank/Unused                     800609CCE1FB71B08497FF57B088A1132225FA3804           Off   
+Frog Tank/Unused                     800609CCE1FB71B08497FF57B088A1132225FA3805           Off   
+Frog Tank/UV                         800609CCE1FB71B08497FF57B088A1132225FA3800           Off   
+Frog Tank/Incandescent               800609CCE1FB71B08497FF57B088A1132225FA3801           Off   
+Frog Tank/Grow light                 800609CCE1FB71B08497FF57B088A1132225FA3802           On    
+Frog Tank/Heater                     800609CCE1FB71B08497FF57B088A1132225FA3803           On    
+Laundry Room Light                   192.168.100.42                             HS200(US) On       0
+Master Bedroom Light                 192.168.100.43                             HS220(US) Off    100
+Front Room                           192.168.100.44                             HS200(US) Off      0
+Outside Front Overhead Light         192.168.100.45                             HS200(US) On       0
+Hallway Can Lights                   192.168.100.46                             HS210(US) On       0
+Jen’s Office Fan                     192.168.100.48                             HS200(US) Off      0
+Master Bathroom Fan                  192.168.100.49                             HS200(US) Off      0
+Master Bathroom Mirrors              192.168.100.50                             HS200(US) Off      0
+Kitchen Island Light                 192.168.100.51                             HS200(US) Off      0
+Jen’s Reading Lamp                   192.168.100.52                             HS103(US) Off      0
+Breakfast Nook                       192.168.100.53                             HS200(US) Off      0
+Scot’s Office Overhead Light         192.168.100.54                             HS220(US) Off     46
+Guppie                               192.168.100.55                             KP303(US)       
+Guppie/Fish tank 1 filter            8006D442E080440F22A89B072F2E67FB1D9B3DFE02           On    
+Guppie/Fish tank 1 light             8006D442E080440F22A89B072F2E67FB1D9B3DFE01           Off   
+Guppie/Fish tank 1 heater            8006D442E080440F22A89B072F2E67FB1D9B3DFE00           On    
+Edgar                                192.168.100.57                             KP303(US)       
+Edgar/Fish tank 2 light              8006972A91D031658289D308866206E11D9B838A02           On    
+Edgar/Fish tank 2 filter             8006972A91D031658289D308866206E11D9B838A01           On    
+Edgar/Fish tank 2 heater             8006972A91D031658289D308866206E11D9B838A00           Off   
+Scot’s Bedside Lamp                  192.168.100.58                             HS103(US) Off      0
+Front Hallway 2                      192.168.100.60                             HS210(US) Off      0
+Scot’s Office Fan                    192.168.100.61                             HS200(US) Off      0
+Plant Shelf 1                        192.168.100.62                             HS300(US)       
+Plant Shelf 1/Primary                800621D135774DF39C8C9A878A5ACF9124ACADE500           Off   
+Plant Shelf 1/Secondary              800621D135774DF39C8C9A878A5ACF9124ACADE501           Off   
+Plant Shelf 1/Spotlight              800621D135774DF39C8C9A878A5ACF9124ACADE502           Off   
+Plant Shelf 1/Plug 4                 800621D135774DF39C8C9A878A5ACF9124ACADE503           Off   
+Plant Shelf 1/Plug 5                 800621D135774DF39C8C9A878A5ACF9124ACADE504           Off   
+Plant Shelf 1/Plug 6                 800621D135774DF39C8C9A878A5ACF9124ACADE505           Off   
+Plant Shelf 2                        192.168.100.63                             HS300(US)       
+Plant Shelf 2/Primary                8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F200           Off   
+Plant Shelf 2/Secondary              8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F201           Off   
+Plant Shelf 2/Spotlight              8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F202           Off   
+Plant Shelf 2/Plug 4                 8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F203           Off   
+Plant Shelf 2/Plug 5                 8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F204           Off   
+Plant Shelf 2/Plug 6                 8006AA385A1A397D4C1A9AF6BC6D8D8324CB87F205           Off   
+Conservatory AV                      192.168.100.64                             HS300(US)       
+Conservatory AV/Peachtree Amp        80068B68F17684F2CB930C6CDC47FC3F2375E7FB00           On    
+Conservatory AV/Clearaudio Turntable 80068B68F17684F2CB930C6CDC47FC3F2375E7FB01           On    
+Conservatory AV/Stream Mac           80068B68F17684F2CB930C6CDC47FC3F2375E7FB02           On    
+Conservatory AV/Air Filter           80068B68F17684F2CB930C6CDC47FC3F2375E7FB03           On    
+Conservatory AV/Printer              80068B68F17684F2CB930C6CDC47FC3F2375E7FB04           On    
+Conservatory AV/Monitor              80068B68F17684F2CB930C6CDC47FC3F2375E7FB05           On    
+Counter Fish Tank                    192.168.100.65                             HS300(US)       
+Counter Fish Tank/Pi Zero            8006180DF51AF68BAB85AD990E3BD0E023760CFC00           On    
+Counter Fish Tank/Heater             8006180DF51AF68BAB85AD990E3BD0E023760CFC01           Off   
+Counter Fish Tank/Light              8006180DF51AF68BAB85AD990E3BD0E023760CFC02           On    
+Counter Fish Tank/Plug 4             8006180DF51AF68BAB85AD990E3BD0E023760CFC03           Off   
+Counter Fish Tank/Filter             8006180DF51AF68BAB85AD990E3BD0E023760CFC04           On    
+Counter Fish Tank/Plug 6             8006180DF51AF68BAB85AD990E3BD0E023760CFC05           Off  
 ```
 
 disable the cloud service for all devices on the local subnets
@@ -82,58 +141,90 @@ adjust the brightness on a dimmer switch
 
 show dimmer status and timeings for all dimmer-enabled devices (this needs to be prettier...)
 ```
- % kasa getalldimmer    
-[192.168.100.46] Entrance Chandiler
-Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
-[192.168.100.44] Scot’s Office Overhead Light
-Min Threshold: 11	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
-[192.168.100.60] Master Bathroom Closet
-Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
-[192.168.100.62] Jen’s Office Light
-Min Threshold: 23	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
-[192.168.100.73] Master Bedroom Light
-Min Threshold: 0	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
-[192.168.100.24] Fireplace Can Dimmer
-Min Threshold: 9	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 10000ms	Ramp Rate: 30ms
-[192.168.100.69] Master Bathroom Shower Lights
-Min Threshold: 1	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 60000ms	Ramp Rate: 30ms
-[192.168.100.51] Master Bathroom Can Lights
-Min Threshold: 0	Fade On: 1500ms		Fade Off: 5000ms
-Gentle On: 3000ms	Gentle Off: 30000ms	Ramp Rate: 30ms
+ % kasa dimmer
+Device                        IP             Min Fade On Fade Off Gentle On Gentle Off Ramp Rate
+Scot’s Office Overhead Light  192.168.100.54 11  1500    5000     3000      30000      30
+Fireplace Can Dimmer          192.168.100.24 9   1500    5000     3000      10000      30
+Master Bedroom Light          192.168.100.43 0   1500    5000     3000      10000      30
+Master Bathroom Closet        192.168.100.34 23  1500    5000     3000      10000      30
+Master Bathroom Can Lights    192.168.100.37 0   1500    5000     3000      30000      30
+Master Bathroom Shower Lights 192.168.100.32 1   1500    5000     3000      60000      30
+Jen’s Office Light            192.168.100.38 23  1500    5000     3000      10000      30
+Entrance Chandiler            192.168.100.56 23  1500    5000     3000      30000      30
 ```
 
 details about a single device
 ```
-% kasa info 192.168.1.144
-Alias:		Fireplace Can Dimmer
-DevName:	Wi-Fi Smart Dimmer
-Model:		HS220(US) [2.0]
-Device ID:	xxx
-OEM ID:		xxx
-Hardware ID:	xxx
-Software:	1.0.5 Build 201211 Rel.085320
-MIC:		IOT.SMARTPLUGSWITCH
-MAC:		60:32:B1:00:00:00
-LED Off:	0
-Active Mode:	none
-Relay:	0	Brightness:	25%
+ % kasa info 192.168.100.56
+Alias:       Entrance Chandiler
+DevName:     Wi-Fi Smart Dimmer
+Model:       HS220(US) (2.0)
+Device ID:   800660D983102C81B1DBC3F890B96FDA1E35996A
+OEM ID:      97D03CA037C71B6BCFAB8705E9B0C417
+Hardware ID: CA321A94521D18706FC7C34CA84F99A4
+Software:    1.0.8 Build 210423 Rel.075507
+MIC:         IOT.SMARTPLUGSWITCH
+MAC:         28:EE:52:AA:9C:31
+LED Off:     0
+Active Mode: none
+Outlet       Relay State Brightness
+             1           25
 ```
 
 Get real-time usage
 ```
-% kasa emeter 192.168.1.203
-CurrentMA:	1807
-VoltageMV:	122209
-PowerMW:	175494
-TotalWH:	2097
-```
+ % kasa emeter
+Device                                 Current Voltage Power   Since Reset
+Conservatory AV/Peachtree Amp          0mA     122.49V 0.00W   0.00kWh
+Conservatory AV/Clearaudio Turntable   0mA     122.73V 0.00W   0.00kWh
+Conservatory AV/Stream Mac             74mA    122.86V 4.50W   0.04kWh
+Conservatory AV/Air Filter             163mA   122.87V 18.48W  0.15kWh
+Conservatory AV/Printer                0mA     123.53V 0.00W   0.01kWh
+Conservatory AV/Monitor                24mA    123.00V 1.07W   0.01kWh
+Living Room Entertainment/Sony Blu-ray 0mA     123.07V 0.00W   0.00kWh
+Living Room Entertainment/Sony TV      1121mA  122.86V 134.89W 0.74kWh
+Living Room Entertainment/Subwoofer    0mA     122.92V 0.00W   0.00kWh
+Living Room Entertainment/Onkyo Amp    462mA   122.99V 38.21W  0.16kWh
+Living Room Entertainment/Turntable    0mA     122.83V 0.00W   0.00kWh
+Living Room Entertainment/CD player    0mA     123.08V 0.00W   0.00kWh
+Counter Fish Tank/Pi Zero              16mA    123.06V 0.82W   0.01kWh
+Counter Fish Tank/Heater               0mA     123.00V 0.00W   0.09kWh
+Counter Fish Tank/Light                108mA   123.08V 6.96W   0.04kWh
+Counter Fish Tank/Plug 4               0mA     122.97V 0.00W   0.00kWh
+Counter Fish Tank/Filter               148mA   122.98V 7.13W   0.06kWh
+Counter Fish Tank/Plug 6               0mA     123.03V 0.00W   0.00kWh
+Potting Bench/Fan                      0mA     122.59V 0.00W   0.00kWh
+Potting Bench/Bench light 1            0mA     122.58V 0.00W   0.00kWh
+Potting Bench/Bench light 2            0mA     122.69V 0.00W   0.00kWh
+Potting Bench/Heat mat                 0mA     122.71V 0.00W   0.00kWh
+Potting Bench/Sewing machine           0mA     122.88V 0.00W   0.46kWh
+Potting Bench/Unused                   0mA     122.84V 0.00W   0.00kWh
+Tea Kettle                             0mA     122.57V 0.00W   0.12kWh
+Frog Tank/Unused                       0mA     122.68V 0.00W   0.09kWh
+Frog Tank/Unused                       0mA     123.96V 0.00W   0.07kWh
+Frog Tank/UV                           0mA     123.33V 0.00W   0.11kWh
+Frog Tank/Incandescent                 0mA     123.17V 0.00W   0.24kWh
+Frog Tank/Grow light                   0mA     123.35V 0.00W   0.00kWh
+Frog Tank/Heater                       0mA     123.02V 0.00W   0.00kWh
+Plant Shelf 2/Primary                  0mA     123.34V 0.00W   0.01kWh
+Plant Shelf 2/Secondary                0mA     123.40V 0.00W   0.40kWh
+Plant Shelf 2/Spotlight                0mA     123.81V 0.00W   0.06kWh
+Plant Shelf 2/Plug 4                   0mA     123.39V 0.00W   0.00kWh
+Plant Shelf 2/Plug 5                   0mA     123.10V 0.00W   0.00kWh
+Plant Shelf 2/Plug 6                   0mA     123.44V 0.00W   0.00kWh
+Garage/Battery charger 1               13mA    122.65V 0.70W   0.01kWh
+Garage/Battery charger 2               0mA     123.44V 0.00W   0.00kWh
+Garage/Battery charger 3               0mA     123.63V 0.00W   0.00kWh
+Garage/Unused                          0mA     123.59V 0.00W   0.00kWh
+Garage/Hot plate                       0mA     123.07V 0.00W   0.00kWh
+Garage/Condenser pump                  0mA     123.51V 0.00W   0.00kWh
+Plant Shelf 1/Primary                  0mA     123.40V 0.00W   0.40kWh
+Plant Shelf 1/Secondary                0mA     123.47V 0.00W   0.00kWh
+Plant Shelf 1/Spotlight                0mA     123.60V 0.00W   0.06kWh
+Plant Shelf 1/Plug 4                   0mA     122.44V 0.00W   0.00kWh
+Plant Shelf 1/Plug 5                   0mA     123.51V 0.00W   0.00kWh
+Plant Shelf 1/Plug 6                   0mA     123.44V 0.00W   0.00kWh
+Total House                            2129mA          212.76W 3.32kWh```
 
 Get daily stats for a month (Feb)
 ```
@@ -278,90 +369,6 @@ Get daily stats for a month (March) on a multi-plug strip
 2026-03-30:	0Wh
 	Plug Total:	0Wh
 	Strip Total:	44244Wh
-```
-
-Emeter status on multi-plug power-strip
- ```
- % kasa emeter 192.168.100.27   
-[1]	Current:	39mA	Voltage:	125.12V	Power:	2.83W	Total:	0.15kWh
-[2]	Current:	329mA	Voltage:	124.92V	Power:	23.10W	Total:	2.29kWh
-[3]	Current:	187mA	Voltage:	125.06V	Power:	9.88W	Total:	0.60kWh
-[4]	Current:	32mA	Voltage:	125.08V	Power:	1.72W	Total:	0.46kWh
-[5]	Current:	0mA	Voltage:	125.00V	Power:	0.00W	Total:	0.00kWh
-[6]	Current:	0mA	Voltage:	125.24V	Power:	0.00W	Total:	0.00kWh
-Total	Current:	587mA	Power:	37.52W
-```
-
-Every active emeter device
-```
- % kasa getallemeter
-[Counter Fish Tank]                                                               
-[C00]                       Current: 0mA    Voltage: 123.36V Power: 0.00W  Today: 2.71kWh
-[C01]                       Current: 153mA  Voltage: 123.32V Power: 7.36W  Today: 14.90kWh
-[C02]                       Current: 0mA    Voltage: 123.39V Power: 0.00W  Today: 0.00kWh
-[C03]                       Current: 0mA    Voltage: 123.20V Power: 0.00W  Today: 0.00kWh
-[C04]                       Current: 0mA    Voltage: 123.22V Power: 0.00W  Today: 1.13kWh
-[C05]                       Current: 15mA   Voltage: 123.28V Power: 0.78W  Today: 18.14kWh
-Total                       Current: 168mA                   Power: 8.13W  Total: 36.88kWh
-[Living Room Entertainment]                                                       
-[1]                         Current: 0mA    Voltage: 123.35V Power: 0.00W  Today: 0.41kWh
-[2]                         Current: 348mA  Voltage: 123.17V Power: 22.32W Today: 5.59kWh
-[3]                         Current: 0mA    Voltage: 123.29V Power: 0.00W  Today: 1.28kWh
-[4]                         Current: 34mA   Voltage: 123.36V Power: 1.71W  Today: 1.36kWh
-[5]                         Current: 0mA    Voltage: 123.26V Power: 0.00W  Today: 0.00kWh
-[6]                         Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.00kWh
-Total                       Current: 382mA                   Power: 24.03W Total: 8.64kWh
-[Plant Stand 2]                                                                   
-[Plug 1]                    Current: 0mA    Voltage: 122.70V Power: 0.00W  Today: 0.00kWh
-[Plug 2]                    Current: 0mA    Voltage: 122.76V Power: 0.00W  Today: 0.00kWh
-[Plug 3]                    Current: 0mA    Voltage: 123.14V Power: 0.00W  Today: 0.00kWh
-[Plug 4]                    Current: 121mA  Voltage: 122.72V Power: 9.01W  Today: 1.63kWh
-[Plug 5]                    Current: 0mA    Voltage: 122.46V Power: 0.00W  Today: 0.01kWh
-[Plug 6]                    Current: 518mA  Voltage: 122.81V Power: 59.20W Today: 10.27kWh
-Total                       Current: 639mA                   Power: 68.21W Total: 11.91kWh
-[Conservatory AV]                                                                 
-[B00]                       Current: 0mA    Voltage: 122.88V Power: 0.00W  Today: 0.18kWh
-[B01]                       Current: 0mA    Voltage: 123.14V Power: 0.00W  Today: 0.00kWh
-[B02]                       Current: 74mA   Voltage: 123.24V Power: 4.79W  Today: 5.16kWh
-[B03]                       Current: 280mA  Voltage: 123.24V Power: 32.88W Today: 4.36kWh
-[B04]                       Current: 0mA    Voltage: 123.95V Power: 0.00W  Today: 0.07kWh
-[B05]                       Current: 0mA    Voltage: 123.42V Power: 0.00W  Today: 1.27kWh
-Total                       Current: 354mA                   Power: 37.67W Total: 11.04kWh
-[Potting Bench]                                                                   
-[A00]                       Current: 0mA    Voltage: 121.91V Power: 0.00W  Today: 0.00kWh
-[A01]                       Current: 0mA    Voltage: 121.93V Power: 0.00W  Today: 0.00kWh
-[A02]                       Current: 0mA    Voltage: 122.00V Power: 0.00W  Today: 0.00kWh
-[A03]                       Current: 0mA    Voltage: 122.01V Power: 0.00W  Today: 0.00kWh
-[A04]                       Current: 287mA  Voltage: 122.16V Power: 34.81W Today: 8.49kWh
-[A05]                       Current: 0mA    Voltage: 122.04V Power: 0.00W  Today: 1.88kWh
-Total                       Current: 287mA                   Power: 34.81W Total: 10.36kWh
-[Unused Plug]                                                                     
-                            Current: 0mA    Voltage: 122.56V Power: 0.00W  Today: 0.00kWh
-[Plant Stand 1]                                                                   
-[Plug 1]                    Current: 0mA    Voltage: 122.73V Power: 0.00W  Today: 0.00kWh
-[Plug 2]                    Current: 0mA    Voltage: 122.81V Power: 0.00W  Today: 0.00kWh
-[Plug 3]                    Current: 0mA    Voltage: 122.94V Power: 0.00W  Today: 0.00kWh
-[Plug 4]                    Current: 122mA  Voltage: 121.78V Power: 8.96W  Today: 0.67kWh
-[Plug 5]                    Current: 0mA    Voltage: 122.89V Power: 0.00W  Today: 0.00kWh
-[Plug 6]                    Current: 519mA  Voltage: 122.82V Power: 59.41W Today: 4.41kWh
-Total                       Current: 641mA                   Power: 68.37W Total: 5.07kWh
-[Garage]                                                                          
-[800]                       Current: 14mA   Voltage: 122.62V Power: 0.67W  Today: 0.50kWh
-[801]                       Current: 0mA    Voltage: 123.35V Power: 0.00W  Today: 0.05kWh
-[802]                       Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.18kWh
-[803]                       Current: 0mA    Voltage: 123.47V Power: 0.00W  Today: 0.13kWh
-[804]                       Current: 0mA    Voltage: 122.98V Power: 0.00W  Today: 0.00kWh
-[805]                       Current: 0mA    Voltage: 123.43V Power: 0.00W  Today: 0.00kWh
-Total                       Current: 14mA                    Power: 0.67W  Total: 0.86kWh
-[Frog Tank]                                                                       
-[800]                       Current: 74mA   Voltage: 122.85V Power: 8.75W  Today: 1.89kWh
-[801]                       Current: 0mA    Voltage: 124.11V Power: 0.00W  Today: 1.26kWh
-[802]                       Current: 0mA    Voltage: 123.49V Power: 0.00W  Today: 3.83kWh
-[803]                       Current: 0mA    Voltage: 123.33V Power: 0.00W  Today: 5.25kWh
-[804]                       Current: 0mA    Voltage: 123.50V Power: 0.00W  Today: 0.00kWh
-[805]                       Current: 0mA    Voltage: 123.17V Power: 0.00W  Today: 0.00kWh
-Total                       Current: 74mA                    Power: 8.75W  Total: 12.24kWh
-Total House                 Current: 2559mA                  Power: 97.00W Total: 0.00kWh
 ```
 
 Get Countdown Rules (needs to be prettier)
