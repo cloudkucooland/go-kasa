@@ -32,11 +32,12 @@ var allemeter = &cli.Command{
 	Usage: "get emeter stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		defer cancel()
+
 		m, err := kasa.BroadcastEmeter(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		defer cancel()
 
 		var d []DimmerResult
 		var mu sync.Mutex

@@ -13,11 +13,12 @@ const repeats = 1
 
 func queryall(ctx context.Context, results chan emeterdata) error {
 	bctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	m, err := kasa.BroadcastEmeter(bctx, repeats)
 	if err != nil {
 		return err
 	}
-	defer cancel()
 
 	var wg sync.WaitGroup
 

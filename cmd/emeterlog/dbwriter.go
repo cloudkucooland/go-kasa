@@ -23,12 +23,12 @@ func setupdb(ctx context.Context, cmd *cli.Command) error {
 	var err error
 
 	if h := os.Getenv("INFLUX_HOST"); h != "" {
-		emlog.InfoContext(ctx, "INFLUX_HOST", h)
+		emlog.InfoContext(ctx, "INFLUX_HOST", "value", h)
 	} else {
 		emlog.InfoContext(ctx, "INFLUX_HOST not set")
 	}
 	if d := os.Getenv("INFLUX_DATABASE"); d != "" {
-		emlog.InfoContext(ctx, "INFLUX_DATABASE", d)
+		emlog.InfoContext(ctx, "INFLUX_DATABASE", "value", d)
 	} else {
 		emlog.InfoContext(ctx, "INFLUX_DATABASE not set")
 	}

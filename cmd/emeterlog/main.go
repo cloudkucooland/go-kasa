@@ -38,6 +38,6 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := cmd.Run(ctx, os.Args); err != nil {
-		emlog.Error("error", err.Error())
+		emlog.Error("error", "error", err.Error())
 	}
 }

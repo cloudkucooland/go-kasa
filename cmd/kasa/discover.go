@@ -18,11 +18,13 @@ var discover = &cli.Command{
 	Usage: "discover local devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		defer cancel()
+
 		m, err := kasa.BroadcastDiscovery(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		defer cancel()
+		// fmt.Fprintf(os.Stderr, "found %d devices\n", len(m))
 
 		return formatOutput(cmd, m, func() {
 			keys := make([]string, 0, len(m))
@@ -49,8 +51,6 @@ var discover = &cli.Command{
 			}
 			tabwrite.Flush()
 		})
-		fmt.Fprintf(os.Stderr, "found %d devices\n", len(m))
-		return nil
 	},
 }
 

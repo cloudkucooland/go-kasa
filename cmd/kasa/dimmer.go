@@ -62,7 +62,6 @@ var dimmer = &cli.Command{
 			fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", "", k.IP, res.MinThreshold, res.FadeOnTime, res.FadeOffTime, res.GentleOnTime, res.GentleOffTime, res.RampRate)
 			tabwrite.Flush()
 		})
-		return nil
 	},
 }
 
@@ -77,11 +76,12 @@ var alldimmer = &cli.Command{
 	Usage: "get dimmer status for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
+		defer cancel()
+
 		m, err := kasa.BroadcastDimmerParameters(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		defer cancel()
 
 		var results []dimmerResult
 		var mu sync.Mutex

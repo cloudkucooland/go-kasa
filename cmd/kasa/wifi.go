@@ -69,11 +69,12 @@ var allwifi = &cli.Command{
 	Usage: "get wifi stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(context.Background(), time.Duration(cmd.Int("timeout"))*time.Second)
+		defer cancel()
+
 		m, err := kasa.BroadcastWifiParameters(bctx, int(cmd.Int("repeats")))
 		if err != nil {
 			return err
 		}
-		defer cancel()
 
 		w := make([]ws, 0)
 		var mu sync.Mutex
