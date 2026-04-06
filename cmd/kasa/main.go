@@ -140,12 +140,12 @@ func main() {
 					&cli.StringArg{Name: "state"},
 				},
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					b, err := strconv.ParseBool(cmd.String("state"))
+					b, err := strconv.ParseBool(cmd.StringArg("state"))
 					if err != nil {
 						return err
 					}
 					k := ctx.Value("kasaDev").(*kasa.Device)
-					child := cmd.String("child")
+					child := cmd.StringArg("child")
 					if child != "" {
 						return k.SetRelayStateChildCtx(ctx, child, b)
 					}

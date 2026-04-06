@@ -149,7 +149,7 @@ var emeter = &cli.Command{
 		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		if month == 0 {
 			fmt.Fprintf(tabwrite, "Device\tCurrent\t%s\tPower\tSince Reset\n", color.GreenString("Voltage"))
-			child := cmd.String("child")
+			child := cmd.StringArg("child")
 			if child == "" {
 				var ma uint
 				var w, twh float64

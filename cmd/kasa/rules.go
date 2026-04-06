@@ -27,7 +27,7 @@ var addcountdown = &cli.Command{
 		if dur < 1 || dur > 3600 {
 			return fmt.Errorf("invalid duration (1-3600)")
 		}
-		b, err := strconv.ParseBool(cmd.String("target"))
+		b, err := strconv.ParseBool(cmd.StringArg("target"))
 		if err != nil {
 			return err
 		}
@@ -83,6 +83,6 @@ var setmode = &cli.Command{
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
-		return k.SetModeCtx(ctx, cmd.String("mode"))
+		return k.SetModeCtx(ctx, cmd.StringArg("mode"))
 	},
 }

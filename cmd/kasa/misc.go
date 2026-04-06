@@ -48,7 +48,7 @@ var ledoff = &cli.Command{
 		&cli.StringArg{Name: "state"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		b, err := strconv.ParseBool(cmd.String("state"))
+		b, err := strconv.ParseBool(cmd.StringArg("state"))
 		if err != nil {
 			return err
 		}
@@ -82,11 +82,13 @@ var alias = &cli.Command{
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
-		child := cmd.String("child")
+
+		child := cmd.StringArg("child")
 		if child != "" {
-			return k.SetChildAliasCtx(ctx, child, cmd.String("newname"))
+			return k.SetChildAliasCtx(ctx, child, cmd.StringArg("newname"))
 		}
-		return k.SetAlias(cmd.String("newname"))
+
+		return k.SetAlias(cmd.StringArg("newname"))
 	},
 }
 
@@ -101,6 +103,6 @@ var raw = &cli.Command{
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
-		return k.SendRawCommandCtx(ctx, cmd.String("command"))
+		return k.SendRawCommandCtx(ctx, cmd.StringArg("command"))
 	},
 }

@@ -27,7 +27,7 @@ var setwifi = &cli.Command{
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		k := ctx.Value("kasaDev").(*kasa.Device)
-		_, err := k.SetWIFICtx(ctx, cmd.String("ssid"), cmd.String("key"))
+		_, err := k.SetWIFICtx(ctx, cmd.StringArg("ssid"), cmd.StringArg("key"))
 		return err
 	},
 }
