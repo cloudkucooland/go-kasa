@@ -391,6 +391,11 @@ kasa nocloud 192.168.0.1
 kasa setwifi 192.168.0.1 "MySecureSSID" "securenetpw!"
 ```
 
+Run the json output through jq
+```
+ % kasa -j emeter | jq '.[] | {alias: .alias, active: [.Realtime[] | select(.power_mw > 0) | {outlet: .alias, watts: (.power_mw/1000)}]}}
+```
+
 ===
 
 
