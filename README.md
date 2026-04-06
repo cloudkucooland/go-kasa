@@ -224,7 +224,8 @@ Plant Shelf 1/Spotlight                0mA     123.60V 0.00W   0.06kWh
 Plant Shelf 1/Plug 4                   0mA     122.44V 0.00W   0.00kWh
 Plant Shelf 1/Plug 5                   0mA     123.51V 0.00W   0.00kWh
 Plant Shelf 1/Plug 6                   0mA     123.44V 0.00W   0.00kWh
-Total House                            2129mA          212.76W 3.32kWh```
+Total House                            2129mA          212.76W 3.32kWh
+```
 
 Get daily stats for a month (Feb)
 ```
