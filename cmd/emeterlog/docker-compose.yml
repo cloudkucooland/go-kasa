@@ -26,10 +26,11 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     container_name: grafana
-    network_mode: "host" 
+    network_mode: "host"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=password1234
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_LOG_LEVEL=warn
 
   emeter-logger:
     build:
