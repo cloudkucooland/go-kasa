@@ -14,6 +14,7 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 		return d.OverrideTCP(ctx, cmd)
 	}
 
+	// is this needed if we do it on the connection based on ctx?
 	dialer := &net.Dialer{
 		Timeout:  1 * time.Second,
 		Deadline: time.Now().Add(2 * time.Second),
@@ -27,7 +28,7 @@ func (d *Device) sendTCP(ctx context.Context, cmd string) ([]byte, error) {
 	defer conn.Close()
 
 	if d, ok := ctx.Deadline(); ok {
-		conn.SetDeadline(d)
+		_ = conn.SetDeadline(d)
 	}
 
 	// send the command with the uint32 "header"
