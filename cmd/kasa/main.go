@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -31,8 +32,12 @@ func main() {
 				Aliases: []string{"c"},
 			},
 			&cli.BoolFlag{
-				Name:    "debug",
-				Aliases: []string{"d"},
+				Name:    "json",
+				Aliases: []string{"j"},
+			},
+			&cli.BoolFlag{
+				Name:    "no-header",
+				Aliases: []string{"n"},
 			},
 			&cli.IntFlag{
 				Name:    "repeats",
@@ -70,6 +75,7 @@ func main() {
 					if err != nil {
 						return err
 					}
+
 					tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
 					fmt.Fprintf(tabwrite, "Alias:\t%s\n", s.Alias)
@@ -147,13 +153,13 @@ func main() {
 				},
 			},
 			alias,
-			getallemeter,
 			emeter,
-			getalldimmer,
-			getdimmer,
+			allemeter,
+			dimmer,
+			alldimmer,
 			brightness,
-			getallwifi,
-			wifistatus,
+			wifi,
+			allwifi,
 			setwifi,
 			setfadeontime,
 			setfadeofftime,
@@ -165,10 +171,10 @@ func main() {
 			ledoff,
 			addcountdown,
 			cleancountdown,
-			getcountdown,
+			countdown,
 			setmode,
-			getlightsensorbrightness,
-			getlightsensorconfig,
+			lightsensorbrightness,
+			lightsensorconfig,
 			raw,
 		},
 	}
@@ -176,14 +182,21 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 	if err := cmd.Run(ctx, os.Args); err != nil {
+		if cmd.Bool("json") {
+			status := map[string]any{"success": false, "error": err.Error()}
+			json.NewEncoder(os.Stdout).Encode(status)
+		}
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
+	/* if cmd.Bool("json") {
+		status := map[string]any{"success": true}
+		json.NewEncoder(os.Stdout).Encode(status)
+	} */
 }
 
 func RequireDevice(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 	host := cmd.Args().Get(0)
-
 	if host == "" {
 		return ctx, fmt.Errorf("host argument is required for this command")
 	}
@@ -192,8 +205,17 @@ func RequireDevice(ctx context.Context, cmd *cli.Command) (context.Context, erro
 	if err != nil {
 		return ctx, fmt.Errorf("failed to initialize device: %w", err)
 	}
-
 	k.Port = int(cmd.Int("port"))
 
 	return context.WithValue(ctx, "kasaDev", k), nil
+}
+
+func formatOutput(cmd *cli.Command, data any, pretty func()) error {
+	if cmd.Bool("json") {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(data)
+	}
+	pretty()
+	return nil
 }

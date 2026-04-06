@@ -49,7 +49,7 @@ var cleancountdown = &cli.Command{
 	},
 }
 
-var getcountdown = &cli.Command{
+var countdown = &cli.Command{
 	Name:      "getcountdown",
 	Usage:     "view countdown rules",
 	Before:    RequireDevice,

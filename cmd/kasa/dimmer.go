@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
+	"sync"
 	"text/tabwriter"
 	"time"
 
 	"github.com/cloudkucooland/go-kasa"
-
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 var brightness = &cli.Command{
@@ -36,38 +38,42 @@ var brightness = &cli.Command{
 	},
 }
 
-var getdimmer = &cli.Command{
-	Name:      "getdimmer",
+var dimmer = &cli.Command{
+	Name:      "dimmer",
 	Usage:     "check dimmer parameters",
-	ArgsUsage: "host",
+	ArgsUsage: "[host]",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
 		&cli.StringArg{Name: "host"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.StringArg("host") == "" {
-			return getalldimmer.Action(ctx, cmd)
-		}
-
-		nctx, err := RequireDevice(ctx, cmd)
-		if err != nil {
-			return err
-		}
-		k := nctx.Value("kasaDev").(*kasa.Device)
-		res, err := k.GetDimmerParametersCtx(nctx)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		res, err := k.GetDimmerParametersCtx(ctx)
 		if err != nil {
 			return err
 		}
 
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
-		fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", "", k.IP, res.MinThreshold, res.FadeOnTime, res.FadeOffTime, res.GentleOnTime, res.GentleOffTime, res.RampRate)
-		tabwrite.Flush()
+		return formatOutput(cmd, res, func() {
+			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+			if !cmd.Bool("no-header") {
+				fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
+			}
+			fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", "", k.IP, res.MinThreshold, res.FadeOnTime, res.FadeOffTime, res.GentleOnTime, res.GentleOffTime, res.RampRate)
+			tabwrite.Flush()
+		})
 		return nil
 	},
 }
 
-var getalldimmer = &cli.Command{
-	Name:  "getalldimmer",
+type dimmerResult struct {
+	Alias string `json:"alias"`
+	Host  string `json:"host"`
+	kasa.DimmerParameters
+}
+
+var alldimmer = &cli.Command{
+	Name:  "alldimmer",
 	Usage: "get dimmer status for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
@@ -77,25 +83,50 @@ var getalldimmer = &cli.Command{
 		}
 		defer cancel()
 
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-		fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
+		var results []dimmerResult
+		var mu sync.Mutex
+		g, gctx := errgroup.WithContext(ctx)
 
 		for k, v := range m {
-			if v.ErrCode == 0 {
-				kd, err := kasa.NewDevice(k)
-				if err != nil {
-					return err
+			h, i := k, v // shadow for closure
+			g.Go(func() error {
+				if i.ErrCode == 0 {
+					kd, err := kasa.NewDevice(h)
+					if err != nil {
+						return err
+					}
+					s, err := kd.GetSettingsCtx(gctx)
+					if err != nil {
+						return err
+					}
+					mu.Lock()
+					results = append(results, dimmerResult{
+						Alias:            s.Alias,
+						Host:             h,
+						DimmerParameters: *i,
+					})
+					mu.Unlock()
 				}
-				s, err := kd.GetSettingsCtx(ctx)
-				if err != nil {
-					return err
-				}
-
-				fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", s.Alias, k, v.MinThreshold, v.FadeOnTime, v.FadeOffTime, v.GentleOnTime, v.GentleOffTime, v.RampRate)
-			}
+				return nil
+			})
 		}
-		tabwrite.Flush()
-		return nil
+		g.Wait()
+
+		return formatOutput(cmd, results, func() {
+			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+			if !cmd.Bool("no-header") {
+				fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
+			}
+
+			sort.Slice(results, func(i, j int) bool {
+				return results[i].Alias < results[j].Alias
+			})
+
+			for _, v := range results {
+				fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", v.Alias, v.Host, v.MinThreshold, v.FadeOnTime, v.FadeOffTime, v.GentleOnTime, v.GentleOffTime, v.RampRate)
+			}
+			tabwrite.Flush()
+		})
 	},
 }
 

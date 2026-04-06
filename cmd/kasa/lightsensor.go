@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var getlightsensorbrightness = &cli.Command{
+var lightsensorbrightness = &cli.Command{
 	Name:      "ambient",
 	Usage:     "get ambient brightness",
 	UsageText: "kasa ambient host",
@@ -28,7 +28,7 @@ var getlightsensorbrightness = &cli.Command{
 	},
 }
 
-var getlightsensorconfig = &cli.Command{
+var lightsensorconfig = &cli.Command{
 	Name:      "lightsensor",
 	Usage:     "get light sensor config",
 	UsageText: "kasa lightsensor host",

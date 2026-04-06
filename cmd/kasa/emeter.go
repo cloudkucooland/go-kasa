@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
+	"sync"
 	"text/tabwriter"
 	"time"
 
@@ -11,14 +13,24 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
-var getallemeter = &cli.Command{
-	Name:  "getallemeter",
+type DimmerResult struct {
+	Host string `json:"host"`
+	kasa.Sysinfo
+	Realtime []Realtime
+}
+
+type Realtime struct {
+	kasa.Child
+	kasa.EmeterRealtime
+}
+
+var allemeter = &cli.Command{
+	Name:  "allemeter",
 	Usage: "get emeter stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-
 		bctx, cancel := context.WithTimeout(ctx, time.Duration(cmd.Int("timeout"))*time.Second)
 		m, err := kasa.BroadcastEmeter(bctx, int(cmd.Int("repeats")))
 		if err != nil {
@@ -26,69 +38,92 @@ var getallemeter = &cli.Command{
 		}
 		defer cancel()
 
-		fmt.Fprintf(tabwrite, "Device\tCurrent\t%s\tPower\tSince Reset\n", color.GreenString("Voltage"))
-		var tma, twh, tw uint // total MA, Wh, W and
+		var d []DimmerResult
+		var mu sync.Mutex
+		g, gctx := errgroup.WithContext(ctx)
+
 		for k, v := range m {
-			kd, err := kasa.NewDevice(k)
-			if err != nil {
-				return err
-			}
-			s, err := kd.GetSettingsCtx(ctx)
-			if err != nil {
-				continue
-			}
+			kk, vv := k, v
+			g.Go(func() error {
+				dr := DimmerResult{
+					Host: kk,
+				}
+				kd, err := kasa.NewDevice(kk)
+				if err != nil {
+					return err
+				}
 
-			if s.NumChildren > 0 {
-				fmt.Fprintf(tabwrite, "[%s]\t\t\t\t\t\n", s.Alias)
-				var ma, w, tsr uint
-				for _, c := range s.Children {
-					cv, err := kd.GetEmeterChildCtx(ctx, c.ID)
-					if err != nil {
-						continue
+				drs, err := kd.GetSettingsCtx(gctx)
+				if err != nil {
+					return err
+				}
+				dr.Sysinfo = *drs
+
+				if drs.NumChildren > 0 {
+					for _, c := range drs.Children {
+						drc, err := kd.GetEmeterChildCtx(gctx, c.ID)
+						if err != nil {
+							continue
+						}
+						dr.Realtime = append(dr.Realtime, Realtime{c, *drc})
 					}
+				} else {
+					dr.Realtime = append(dr.Realtime, Realtime{kasa.Child{}, vv.Emeter.Realtime})
+				}
+				mu.Lock()
+				d = append(d, dr)
+				mu.Unlock()
+				return nil
+			})
+		}
+		g.Wait()
 
-					fmt.Fprintf(tabwrite, "%s\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", c.Alias, cv.CurrentMA, colorVolts(cv.VoltageMV), float64(cv.PowerMW)/1000, float64(cv.TotalWH)/1000)
+		return formatOutput(cmd, d, func() {
+			sort.Slice(d, func(i, j int) bool {
+				return d[i].Alias < d[j].Alias
+			})
+
+			var tma, twh, tw uint // total MA, Wh, W and
+			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+			if !cmd.Bool("no-header") {
+				fmt.Fprintf(tabwrite, "Device\tCurrent\t%s\tPower\tSince Reset\n", color.GreenString("Voltage"))
+			}
+
+			for _, s := range d {
+				var ma, w, tsr uint
+				for _, cv := range s.Realtime {
+					displayName := s.Alias
+					if cv.Alias != "" {
+						displayName = fmt.Sprintf("%s/%s", s.Alias, cv.Alias)
+					}
+					fmt.Fprintf(tabwrite, "%s\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", displayName, cv.CurrentMA, colorVolts(cv.VoltageMV), float64(cv.PowerMW)/1000, float64(cv.TotalWH)/1000)
 					ma += cv.CurrentMA
 					w += cv.PowerMW
 					tsr += cv.TotalWH
 				}
-				fmt.Fprintf(tabwrite, "%s Total\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", s.Alias, ma, color.GreenString(" "), float64(w)/1000, float64(tsr)/1000)
 				tma += ma
 				twh += tsr
 				tw += w
-			} else {
-				fmt.Fprintf(tabwrite, "%s\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", s.Alias, v.Emeter.Realtime.CurrentMA, colorVolts(v.Emeter.Realtime.VoltageMV), float64(v.Emeter.Realtime.PowerMW)/1000, float64(v.Emeter.Realtime.TotalWH)/1000)
-				tma += v.Emeter.Realtime.CurrentMA
-				tw += v.Emeter.Realtime.PowerMW
-				twh += v.Emeter.Realtime.TotalWH
 			}
-		}
-		fmt.Fprintf(tabwrite, "Total House\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", tma, color.GreenString(" "), float64(tw)/1000, float64(twh)/1000)
-		tabwrite.Flush()
-		return nil
+			fmt.Fprintf(tabwrite, "Total House\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", tma, color.GreenString(" "), float64(tw)/1000, float64(twh)/1000)
+			tabwrite.Flush()
+		})
 	},
 }
 
 var emeter = &cli.Command{
 	Name:      "emeter",
 	Usage:     "check energy usage",
-	ArgsUsage: "host month year",
+	ArgsUsage: "[host] [month] [year]",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
 		&cli.StringArg{Name: "host"},
 		&cli.IntArg{Name: "month"},
 		&cli.IntArg{Name: "year"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.StringArg("host") == "" {
-			return getallemeter.Action(ctx, cmd)
-		}
-
-		nctx, err := RequireDevice(ctx, cmd)
-		if err != nil {
-			return err
-		}
-		k := nctx.Value("kasaDev").(*kasa.Device)
-		s, err := k.GetSettingsCtx(nctx)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		s, err := k.GetSettingsCtx(ctx)
 		if err != nil {
 			return err
 		}

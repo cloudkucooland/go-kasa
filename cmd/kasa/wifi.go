@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
+	"sync"
 	"text/tabwriter"
 	"time"
 
 	"github.com/cloudkucooland/go-kasa"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 var setwifi = &cli.Command{
@@ -29,37 +32,40 @@ var setwifi = &cli.Command{
 	},
 }
 
-var wifistatus = &cli.Command{
-	Name:      "wifistatus",
+var wifi = &cli.Command{
+	Name:      "wifi",
 	Usage:     "check device wifi status",
-	ArgsUsage: "host",
+	ArgsUsage: "[host]",
+	Before:    RequireDevice,
 	Arguments: []cli.Argument{
 		&cli.StringArg{Name: "host"},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.StringArg("host") == "" {
-			return getallwifi.Action(ctx, cmd)
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		res, err := k.GetWIFIStatusCtx(ctx)
+		if err != nil {
+			return err
 		}
 
-		nctx, err := RequireDevice(ctx, cmd)
-		if err != nil {
-			return err
-		}
-		k := nctx.Value("kasaDev").(*kasa.Device)
-		res, err := k.GetWIFIStatusCtx(nctx)
-		if err != nil {
-			return err
-		}
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
-		fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", "", k.IP, res.SSID, keyType(res.KeyType), colorRSSI(res.RSSI))
-		tabwrite.Flush()
-		return nil
+		return formatOutput(cmd, res, func() {
+			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			if !cmd.Bool("no-header") {
+				fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
+			}
+			fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", "", k.IP, res.SSID, keyType(res.KeyType), colorRSSI(res.RSSI))
+			tabwrite.Flush()
+		})
 	},
 }
 
-var getallwifi = &cli.Command{
-	Name:  "getallwifi",
+type ws struct {
+	Host    string
+	StaInfo *kasa.StaInfo
+	Sysinfo *kasa.Sysinfo
+}
+
+var allwifi = &cli.Command{
+	Name:  "allwifi",
 	Usage: "get wifi stats for all devices",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		bctx, cancel := context.WithTimeout(context.Background(), time.Duration(cmd.Int("timeout"))*time.Second)
@@ -69,38 +75,53 @@ var getallwifi = &cli.Command{
 		}
 		defer cancel()
 
-		tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		w := make([]ws, 0)
+		var mu sync.Mutex
+		g, gctx := errgroup.WithContext(ctx)
 
-		fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
-		for k, v := range m {
-			kd, err := kasa.NewDevice(k)
-			if err != nil {
-				return err
-			}
-			s, err := kd.GetSettingsCtx(ctx)
-			if err != nil {
-				continue
-			}
-
-			fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", s.Alias, k, v.SSID, keyType(v.KeyType), colorRSSI(v.RSSI))
+		for host, info := range m {
+			h, i := host, info // shadow for closure
+			g.Go(func() error {
+				kd, _ := kasa.NewDevice(h)
+				s, err := kd.GetSettingsCtx(gctx)
+				if err != nil {
+					return nil // skip if offline
+				}
+				mu.Lock()
+				w = append(w, ws{h, i, s})
+				mu.Unlock()
+				return nil
+			})
 		}
-		tabwrite.Flush()
-		return nil
+		g.Wait()
+
+		return formatOutput(cmd, w, func() {
+			sort.Slice(w, func(i, j int) bool {
+				return w[i].Sysinfo.Alias < w[j].Sysinfo.Alias
+			})
+
+			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			if !cmd.Bool("no-header") {
+				fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
+			}
+			for _, v := range w {
+				fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", v.Sysinfo.Alias, v.Host, v.StaInfo.SSID, keyType(v.StaInfo.KeyType), colorRSSI(v.StaInfo.RSSI))
+			}
+			tabwrite.Flush()
+		})
 	},
 }
 
 func colorRSSI(rssi int) string {
 	s := fmt.Sprintf("%ddB", rssi)
-	colored := ""
 	switch {
-	case rssi < -96.0:
-		colored = color.RedString(s)
-	case (rssi > -96.0 && rssi <= -85):
-		colored = color.YellowString(s)
+	case rssi <= -80:
+		return color.RedString(s)
+	case rssi <= -70:
+		return color.YellowString(s)
 	default:
-		colored = color.GreenString(s)
+		return color.GreenString(s)
 	}
-	return colored
 }
 
 func keyType(t int) string {
@@ -108,7 +129,7 @@ func keyType(t int) string {
 	case 3:
 		return color.GreenString("WPA3")
 	case 2:
-		return color.YellowString("WEP")
+		return color.YellowString("WPA2")
 	default:
 		return color.RedString("Unknown")
 	}
