@@ -77,7 +77,9 @@ var allemeter = &cli.Command{
 				return nil
 			})
 		}
-		g.Wait()
+		if err := g.Wait(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
 
 		return formatOutput(cmd, d, func() {
 			sort.Slice(d, func(i, j int) bool {
@@ -107,7 +109,7 @@ var allemeter = &cli.Command{
 				tw += w
 			}
 			fmt.Fprintf(tabwrite, "Total House\t%dmA\t%s\t%2.2fW\t%2.2fkWh\n", tma, color.GreenString(" "), float64(tw)/1000, float64(twh)/1000)
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }
@@ -182,7 +184,7 @@ var emeter = &cli.Command{
 				fmt.Fprintf(tabwrite, "%2.2fW\t", float64(em.PowerMW)/1000)
 				fmt.Fprintf(tabwrite, "%2.2fkWh\n", float64(em.TotalWH)/1000)
 			}
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 			return nil
 		}
 
@@ -213,7 +215,7 @@ var emeter = &cli.Command{
 				fmt.Fprintf(tabwrite, "%d-%02d-%02d:\t%dWh\n", v.Year, v.Month, v.Day, v.WH)
 			}
 		}
-		tabwrite.Flush()
+		_ = tabwrite.Flush()
 		return nil
 	},
 }

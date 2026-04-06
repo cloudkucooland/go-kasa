@@ -60,7 +60,7 @@ var dimmer = &cli.Command{
 				fmt.Fprintf(tabwrite, "Device\tIP\tMin\tFade On\tFade Off\tGentle On\tGentle Off\tRamp Rate\n")
 			}
 			fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", "", k.IP, res.MinThreshold, res.FadeOnTime, res.FadeOffTime, res.GentleOnTime, res.GentleOffTime, res.RampRate)
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }
@@ -110,7 +110,9 @@ var alldimmer = &cli.Command{
 				return nil
 			})
 		}
-		g.Wait()
+		if err := g.Wait(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
 
 		return formatOutput(cmd, results, func() {
 			tabwrite := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -125,7 +127,7 @@ var alldimmer = &cli.Command{
 			for _, v := range results {
 				fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", v.Alias, v.Host, v.MinThreshold, v.FadeOnTime, v.FadeOffTime, v.GentleOnTime, v.GentleOffTime, v.RampRate)
 			}
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }

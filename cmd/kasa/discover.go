@@ -49,7 +49,7 @@ var discover = &cli.Command{
 					}
 				}
 			}
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }

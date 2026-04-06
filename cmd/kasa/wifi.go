@@ -53,7 +53,7 @@ var wifi = &cli.Command{
 				fmt.Fprintf(tabwrite, "Device\tIP\tSSID\t%s\t%s\n", color.GreenString("Key Type"), color.GreenString("RSSI"))
 			}
 			fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", "", k.IP, res.SSID, keyType(res.KeyType), colorRSSI(res.RSSI))
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }
@@ -94,7 +94,9 @@ var allwifi = &cli.Command{
 				return nil
 			})
 		}
-		g.Wait()
+		if err := g.Wait(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
 
 		return formatOutput(cmd, w, func() {
 			sort.Slice(w, func(i, j int) bool {
@@ -108,7 +110,7 @@ var allwifi = &cli.Command{
 			for _, v := range w {
 				fmt.Fprintf(tabwrite, "%s\t%s\t%s\t%s\t%s\n", v.Sysinfo.Alias, v.Host, v.StaInfo.SSID, keyType(v.StaInfo.KeyType), colorRSSI(v.StaInfo.RSSI))
 			}
-			tabwrite.Flush()
+			_ = tabwrite.Flush()
 		})
 	},
 }

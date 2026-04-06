@@ -98,7 +98,7 @@ func main() {
 					} else {
 						fmt.Fprintf(tabwrite, "\t%d\t%d\n", s.RelayState, s.Brightness)
 					}
-					tabwrite.Flush()
+					_ = tabwrite.Flush()
 					return nil
 				},
 			},
@@ -126,7 +126,7 @@ func main() {
 					} else {
 						fmt.Fprintf(tabwrite, "%s\t\t%d\t%d\n", s.Alias, s.RelayState, s.Brightness)
 					}
-					tabwrite.Flush()
+					_ = tabwrite.Flush()
 					return nil
 				},
 			},
@@ -184,7 +184,7 @@ func main() {
 	if err := cmd.Run(ctx, os.Args); err != nil {
 		if cmd.Bool("json") {
 			status := map[string]any{"success": false, "error": err.Error()}
-			json.NewEncoder(os.Stdout).Encode(status)
+			_ = json.NewEncoder(os.Stdout).Encode(status)
 		}
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)

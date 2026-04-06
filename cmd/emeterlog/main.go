@@ -15,7 +15,7 @@ var emlog *slog.Logger
 func main() {
 	cmd := &cli.Command{
 		Name:      "emeterlog",
-		Version:   "v0.0.1",
+		Version:   "v0.5.0",
 		Copyright: "(c) 2026 Scot Bontrager",
 		Usage:     "log kasa emeter data to influxdb",
 		UsageText: "emeterlog",
@@ -23,9 +23,20 @@ func main() {
 		UseShortOptionHandling: true,
 		EnableShellCompletion:  true,
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "debug",
-				Aliases: []string{"d"},
+			&cli.IntFlag{
+				Name:    "repeats",
+				Aliases: []string{"r"},
+				Value: 1,
+			},
+			&cli.IntFlag{
+				Name:    "timeout",
+				Aliases: []string{"t"},
+				Value: 2,
+			},
+			&cli.IntFlag{
+				Name:    "pollrate",
+				Aliases: []string{"p"},
+				Value: 30,
 			},
 		},
 

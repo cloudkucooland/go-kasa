@@ -17,7 +17,22 @@ var startup = &cli.Command{
 		results := make(chan emeterdata, 100)
 		go startDBWriter(ctx, results)
 
-		ticker := time.NewTicker(30 * time.Second)
+		pollrate := cmd.Int("pollrate")
+		if pollrate <= 0 {
+			pollrate = 2
+		}
+
+		tt := cmd.Int("timeout")
+		if tt > 0 {
+			timeout = time.Duration(tt) * time.Second
+		}
+
+		rr := cmd.Int("repeats")
+		if rr > 0 {
+			repeats = rr
+		}
+
+		ticker := time.NewTicker(time.Duration(pollrate) * time.Second)
 
 		for {
 			select {

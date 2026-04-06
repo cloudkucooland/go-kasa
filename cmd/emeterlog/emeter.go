@@ -8,8 +8,8 @@ import (
 	"github.com/cloudkucooland/go-kasa"
 )
 
-const timeout = 2 * time.Second
-const repeats = 1
+var timeout = 2 * time.Second
+var repeats = 1
 
 func queryall(ctx context.Context, results chan emeterdata) error {
 	bctx, cancel := context.WithTimeout(ctx, timeout)

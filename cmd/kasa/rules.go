@@ -67,7 +67,7 @@ var countdown = &cli.Command{
 		for _, r := range res {
 			fmt.Fprintf(tabwrite, "%s\t%s\t%d\t%d\t%d\t%d\n", r.ID, r.Name, r.Enable, r.Delay, r.Active, r.Remaining)
 		}
-		tabwrite.Flush()
+		_ = tabwrite.Flush()
 		return nil
 	},
 }

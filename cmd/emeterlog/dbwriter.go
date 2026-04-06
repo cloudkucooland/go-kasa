@@ -49,7 +49,9 @@ func startDBWriter(ctx context.Context, r <-chan emeterdata) {
 	for {
 		select {
 		case <-ctx.Done():
-			client.WritePoints(context.Background(), batch.Emit())
+			if err := client.WritePoints(context.Background(), batch.Emit()); err != nil {
+				emlog.Error("influx shutdown write error", "err", err)
+			}
 			return
 		case v, ok := <-r:
 			if !ok {
