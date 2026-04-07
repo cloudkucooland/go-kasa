@@ -12,7 +12,7 @@ It uses UDP rather than TCP where possible for better performance.
 The CLI is robust and feature-rich, including JSON output. All the commands you need to manage your Kasa environment should be covered.
 
 ## CLI install
-Make sure you have Go version 1.18 or newer installed on your system. See [The Go install instructions](https://go.dev/doc/install) for details.
+Make sure you have Go version 1.25 or newer installed on your system. See [The Go install instructions](https://go.dev/doc/install) for details.
 
 In your shell (terminal on macOS, PowerShell on Windows, lots of options on Linux and UNIX systems...) 
 ``go install github.com/cloudkucooland/go-kasa/cmd/kasa@latest``
