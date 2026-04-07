@@ -217,7 +217,7 @@ func TestSendRawCommandCtx(t *testing.T) {
 		},
 	}
 
-	err := md.SendRawCommandCtx(context.Background(), "test")
+	_, err := md.SendRawCommandCtx(context.Background(), "test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
