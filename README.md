@@ -1,6 +1,7 @@
 [![LICENSE](https://img.shields.io/badge/license-BSD-green.svg)](LICENSE)
 [![GoReportCard](https://goreportcard.com/badge/cloudkucooland/go-kasa)](https://goreportcard.com/report/cloudkucooland/go-kasa)
 [![GoDoc](https://godoc.org/github.com/cloudkucooland/go-kasa?status.svg)](https://godoc.org/github.com/cloudkucooland/go-kasa)
+[![Go](https://github.com/cloudkucooland/go-kasa/actions/workflows/go.yml/badge.svg)](https://github.com/cloudkucooland/go-kasa/actions/workflows/go.yml)
 
 
 # go-kasa
