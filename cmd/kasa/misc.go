@@ -90,7 +90,7 @@ var alias = &cli.Command{
 			return fmt.Errorf("need a valid name")
 		}
 
-		child := cmd.StringArg("child")
+		child := cmd.String("child")
 		if child != "" {
 			fmt.Fprintf(os.Stderr, "using child %s", child)
 			return k.SetChildAliasCtx(ctx, child, nn)

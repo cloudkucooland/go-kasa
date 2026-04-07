@@ -321,39 +321,51 @@ func (d *Device) GetWIFIStatusCtx(ctx context.Context) (*StaInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ksta StaInfo
+
+	var ksta KasaDevice
 	if err := json.Unmarshal(res, &ksta); err != nil {
 		return nil, err
 	}
 
-	if err := ksta.KasaErr.OK(); err != nil {
+	if err := ksta.NetIf.StaInfo.KasaErr.OK(); err != nil {
 		return nil, err
 	}
 
-	return &ksta, nil
+	return &ksta.NetIf.StaInfo, nil
 }
 
 // SetWIFI configures the WiFi station info
-func (d *Device) SetWIFI(ssid string, key string) (*StaInfo, error) {
+func (d *Device) SetWIFI(ssid string, key string) (*SetStaInfo, error) {
 	return d.SetWIFICtx(context.Background(), ssid, key)
 }
 
-func (d *Device) SetWIFICtx(ctx context.Context, ssid string, key string) (*StaInfo, error) {
-	cmd := fmt.Sprintf(CmdWifiSetStainfo, ssid, key, 3)
+func (d *Device) SetWIFICtx(ctx context.Context, ssid string, key string) (*SetStaInfo, error) {
+	if ssid == "" {
+		return nil, fmt.Errorf("no ssid specified")
+	}
+	if key == "" {
+		return nil, fmt.Errorf("no key specified")
+	}
+
+	cmd := fmt.Sprintf(CmdWifiSetStainfo, ssid, key, 4)
 	res, err := d.sendTCP(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
-	var ksta StaInfo
+
+	var ksta KasaDevice
 	if err := json.Unmarshal(res, &ksta); err != nil {
 		return nil, err
 	}
 
-	if err := ksta.KasaErr.OK(); err != nil {
+	if err := ksta.NetIf.SetStaInfo.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+	if err := ksta.NetIf.KasaErr.OK(); err != nil {
 		return nil, err
 	}
 
-	return &ksta, nil
+	return &ksta.NetIf.SetStaInfo, nil
 }
 
 // GetDimmerParameters returns the dimmer parameters from dimmer-capable devices

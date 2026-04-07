@@ -35,7 +35,7 @@ var setwifi = &cli.Command{
 var wifi = &cli.Command{
 	Name:      "wifi",
 	Usage:     "check device wifi status",
-	ArgsUsage: "[host]",
+	ArgsUsage: "host",
 	Before:    RequireDevice,
 	Arguments: []cli.Argument{
 		&cli.StringArg{Name: "host"},
