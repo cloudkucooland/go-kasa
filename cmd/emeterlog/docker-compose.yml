@@ -5,6 +5,7 @@ services:
     network_mode: host
     volumes:
       - influxdb_data:/var/lib/influxdb2
+    restart: unless-stopped
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
@@ -12,6 +13,11 @@ services:
       - DOCKER_INFLUXDB_INIT_ORG=myhouse
       - DOCKER_INFLUXDB_INIT_BUCKET=energy
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-token-123
+    deploy:
+      resources:
+        limits:
+          memory: "1g"
+
 
   grafana:
     image: grafana/grafana:latest
@@ -22,6 +28,11 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=password1234
+      - GF_LOG_LEVEL=warn
+    deploy:
+      resources:
+        limits:
+          memory: "256m"
 
   emeter-logger:
     build:
@@ -36,6 +47,31 @@ services:
       - INFLUX_BUCKET=energy
       - INFLUX_DATABASE=energy
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: "16m"
+
+  envoy-logger:
+    build:
+      context: ../../../go-envoy
+      dockerfile: cmd/logger/Dockerfile
+    network_mode: host
+    volumes:
+      - ./envoy_data:/data
+    environment:
+      - INFLUX_HOST=http://localhost:8086
+      - INFLUX_URL=http://localhost:8086
+      - INFLUX_TOKEN=my-super-secret-token-123
+      - INFLUX_ORG=myhouse
+      - INFLUX_BUCKET=energy
+      - INFLUX_DATABASE=energy
+    restart: unless-stopped
+    command: ["./envoylog", "startup", "--token", "/data/envoy.jwt"]
+    deploy:
+      resources:
+        limits:
+          memory: "32m"
 
 volumes:
   influxdb_data:
