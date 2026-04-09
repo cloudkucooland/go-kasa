@@ -42,7 +42,7 @@ var startup = &cli.Command{
 			case <-ticker.C:
 				// drop any lingering attempts before the next tick
 				runCtx, cancel := context.WithTimeout(ctx, 25*time.Second)
-                defer cancel()
+				defer cancel()
 				if err := queryall(runCtx, results); err != nil {
 					emlog.Error("query error", "err", err)
 				}

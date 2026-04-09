@@ -26,17 +26,17 @@ func main() {
 			&cli.IntFlag{
 				Name:    "repeats",
 				Aliases: []string{"r"},
-				Value: 1,
+				Value:   1,
 			},
 			&cli.IntFlag{
 				Name:    "timeout",
 				Aliases: []string{"t"},
-				Value: 2,
+				Value:   2,
 			},
 			&cli.IntFlag{
 				Name:    "pollrate",
 				Aliases: []string{"p"},
-				Value: 30,
+				Value:   30,
 			},
 		},
 

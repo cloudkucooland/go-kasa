@@ -123,7 +123,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 22,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -196,6 +196,101 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Energy"
+          },
+          "query": "data = from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"emeter\" and r._field == \"PowerMW\")\n|> map(fn: (r) => ({ \n      r with \n      type: if r.alias =~ /.*total-consumption.*/ then \"total\" \n            else if r.alias =~ /.*production.*/ then \"exclude\"\n            else \"plug\",\n      unique_id: r.alias + \" (\" + r.device + \")\"\n    }))\n  |> filter(fn: (r) => r.type != \"exclude\")  |> group(columns: [\"type\", \"unique_id\"])\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)\n  |> fill(usePrevious: true)\n  |> group(columns: [\"_time\", \"type\"])\n  |> sum()\n  |> group(columns: [\"type\"])\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"type\"], valueColumn: \"_value\")\n\ndata\n  |> map(fn: (r) => ({\n      _time: r._time,\n      _field: \"Unaccounted Watts\",\n      _value: (float(v: if exists r.total then r.total else 0.0) - float(v: if exists r.plug then r.plug else 0.0)) / 1000.0\n    }))",
+          "refId": "A"
+        }
+      ],
+      "title": "Unaccounted for Power Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Energy"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "axisSoftMax": 1800,
             "axisSoftMin": 1,
             "barAlignment": 0,
@@ -248,10 +343,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 16,
-        "w": 22,
+        "h": 14,
+        "w": 24,
         "x": 0,
-        "y": 8
+        "y": 16
       },
       "id": 1,
       "options": {
@@ -274,11 +369,27 @@
             "type": "influxdb",
             "uid": "InfluxDB_Energy"
           },
-          "query": "import \"strings\"\n\ndata = from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"PowerMW\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ \n      r with \n      _value: float(v: r._value) / 1000.0\n    }))\n\ndata\n  |> map(fn: (r) => ({ \n      r with \n      _field: r.alias + \" (\" + strings.substring(v: r.device, start: 37, end: 40) + \")\"\n    }))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"individual_devices\")\n\ndata\n  |> group(columns: [\"_time\"]) \n  |> sum()\n  |> group()   \n  |> map(fn: (r) => ({ r with _field: \"TOTAL SYSTEM DRAW\" }))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> yield(name: \"total_draw\")",
+          "query": "from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"PowerMW\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 1000.0 }))\n  |> yield(name: \"watts\")",
           "refId": "A"
         }
       ],
       "title": "Watt of Power",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*alias=\"([^\"]+)\".*device=\".{37}(.{3})\".*",
+            "renamePattern": "$1 ($2)"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*alias=\"([^\"]+)\".*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
       "type": "timeseries"
     },
     {
@@ -344,9 +455,9 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 22,
+        "w": 24,
         "x": 0,
-        "y": 24
+        "y": 30
       },
       "id": 5,
       "options": {
@@ -365,193 +476,11 @@
       "pluginVersion": "12.4.2",
       "targets": [
         {
-          "query": "from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"VoltageMV\")\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 1000.0 }))\n  // No group() here means it stays split by 'alias'\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"per_device_avg\")",
+          "query": "from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"VoltageMV\")\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 1000.0 }))\n  |> map(fn: (r) => ({ r with _field: r.alias }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"per_device_avg\")",
           "refId": "A"
         }
       ],
-      "title": "New panel",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "InfluxDB_Energy"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 9,
-        "x": 0,
-        "y": 36
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "query": "from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"alias\"] == \"${Device}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"VoltageMV\" or r[\"_field\"] == \"CurrentMA\")\n  // Convert milli-units to base units\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 1000.0 }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"v_and_i\")",
-          "refId": "A"
-        }
-      ],
-      "title": "Currently Current",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "InfluxDB_Energy"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 14,
-        "x": 9,
-        "y": 36
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "query": "from(bucket: \"energy\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"emeter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"VoltageMV\" or r[\"_field\"] == \"CurrentMA\")\n  // Convert milli-units to base units\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 1000.0 }))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"v_and_i\")",
-          "refId": "A"
-        }
-      ],
-      "title": "Currently Everything",
+      "title": "Chaos Voltage View",
       "type": "timeseries"
     }
   ],
@@ -593,6 +522,6 @@
   "timezone": "browser",
   "title": "More Power!",
   "uid": "adh8jlx",
-  "version": 36,
+  "version": 2,
   "weekStart": ""
 }

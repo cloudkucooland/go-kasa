@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/InfluxCommunity/influxdb3-go/v2/influxdb3"
-	"github.com/InfluxCommunity/influxdb3-go/v2/influxdb3/batching"
+	"github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/cloudkucooland/go-kasa"
 	"github.com/urfave/cli/v3"
 )
@@ -17,62 +17,63 @@ type emeterdata struct {
 	R        *kasa.EmeterRealtime
 }
 
-var client *influxdb3.Client
+var (
+	client   influxdb2.Client
+	writeAPI api.WriteAPI
+)
 
 func setupdb(ctx context.Context, cmd *cli.Command) error {
-	var err error
+	host := os.Getenv("INFLUX_HOST")
+	token := os.Getenv("INFLUX_TOKEN")
+	org := os.Getenv("INFLUX_ORG")
+	bucket := os.Getenv("INFLUX_BUCKET")
 
-	if h := os.Getenv("INFLUX_HOST"); h != "" {
-		emlog.InfoContext(ctx, "INFLUX_HOST", "value", h)
-	} else {
-		emlog.InfoContext(ctx, "INFLUX_HOST not set")
-	}
-	if d := os.Getenv("INFLUX_DATABASE"); d != "" {
-		emlog.InfoContext(ctx, "INFLUX_DATABASE", "value", d)
-	} else {
-		emlog.InfoContext(ctx, "INFLUX_DATABASE not set")
-	}
+	emlog.InfoContext(ctx, "Setting up Kasa InfluxDB V2 Client", "host", host, "bucket", bucket)
 
-	client, err = influxdb3.NewFromEnv()
-	if err != nil {
-		return err
-	}
+	client = influxdb2.NewClient(host, token)
+	
+	// Use the async WriteAPI to handle batching automatically
+	writeAPI = client.WriteAPI(org, bucket)
+
+	// Log async errors
+	go func() {
+		for err := range writeAPI.Errors() {
+			emlog.Error("kasa influx write error", "err", err)
+		}
+	}()
 
 	return nil
 }
 
 func startDBWriter(ctx context.Context, r <-chan emeterdata) {
-	batch := batching.NewBatcher(batching.WithSize(80))
-
-	emlog.Info("DB Writer started")
+	emlog.Info("Kasa DB Writer started (V2 Downgrade)")
 
 	for {
 		select {
 		case <-ctx.Done():
-			if err := client.WritePoints(context.Background(), batch.Emit()); err != nil {
-				emlog.Error("influx shutdown write error", "err", err)
-			}
+			writeAPI.Flush()
+			client.Close()
 			return
 		case v, ok := <-r:
 			if !ok {
 				return
 			}
-			p := influxdb3.NewPoint("emeter",
-				map[string]string{"device": v.DeviceID, "alias": v.Alias},
-				map[string]any{
-					"slot":      v.R.Slot,
-					"VoltageMV": v.R.VoltageMV,
-					"CurrentMA": v.R.CurrentMA,
-					"PowerMW":   v.R.PowerMW,
+			
+			// Explicit uint64 casts ensure the 'u' suffix is added in Line Protocol
+			p := influxdb2.NewPoint("emeter",
+				map[string]string{
+					"device": v.DeviceID, 
+					"alias":  v.Alias,
+				},
+				map[string]interface{}{
+					"slot":      uint64(v.R.Slot),
+					"VoltageMV": uint64(v.R.VoltageMV),
+					"CurrentMA": uint64(v.R.CurrentMA),
+					"PowerMW":   uint64(v.R.PowerMW),
 				},
 				time.Now())
 
-			batch.Add(p)
-			if batch.Ready() {
-				if err := client.WritePoints(ctx, batch.Emit()); err != nil {
-					emlog.Error("influx write error", "err", err)
-				}
-			}
+			writeAPI.WritePoint(p)
 		}
 	}
 }
