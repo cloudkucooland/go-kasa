@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 )
 
 func boolToInt(b bool) int {
@@ -31,8 +30,24 @@ func (d *Device) SetRelayStateChild(childID string, newstate bool) error {
 }
 
 func (d *Device) SetRelayStateChildCtx(ctx context.Context, childID string, newstate bool) error {
-	cmd := fmt.Sprintf(CmdSetRelayStateChild, childID, boolToInt(newstate))
-	return d.sendUDP(ctx, cmd)
+	type cmd struct {
+		Context struct {
+			ChildIDs []string `json:"child_ids"`
+		} `json:"context"`
+		System struct {
+			SetRelayState struct {
+				State int `json:"state"`
+			} `json:"set_relay_state"`
+		} `json:"system"`
+	}
+	var c cmd
+	c.Context.ChildIDs = []string{childID}
+	c.System.SetRelayState.State = boolToInt(newstate)
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 // SetRelayStateChildMulti adjusts multiple relays on a multi-relay device
@@ -41,13 +56,24 @@ func (d *Device) SetRelayStateChildMulti(newstate bool, children ...string) erro
 }
 
 func (d *Device) SetRelayStateChildMultiCtx(ctx context.Context, newstate bool, children ...string) error {
-	quoted := make([]string, len(children))
-	for i, c := range children {
-		quoted[i] = `"` + c + `"`
+	type cmd struct {
+		Context struct {
+			ChildIDs []string `json:"child_ids"`
+		} `json:"context"`
+		System struct {
+			SetRelayState struct {
+				State int `json:"state"`
+			} `json:"set_relay_state"`
+		} `json:"system"`
 	}
-
-	cmd := fmt.Sprintf(CmdSetRelayStateChildMulti, strings.Join(quoted, ","), boolToInt(newstate))
-	return d.sendUDP(ctx, cmd)
+	var c cmd
+	c.Context.ChildIDs = children
+	c.System.SetRelayState.State = boolToInt(newstate)
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 func (d *Device) SendRawCommand(cmd string) ([]byte, error) {
@@ -185,9 +211,22 @@ func (d *Device) GetEmeterChild(child string) (*EmeterRealtime, error) {
 }
 
 func (d *Device) GetEmeterChildCtx(ctx context.Context, child string) (*EmeterRealtime, error) {
-	q := fmt.Sprintf(CmdGetEmeterChild, child)
+	type cmd struct {
+		Context struct {
+			ChildIDs []string `json:"child_ids"`
+		} `json:"context"`
+		Emeter struct {
+			GetRealtime struct{} `json:"get_realtime"`
+		} `json:"emeter"`
+	}
+	var c cmd
+	c.Context.ChildIDs = []string{child}
+	b, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
 
-	res, err := d.sendTCP(ctx, q)
+	res, err := d.sendTCP(ctx, string(b))
 	if err != nil {
 		return nil, err
 	}
@@ -209,9 +248,27 @@ func (d *Device) GetEmeterChildMonth(month int, year int, child string) (*Emeter
 }
 
 func (d *Device) GetEmeterChildMonthCtx(ctx context.Context, month int, year int, child string) (*EmeterDaystat, error) {
-	q := fmt.Sprintf(CmdGetEmeterMonthChild, child, month, year)
+	type cmd struct {
+		Context struct {
+			ChildIDs []string `json:"child_ids"`
+		} `json:"context"`
+		Emeter struct {
+			GetDaystat struct {
+				Month int `json:"month"`
+				Year  int `json:"year"`
+			} `json:"get_daystat"`
+		} `json:"emeter"`
+	}
+	var c cmd
+	c.Context.ChildIDs = []string{child}
+	c.Emeter.GetDaystat.Month = month
+	c.Emeter.GetDaystat.Year = year
+	b, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
 
-	res, err := d.sendTCP(ctx, q)
+	res, err := d.sendTCP(ctx, string(b))
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +278,7 @@ func (d *Device) GetEmeterChildMonthCtx(ctx context.Context, month int, year int
 		return nil, err
 	}
 
-	if err := kd.Emeter.Realtime.KasaErr.OK(); err != nil {
+	if err := kd.Emeter.DayStat.KasaErr.OK(); err != nil {
 		return nil, err
 	}
 
@@ -244,8 +301,22 @@ func (d *Device) EnableCloud(username, password string) error {
 }
 
 func (d *Device) EnableCloudCtx(ctx context.Context, username, password string) error {
-	cmd := fmt.Sprintf(CmdSetServerCreds, username, password)
-	return d.sendUDP(ctx, cmd)
+	type cmd struct {
+		CNCloud struct {
+			Bind struct {
+				Username string `json:"username"`
+				Password string `json:"password"`
+			} `json:"bind"`
+		} `json:"cnCloud"`
+	}
+	var c cmd
+	c.CNCloud.Bind.Username = username
+	c.CNCloud.Bind.Password = password
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 // Reboot instructs the device to reboot
@@ -273,8 +344,20 @@ func (d *Device) SetAlias(s string) error {
 }
 
 func (d *Device) SetAliasCtx(ctx context.Context, s string) error {
-	cmd := fmt.Sprintf(CmdDeviceAlias, s)
-	return d.sendUDP(ctx, cmd)
+	type cmd struct {
+		System struct {
+			SetDevAlias struct {
+				Alias string `json:"alias"`
+			} `json:"set_dev_alias"`
+		} `json:"system"`
+	}
+	var c cmd
+	c.System.SetDevAlias.Alias = s
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 // SetChildAlias sets the name of an individual relay on a multi-relay device, I don't think this works
@@ -283,8 +366,24 @@ func (d *Device) SetChildAlias(childID, s string) error {
 }
 
 func (d *Device) SetChildAliasCtx(ctx context.Context, childID, s string) error {
-	cmd := fmt.Sprintf(CmdChildAlias, childID, s)
-	return d.sendUDP(ctx, cmd)
+	type cmd struct {
+		Context struct {
+			ChildIDs []string `json:"child_ids"`
+		} `json:"context"`
+		System struct {
+			SetDevAlias struct {
+				Alias string `json:"alias"`
+			} `json:"set_dev_alias"`
+		} `json:"system"`
+	}
+	var c cmd
+	c.Context.ChildIDs = []string{childID}
+	c.System.SetDevAlias.Alias = s
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 // SetMode sets the target mode of the system
@@ -347,8 +446,25 @@ func (d *Device) SetWIFICtx(ctx context.Context, ssid string, key string) (*SetS
 		return nil, fmt.Errorf("no key specified")
 	}
 
-	cmd := fmt.Sprintf(CmdWifiSetStainfo, ssid, key, 4)
-	res, err := d.sendTCP(ctx, cmd)
+	type cmd struct {
+		NetIf struct {
+			SetStainfo struct {
+				SSID     string `json:"ssid"`
+				Password string `json:"password"`
+				KeyType  int    `json:"key_type"`
+			} `json:"set_stainfo"`
+		} `json:"netif"`
+	}
+	var c cmd
+	c.NetIf.SetStainfo.SSID = ssid
+	c.NetIf.SetStainfo.Password = key
+	c.NetIf.SetStainfo.KeyType = 4 // Defaulting to 4 as in original code
+	b, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := d.sendTCP(ctx, string(b))
 	if err != nil {
 		return nil, err
 	}
@@ -450,8 +566,26 @@ func (d *Device) AddCountdownRule(dur int, target bool, name string) error {
 }
 
 func (d *Device) AddCountdownRuleCtx(ctx context.Context, dur int, target bool, name string) error {
-	cmd := fmt.Sprintf(CmdAddCountdownRule, dur, boolToInt(target), name)
-	return d.sendUDP(ctx, cmd)
+	type cmd struct {
+		Countdown struct {
+			AddRule struct {
+				Enable int    `json:"enable"`
+				Delay  int    `json:"delay"`
+				Act    int    `json:"act"`
+				Name   string `json:"name"`
+			} `json:"add_rule"`
+		} `json:"count_down"`
+	}
+	var c cmd
+	c.Countdown.AddRule.Enable = 1
+	c.Countdown.AddRule.Delay = dur
+	c.Countdown.AddRule.Act = boolToInt(target)
+	c.Countdown.AddRule.Name = name
+	b, err := json.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return d.sendUDP(ctx, string(b))
 }
 
 func (d *Device) GetLightSensorConfig() (*LightSensorConfig, error) {
@@ -507,3 +641,4 @@ func (d *Device) GetCurrentBrightnessCtx(ctx context.Context) (uint, error) {
    CmdSetPIREnable         = `{"smartlife.iot.PIR":{"set_enable":{"enable":%d}}}`                // 0/1
    CmdSetPIRSensitivity    = `{"smartlife.iot.PIR":{"set_trigger_sens":{"index":%d,"value":%d}}}` // int, int (~decimeters)
 */
+
