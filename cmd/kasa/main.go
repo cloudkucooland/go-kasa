@@ -168,6 +168,22 @@ func main() {
 			reboot,
 			nocloud,
 			cloud,
+			cloudinfo,
+			sefinfo,
+			firmwarelist,
+			gettime,
+			gettimezone,
+			getsensorroutines,
+			deletesensorroutine,
+			getmanualaction,
+			setmanualaction,
+			getschedulerules,
+			deleteschedulerule,
+			deleteallschedulerules,
+			setscheduleenabled,
+			bulbstate,
+			bulbon,
+			bulboff,
 			ledoff,
 			addcountdown,
 			cleancountdown,
@@ -176,6 +192,11 @@ func main() {
 			lightsensorbrightness,
 			lightsensorconfig,
 			raw,
+			diagnose,
+			mcudiagnose,
+			onboarding,
+			btncheck,
+			testmode,
 		},
 	}
 
@@ -189,10 +210,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-	/* if cmd.Bool("json") {
-		status := map[string]any{"success": true}
-		json.NewEncoder(os.Stdout).Encode(status)
-	} */
 }
 
 func RequireDevice(ctx context.Context, cmd *cli.Command) (context.Context, error) {

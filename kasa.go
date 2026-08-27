@@ -90,11 +90,230 @@ type KasaDevice struct {
 	Countdown   Countdown   `json:"count_down"`
 	Emeter      EmeterSub   `json:"emeter"`
 	LightSensor LightSensor `json:"smartlife.iot.LAS"`
+	CNCloud     CNCloud     `json:"cnCloud"`
+	Time        Time        `json:"time"`
+	SensorTrig  SensorTrig  `json:"smartlife.iot.sensor_trigger"`
+	Schedule    Schedule    `json:"schedule"`
+	Bulb        Bulb        `json:"smartlife.iot.smartbulb.lightingservice"`
+	Debug       Diagnose    `json:"smartlife.common.debug"`
+}
+
+type Bulb struct {
+	State           LightState      `json:"get_light_state"`
+	PreferredState  PreferredState  `json:"get_preferred_state"`
+	DefaultBehavior DefaultBehavior `json:"get_default_behavior"`
+	Details         LightDetails    `json:"get_light_details"`
+	KasaErr
+}
+
+type LightState struct {
+	OnOff      int `json:"on_off"`
+	Brightness int `json:"brightness"`
+	Hue        int `json:"hue"`
+	Saturation int `json:"saturation"`
+	ColorTemp  int `json:"color_temp"`
+	KasaErr
+}
+
+type PreferredState struct {
+	Index      int `json:"index"`
+	Brightness int `json:"brightness"`
+	Hue        int `json:"hue"`
+	Saturation int `json:"saturation"`
+	ColorTemp  int `json:"color_temp"`
+	KasaErr
+}
+
+type DefaultBehavior struct {
+	SoftOn Behavior `json:"soft_on"`
+	HardOn Behavior `json:"hard_on"`
+	KasaErr
+}
+
+type Behavior struct {
+	Mode  string `json:"mode"`
+	Index int    `json:"index"`
+}
+
+type LightDetails struct {
+	Wattage   int `json:"wattage"`
+	Lumens    int `json:"lumens"`
+	BeamAngle int `json:"beam_angle"`
+	ColorTemp int `json:"color_temp"`
+	KasaErr
+}
+
+type Schedule struct {
+	Rules     GetSchedRules  `json:"get_rules"`
+	DayStat   SchedDayStat   `json:"get_daystat"`
+	MonthStat SchedMonthStat `json:"get_monthstat"`
+	KasaErr
+}
+
+type GetSchedRules struct {
+	RuleList []SchedRule `json:"rule_list"`
+	KasaErr
+}
+
+type SchedRule struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Enable   int    `json:"enable"`
+	Wday     []int  `json:"wday"`
+	STimeOpt int    `json:"stime_opt"`
+	SOffset  int    `json:"soffset"`
+	SMin     int    `json:"smin"`
+	ETimeOpt int    `json:"etime_opt"`
+	EOffset  int    `json:"eoffset"`
+	EMin     int    `json:"emin"`
+	Freq     int    `json:"frequency"`
+	Repeat   int    `json:"repeat"`
+	Year     int    `json:"year"`
+	Month    int    `json:"month"`
+	Day      int    `json:"day"`
+	Force    int    `json:"force"`
+	Duration int    `json:"duration"`
+	LastFor  int    `json:"lastFor"`
+}
+
+type SchedDayStat struct {
+	List []SchedDay `json:"day_list"`
+	KasaErr
+}
+
+type SchedDay struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
+	WH    int `json:"energy_wh"`
+}
+
+type SchedMonthStat struct {
+	List []SchedMonth `json:"month_list"`
+	KasaErr
+}
+
+type SchedMonth struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	WH    int `json:"energy_wh"`
+}
+
+type SensorTrig struct {
+	Routines GetRoutines `json:"get_weekday_routine"`
+	Manual   ManualAct   `json:"get_default_manual_action"`
+	KasaErr
+}
+
+type GetRoutines struct {
+	RoutineList []Routine `json:"routine_list"`
+	KasaErr
+}
+
+type Routine struct {
+	ID    string        `json:"id"`
+	Name  string        `json:"name"`
+	En    int           `json:"en"`
+	Wday  []int         `json:"wday"`
+	Array []RoutineItem `json:"array"`
+}
+
+type RoutineItem struct {
+	ST    int `json:"sT"`
+	ET    int `json:"eT"`
+	Clr   int `json:"clr"`
+	OnTT  int `json:"onTT"`
+	OffTT int `json:"offTT"`
+	OffWT int `json:"offWT"`
+}
+
+type ManualAct struct {
+	OffToS int `json:"offToS"`
+	KasaErr
+}
+
+type Time struct {
+	Time     TimeData     `json:"get_time"`
+	Timezone TimezoneData `json:"get_timezone"`
+	KasaErr
+}
+
+type TimeData struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Mday  int `json:"mday"`
+	Hour  int `json:"hour"`
+	Min   int `json:"min"`
+	Sec   int `json:"sec"`
+}
+
+type TimezoneData struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Mday  int `json:"mday"`
+	Hour  int `json:"hour"`
+	Min   int `json:"min"`
+	Sec   int `json:"sec"`
+}
+
+type CNCloud struct {
+	Info    CloudInfo    `json:"get_info"`
+	SefInfo SefInfo      `json:"get_sefinfo"`
+	FwList  FirmwareList `json:"get_intl_fw_list"`
+	KasaErr
+}
+
+type SefInfo struct {
+	SefServer     string `json:"sefServer"`
+	DefaultServer string `json:"defaultServer"`
+	CachedServer  string `json:"cachedServer"`
+	KasaErr
+}
+
+type CloudInfo struct {
+	Username string `json:"username"`
+	Server   string `json:"server"`
+	Bind     int    `json:"bind"`
+	KasaErr
+}
+
+type FirmwareList struct {
+	List []Firmware `json:"fw_list"`
+	KasaErr
+}
+
+type Firmware struct {
+	Ver string `json:"ver"`
+	Rel string `json:"rel"`
 }
 
 // GetSysinfo is defined by kasa devices
 type GetSysinfo struct {
-	Sysinfo Sysinfo `json:"get_sysinfo"`
+	Sysinfo    Sysinfo          `json:"get_sysinfo"`
+	BtnCheck   BtnCheckRes      `json:"get_btn_check_res,omitempty"`
+	TestMode   TestModeRes      `json:"get_test_mode,omitempty"`
+	Onboarding OnboardingStatus `json:"get_onboarding_status,omitempty"`
+	SetOnb     SetOnboarding    `json:"set_onboarding_status,omitempty"`
+}
+
+type BtnCheckRes struct {
+	ResetBtn  bool `json:"reset_btn"`
+	SwitchBtn bool `json:"switch_btn"`
+	KasaErr
+}
+
+type TestModeRes struct {
+	FactoryMode int `json:"factory_mode"`
+	KasaErr
+}
+
+type SetOnboarding struct {
+	KasaErr
+}
+
+type OnboardingStatus struct {
+	Value string `json:"value"`
+	KasaErr
 }
 
 // Sysinfo is defined by kasa devices
@@ -310,3 +529,53 @@ type PIRSensorConfig struct {
 }
 
 // { "smartlife.iot.PIR": { "get_config": { "enable": 1, "version": "1.0", "trigger_index": 1, "cold_time": 60000, "min_adc": 0, "max_adc": 4095, "array": [80, 50, 20, 0], "err_code": 0 } } }
+
+type Diagnose struct {
+	Status      DiagnoseStatus `json:"get_diagnose_status"`
+	MCUDiagnose MCUDiagnose    `json:"get_mcu_diagnose"`
+}
+
+type MCUDiagnose struct {
+	I2CTotalNum       int `json:"i2c_total_num"`
+	MCUI2CResetNum    int `json:"mcu_i2c_reset_num"`
+	MasterI2CAbnormal int `json:"master_i2c_abnormal_num"`
+	KasaErr
+}
+
+type DiagnoseStatus struct {
+	Result DiagnoseResult `json:"result"`
+	KasaErr
+}
+
+type DiagnoseResult struct {
+	Sysinfo  DiagnoseSysinfo  `json:"sysinfo"`
+	Wireless DiagnoseWireless `json:"wireless"`
+	Cloud    DiagnoseCloud    `json:"cloud"`
+}
+
+type DiagnoseSysinfo struct {
+	Uptime  int `json:"uptime"`
+	FreeMem int `json:"free_mem"`
+	RbtFlag int `json:"rbt_flag"`
+	Low     int `json:"low"`
+}
+
+type DiagnoseWireless struct {
+	RSSI                int    `json:"rssi"`
+	Channel             int    `json:"channel"`
+	SSID                string `json:"ssid"`
+	BSSID               string `json:"bssid"`
+	AuthType            int    `json:"auth_type"`
+	CipherType          int    `json:"cipherType"`
+	ReconnCount         int    `json:"reconn_count"`
+	MaxReconnTime       int    `json:"max_reconn_time"`
+	TotalDisconnectTime int    `json:"total_disconnect_time"`
+}
+
+type DiagnoseCloud struct {
+	SendFail  int `json:"send_fail"`
+	HbTimeout int `json:"hb_timeout"`
+	RecvEOF   int `json:"recv_eof"`
+	CloudFsm  int `json:"cloud_fsm"`
+	AccFsm    int `json:"acc_fsm"`
+}

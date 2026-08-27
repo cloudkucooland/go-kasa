@@ -157,6 +157,75 @@ func (d *Device) GetSettingsCtx(ctx context.Context) (*Sysinfo, error) {
 	return &kd.GetSysinfo.Sysinfo, nil
 }
 
+// GetBtnCheckRes gets the device button status
+func (d *Device) GetBtnCheckRes() (*BtnCheckRes, error) {
+	return d.GetBtnCheckResCtx(context.Background())
+}
+
+func (d *Device) GetBtnCheckResCtx(ctx context.Context) (*BtnCheckRes, error) {
+	res, err := d.sendTCP(ctx, CmdGetBtnCheckRes)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.GetSysinfo.BtnCheck.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.GetSysinfo.BtnCheck, nil
+}
+
+// GetTestMode gets the device test mode status
+func (d *Device) GetTestMode() (*TestModeRes, error) {
+	return d.GetTestModeCtx(context.Background())
+}
+
+func (d *Device) GetTestModeCtx(ctx context.Context) (*TestModeRes, error) {
+	res, err := d.sendTCP(ctx, CmdGetTestMode)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.GetSysinfo.TestMode.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.GetSysinfo.TestMode, nil
+}
+
+// GetOnboardingStatus returns onboarding status
+func (d *Device) GetOnboardingStatus() (*OnboardingStatus, error) {
+	return d.GetOnboardingStatusCtx(context.Background())
+}
+
+func (d *Device) GetOnboardingStatusCtx(ctx context.Context) (*OnboardingStatus, error) {
+	res, err := d.sendTCP(ctx, CmdGetOnboarding)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.GetSysinfo.Onboarding.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.GetSysinfo.Onboarding, nil
+}
+
 // GetEmeter returns emeter data from the device
 func (d *Device) GetEmeter() (*EmeterRealtime, error) {
 	return d.GetEmeterCtx(context.Background())
@@ -458,7 +527,7 @@ func (d *Device) SetWIFICtx(ctx context.Context, ssid string, key string) (*SetS
 	var c cmd
 	c.NetIf.SetStainfo.SSID = ssid
 	c.NetIf.SetStainfo.Password = key
-	c.NetIf.SetStainfo.KeyType = 4 // Defaulting to 4 as in original code
+	c.NetIf.SetStainfo.KeyType = 4
 	b, err := json.Marshal(c)
 	if err != nil {
 		return nil, err
@@ -632,13 +701,367 @@ func (d *Device) GetCurrentBrightnessCtx(ctx context.Context) (uint, error) {
 	return ls.GetBrightness.Value, nil
 }
 
-/*
-   CmdSetBrightnessLevel   = `{"smartlife.iot.LAS":{"set_brt_level":{"index":%d,"value":%d}}}` // int, int
-   CmdSetDarkIndex         = `{"smartlife.iot.LAS":{"set_dark_index":{"dark_index":%d}}}`        // int
-   CmdSetLightSensorEnable = `{"smartlife.iot.LAS":{"set_enable":{"enable":%d}}}`               // 0/1
-   CmdGetPIRConfig         = `{"smartlife.iot.PIR":{"get_config":{}}}`
-   CmdSetPIRColdTime       = `{"smartlife.iot.PIR":{"set_cold_time":{"cold_time":%d}}}`          // int
-   CmdSetPIREnable         = `{"smartlife.iot.PIR":{"set_enable":{"enable":%d}}}`                // 0/1
-   CmdSetPIRSensitivity    = `{"smartlife.iot.PIR":{"set_trigger_sens":{"index":%d,"value":%d}}}` // int, int (~decimeters)
-*/
+// GetCloudInfo returns cloud configuration data
+func (d *Device) GetCloudInfo() (*CloudInfo, error) {
+	return d.GetCloudInfoCtx(context.Background())
+}
 
+func (d *Device) GetCloudInfoCtx(ctx context.Context) (*CloudInfo, error) {
+	res, err := d.sendTCP(ctx, CmdGetCloudInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.CNCloud.Info.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.CNCloud.Info, nil
+}
+
+// GetSefInfo returns cloud SEF configuration data
+func (d *Device) GetSefInfo() (*SefInfo, error) {
+	return d.GetSefInfoCtx(context.Background())
+}
+
+func (d *Device) GetSefInfoCtx(ctx context.Context) (*SefInfo, error) {
+	res, err := d.sendTCP(ctx, CmdGetSefInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.CNCloud.SefInfo.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.CNCloud.SefInfo, nil
+}
+
+// SetOnboardingStatus sets onboarding status
+func (d *Device) SetOnboardingStatus(status string) error {
+	return d.SetOnboardingStatusCtx(context.Background(), status)
+}
+
+func (d *Device) SetOnboardingStatusCtx(ctx context.Context, status string) error {
+	res, err := d.sendTCP(ctx, fmt.Sprintf(CmdSetOnboarding, status))
+	if err != nil {
+		return err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return err
+	}
+
+	return kd.GetSysinfo.SetOnb.KasaErr.OK()
+}
+
+// GetDiagnoseStatus returns diagnose status
+func (d *Device) GetDiagnoseStatus() (*DiagnoseResult, error) {
+	return d.GetDiagnoseStatusCtx(context.Background())
+}
+
+func (d *Device) GetDiagnoseStatusCtx(ctx context.Context) (*DiagnoseResult, error) {
+	res, err := d.sendTCP(ctx, CmdGetDebug)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Debug.Status.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Debug.Status.Result, nil
+}
+
+// GetMCUDiagnose returns mcu diagnose status
+func (d *Device) GetMCUDiagnose() (*MCUDiagnose, error) {
+	return d.GetMCUDiagnoseCtx(context.Background())
+}
+
+func (d *Device) GetMCUDiagnoseCtx(ctx context.Context) (*MCUDiagnose, error) {
+	res, err := d.sendTCP(ctx, CmdGetMCUDiagnose)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Debug.MCUDiagnose.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Debug.MCUDiagnose, nil
+}
+
+// GetFirmwareList returns available firmware updates
+func (d *Device) GetFirmwareList() ([]Firmware, error) {
+	return d.GetFirmwareListCtx(context.Background())
+}
+
+func (d *Device) GetFirmwareListCtx(ctx context.Context) ([]Firmware, error) {
+	res, err := d.sendTCP(ctx, CmdGetIntlFwList)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.CNCloud.FwList.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return kd.CNCloud.FwList.List, nil
+}
+
+// GetTime returns the current device time
+func (d *Device) GetTime() (*TimeData, error) {
+	return d.GetTimeCtx(context.Background())
+}
+
+func (d *Device) GetTimeCtx(ctx context.Context) (*TimeData, error) {
+	res, err := d.sendTCP(ctx, CmdGetTime)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Time.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Time.Time, nil
+}
+
+// GetTimezone returns the current device timezone configuration
+func (d *Device) GetTimezone() (*TimezoneData, error) {
+	return d.GetTimezoneCtx(context.Background())
+}
+
+func (d *Device) GetTimezoneCtx(ctx context.Context) (*TimezoneData, error) {
+	res, err := d.sendTCP(ctx, CmdGetTimezone)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Time.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Time.Timezone, nil
+}
+
+// SetTimezone sets the device time
+func (d *Device) SetTimezone(year, month, mday, hour, min, sec int) error {
+	return d.SetTimezoneCtx(context.Background(), year, month, mday, hour, min, sec)
+}
+
+func (d *Device) SetTimezoneCtx(ctx context.Context, year, month, mday, hour, min, sec int) error {
+	cmd := fmt.Sprintf(CmdSetTimezone, year, month, mday, hour, min, sec)
+	return d.sendUDP(ctx, cmd)
+}
+
+// GetSensorRoutines returns all routines
+func (d *Device) GetSensorRoutines() ([]Routine, error) {
+	return d.GetSensorRoutinesCtx(context.Background())
+}
+
+func (d *Device) GetSensorRoutinesCtx(ctx context.Context) ([]Routine, error) {
+	res, err := d.sendTCP(ctx, CmdGetSensorRoutine)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.SensorTrig.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return kd.SensorTrig.Routines.RoutineList, nil
+}
+
+// DeleteSensorRoutine removes a routine by ID
+func (d *Device) DeleteSensorRoutine(id string) error {
+	return d.DeleteSensorRoutineCtx(context.Background(), id)
+}
+
+func (d *Device) DeleteSensorRoutineCtx(ctx context.Context, id string) error {
+	cmd := fmt.Sprintf(CmdDeleteSensorRoutine, id)
+	return d.sendUDP(ctx, cmd)
+}
+
+// GetDefaultManualAction returns the default action configuration
+func (d *Device) GetDefaultManualAction() (int, error) {
+	return d.GetDefaultManualActionCtx(context.Background())
+}
+
+func (d *Device) GetDefaultManualActionCtx(ctx context.Context) (int, error) {
+	res, err := d.sendTCP(ctx, CmdGetDefaultManualAction)
+	if err != nil {
+		return 0, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return 0, err
+	}
+
+	if err := kd.SensorTrig.KasaErr.OK(); err != nil {
+		return 0, err
+	}
+
+	return kd.SensorTrig.Manual.OffToS, nil
+}
+
+// SetDefaultManualAction sets the default action configuration
+func (d *Device) SetDefaultManualAction(offToS int) error {
+	return d.SetDefaultManualActionCtx(context.Background(), offToS)
+}
+
+func (d *Device) SetDefaultManualActionCtx(ctx context.Context, offToS int) error {
+	cmd := fmt.Sprintf(CmdSetDefaultManualAction, offToS)
+	return d.sendUDP(ctx, cmd)
+}
+
+// GetScheduleRules returns all schedule rules
+func (d *Device) GetScheduleRules() ([]SchedRule, error) {
+	return d.GetScheduleRulesCtx(context.Background())
+}
+
+func (d *Device) GetScheduleRulesCtx(ctx context.Context) ([]SchedRule, error) {
+	res, err := d.sendTCP(ctx, CmdGetScheduleRules)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Schedule.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return kd.Schedule.Rules.RuleList, nil
+}
+
+// DeleteScheduleRule removes a rule by ID
+func (d *Device) DeleteScheduleRule(id string) error {
+	return d.DeleteScheduleRuleCtx(context.Background(), id)
+}
+
+func (d *Device) DeleteScheduleRuleCtx(ctx context.Context, id string) error {
+	cmd := fmt.Sprintf(CmdDeleteScheduleRule, id)
+	return d.sendUDP(ctx, cmd)
+}
+
+// DeleteAllScheduleRules removes all rules
+func (d *Device) DeleteAllScheduleRules() error {
+	return d.DeleteAllScheduleRulesCtx(context.Background())
+}
+
+func (d *Device) DeleteAllScheduleRulesCtx(ctx context.Context) error {
+	return d.sendUDP(ctx, CmdDeleteAllScheduleRules)
+}
+
+// SetScheduleEnabled enables or disables the schedule
+func (d *Device) SetScheduleEnabled(enable bool) error {
+	return d.SetScheduleEnabledCtx(context.Background(), enable)
+}
+
+func (d *Device) SetScheduleEnabledCtx(ctx context.Context, enable bool) error {
+	cmd := fmt.Sprintf(CmdSetScheduleEnabled, boolToInt(enable))
+	return d.sendUDP(ctx, cmd)
+}
+
+// GetLightState returns current light state
+func (d *Device) GetLightState() (*LightState, error) {
+	return d.GetLightStateCtx(context.Background())
+}
+
+func (d *Device) GetLightStateCtx(ctx context.Context) (*LightState, error) {
+	res, err := d.sendTCP(ctx, CmdGetLightState)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.Bulb.State.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.Bulb.State, nil
+}
+
+// TransitionLightState updates light settings
+func (d *Device) TransitionLightState(onOff, brightness, hue, saturation, colorTemp, transitionPeriod, ignoreDefault int) error {
+	return d.TransitionLightStateCtx(context.Background(), onOff, brightness, hue, saturation, colorTemp, transitionPeriod, ignoreDefault)
+}
+
+func (d *Device) TransitionLightStateCtx(ctx context.Context, onOff, brightness, hue, saturation, colorTemp, transitionPeriod, ignoreDefault int) error {
+	type transitionState struct {
+		OnOff            int    `json:"on_off"`
+		Mode             string `json:"mode"`
+		Hue              int    `json:"hue"`
+		Saturation       int    `json:"saturation"`
+		ColorTemp        int    `json:"color_temp"`
+		Brightness       int    `json:"brightness"`
+		TransitionPeriod int    `json:"transition_period"`
+		IgnoreDefault    int    `json:"ignore_default"`
+	}
+	ts := transitionState{
+		OnOff:            onOff,
+		Mode:             "normal",
+		Hue:              hue,
+		Saturation:       saturation,
+		ColorTemp:        colorTemp,
+		Brightness:       brightness,
+		TransitionPeriod: transitionPeriod,
+		IgnoreDefault:    ignoreDefault,
+	}
+	b, err := json.Marshal(ts)
+	if err != nil {
+		return err
+	}
+	cmd := fmt.Sprintf(CmdTransitionLightState, string(b))
+	return d.sendUDP(ctx, cmd)
+}

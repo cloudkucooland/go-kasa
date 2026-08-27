@@ -234,34 +234,37 @@ func TestAliasEscaping(t *testing.T) {
 		useTCP   bool
 	}{
 		{
-			name: "SetAlias with quotes",
-			call: func(d *Device) error { return d.SetAliasCtx(context.Background(), `My "Smart" Plug`) },
+			name:     "SetAlias with quotes",
+			call:     func(d *Device) error { return d.SetAliasCtx(context.Background(), `My "Smart" Plug`) },
 			contains: []string{`"alias":"My \"Smart\" Plug"`},
 		},
 		{
-			name: "SetAlias with backslash",
-			call: func(d *Device) error { return d.SetAliasCtx(context.Background(), `C:\Path`) },
+			name:     "SetAlias with backslash",
+			call:     func(d *Device) error { return d.SetAliasCtx(context.Background(), `C:\Path`) },
 			contains: []string{`"alias":"C:\\Path"`},
 		},
 		{
-			name: "SetChildAlias with quotes",
-			call: func(d *Device) error { return d.SetChildAliasCtx(context.Background(), `id"1`, `Lamp "2"`) },
+			name:     "SetChildAlias with quotes",
+			call:     func(d *Device) error { return d.SetChildAliasCtx(context.Background(), `id"1`, `Lamp "2"`) },
 			contains: []string{`"child_ids":["id\"1"]`, `"alias":"Lamp \"2\""`},
 		},
 		{
 			name: "SetWIFI with special chars",
-			call: func(d *Device) error { _, err := d.SetWIFICtx(context.Background(), `My "SSID"`, `P@$$w0rd\`); return err },
+			call: func(d *Device) error {
+				_, err := d.SetWIFICtx(context.Background(), `My "SSID"`, `P@$$w0rd\`)
+				return err
+			},
 			contains: []string{`"ssid":"My \"SSID\""`, `"password":"P@$$w0rd\\"`},
 			useTCP:   true,
 		},
 		{
-			name: "EnableCloud with quotes",
-			call: func(d *Device) error { return d.EnableCloudCtx(context.Background(), `user"name`, `p"ss`) },
+			name:     "EnableCloud with quotes",
+			call:     func(d *Device) error { return d.EnableCloudCtx(context.Background(), `user"name`, `p"ss`) },
 			contains: []string{`"username":"user\"name"`, `"password":"p\"ss"`},
 		},
 		{
-			name: "AddCountdownRule with quotes",
-			call: func(d *Device) error { return d.AddCountdownRuleCtx(context.Background(), 60, true, `Timer "1"`) },
+			name:     "AddCountdownRule with quotes",
+			call:     func(d *Device) error { return d.AddCountdownRuleCtx(context.Background(), 60, true, `Timer "1"`) },
 			contains: []string{`"name":"Timer \"1\""`},
 		},
 	}
@@ -434,8 +437,11 @@ func TestTCPCommands(t *testing.T) {
 			response: `{"emeter":{"get_realtime":{"err_code":0}}}`,
 		},
 		{
-			name:     "GetEmeterChildMonth",
-			call:     func(d *Device) error { _, err := d.GetEmeterChildMonthCtx(context.Background(), 1, 2025, "child1"); return err },
+			name: "GetEmeterChildMonth",
+			call: func(d *Device) error {
+				_, err := d.GetEmeterChildMonthCtx(context.Background(), 1, 2025, "child1")
+				return err
+			},
 			wantCmd:  `{"context":{"child_ids":["child1"]},"emeter":{"get_daystat":{"month":1,"year":2025}}}`,
 			response: `{"emeter":{"get_daystat":{"err_code":0}}}`,
 		},
