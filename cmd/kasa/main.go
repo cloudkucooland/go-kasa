@@ -89,6 +89,7 @@ func main() {
 					fmt.Fprintf(tabwrite, "MAC:\t%s\n", s.MAC)
 					fmt.Fprintf(tabwrite, "LED Off:\t%d\n", s.LEDOff)
 					fmt.Fprintf(tabwrite, "Active Mode:\t%s\n", s.ActiveMode)
+					fmt.Fprintf(tabwrite, "Features:\t%s\n", s.Feature)
 
 					fmt.Fprintf(tabwrite, "Outlet\tRelay State\tBrightness\n")
 					if s.NumChildren > 0 {
