@@ -49,6 +49,7 @@ const (
 	CmdGetEmeterMonthChild = `{"context":{"child_ids":["%s"]},"emeter":{"get_daystat":{"month":%d,"year":%d}}}`
 
 	CmdWifiStainfo    = `{"netif":{"get_stainfo":{}}}`
+	CmdWifiScanInfo   = `{"netif":{"get_scaninfo":{"refresh":%d}}}`
 	CmdWifiSetStainfo = `{"netif":{"set_stainfo":{"ssid":"%s","password":"%s","key_type":%d}}}` // string, string, int
 
 	CmdSetRelayStateChild      = `{"context":{"child_ids":["%s"]},"system":{"set_relay_state":{"state":%d}}}` // index (e.g. ".....00"), 0/1
@@ -65,11 +66,6 @@ const (
 	CmdGetCountdownRules = `{"count_down":{"get_rules":{}}}`
 	CmdDeleteAllRules    = `{"count_down":{"delete_all_rules":{}}}`
 	CmdAddCountdownRule  = `{"count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}` // 0-3600, 0/1, string
-
-	// CmdGetRules = `{"smartlife.iot.common.schedule":{"get_rules":{}}}`
-	// CmdGetCountdownRules = `{"smartlife.iot.common.count_down":{"get_rules":{}}}`
-	// CmdDeleteAllRules    = `{"smartlife.iot.common.count_down":{"delete_all_rules":{}}}`
-	// CmdAddCountdownRule  = `{"smartlife.iot.common.count_down":{"add_rule":{"enable":1,"delay":%d,"act":%d,"name":"%s"}}}`
 
 	CmdCloudUnbind    = `{"cnCloud":{"unbind":null}}`
 	CmdGetCloudInfo   = `{"cnCloud":{"get_info":{}}}`
@@ -97,6 +93,8 @@ const (
 	CmdSetTimezone = `{"time":{"set_timezone":{"year":%d,"month":%d,"mday":%d,"hour":%d,"min":%d,"sec":%d}}}`
 
 	CmdGetSensorRoutine       = `{"smartlife.iot.sensor_trigger":{"get_weekday_routine":{}}}`
+	CmdGetSensorMode          = `{"smartlife.iot.sensor_trigger":{"get_mode":{}}}`
+	CmdSetSensorMode          = `{"smartlife.iot.sensor_trigger":{"set_mode":"%s"}}`
 	CmdAddSensorRoutine       = `{"smartlife.iot.sensor_trigger":{"edit_weekday_routine":%s}}` // JSON struct string
 	CmdDeleteSensorRoutine    = `{"smartlife.iot.sensor_trigger":{"delete_weekday_routine":{"id":"%s"}}}`
 	CmdGetDefaultManualAction = `{"smartlife.iot.sensor_trigger":{"get_default_manual_action":{}}}`

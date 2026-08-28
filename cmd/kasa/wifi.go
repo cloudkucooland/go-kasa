@@ -32,6 +32,28 @@ var setwifi = &cli.Command{
 	},
 }
 
+var scaninfo = &cli.Command{
+	Name:      "scaninfo",
+	Usage:     "scan for wifi networks",
+	UsageText: "kasa scaninfo host",
+	Before:    RequireDevice,
+	ArgsUsage: "host",
+	Arguments: []cli.Argument{
+		&cli.StringArg{Name: "host"},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		res, err := k.GetScanInfoCtx(ctx, 1)
+		if err != nil {
+			return err
+		}
+		for _, ap := range res.ApList {
+			fmt.Printf("SSID: %s, Key Type: %d\n", ap.SSID, ap.KeyType)
+		}
+		return nil
+	},
+}
+
 var wifi = &cli.Command{
 	Name:      "wifi",
 	Usage:     "check device wifi status",

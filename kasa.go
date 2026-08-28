@@ -202,11 +202,18 @@ type SchedMonth struct {
 type SensorTrig struct {
 	Routines GetRoutines `json:"get_weekday_routine"`
 	Manual   ManualAct   `json:"get_default_manual_action"`
+	Mode     SensorMode  `json:"get_mode"`
 	KasaErr
 }
 
 type GetRoutines struct {
 	RoutineList []Routine `json:"routine_list"`
+	KasaErr
+}
+
+type SensorMode struct {
+	Mode  string `json:"mode"`
+	BAuto int    `json:"bAuto"`
 	KasaErr
 }
 
@@ -392,11 +399,24 @@ type Preset struct {
 // NetIf is defined by kasa devices
 // {"netif":{"get_stainfo":{"ssid":"IoT8417","key_type":3,"rssi":-61,"err_code":0}}}
 // {"netif":{"set_stainfo":{"err_code":0}}}
+// {"netif":{"get_scaninfo":{"ap_list":[]}}}
 type NetIf struct {
 	StaInfo    StaInfo    `json:"get_stainfo"`
 	SetStaInfo SetStaInfo `json:"set_stainfo"`
+	ScanInfo   ScanInfo   `json:"get_scaninfo"`
 
 	KasaErr
+}
+
+type ScanInfo struct {
+	ApList      []AP `json:"ap_list"`
+	Wpa3Support int  `json:"wpa3_support"`
+	KasaErr
+}
+
+type AP struct {
+	SSID    string `json:"ssid"`
+	KeyType int    `json:"key_type"`
 }
 
 // StaInfo is defined by kasa devices

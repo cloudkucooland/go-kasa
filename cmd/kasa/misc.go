@@ -180,6 +180,42 @@ var getmanualaction = &cli.Command{
 	},
 }
 
+var sensormode = &cli.Command{
+	Name:      "sensormode",
+	Usage:     "get sensor mode",
+	UsageText: "kasa sensormode host",
+	Before:    RequireDevice,
+	ArgsUsage: "host",
+	Arguments: []cli.Argument{
+		&cli.StringArg{Name: "host"},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		m, err := k.GetSensorModeCtx(ctx)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Mode: %s, bAuto: %d\n", m.Mode, m.BAuto)
+		return nil
+	},
+}
+
+var setsensormode = &cli.Command{
+	Name:      "setsensormode",
+	Usage:     "set sensor mode",
+	UsageText: "kasa setsensormode host mode",
+	Before:    RequireDevice,
+	ArgsUsage: "host mode",
+	Arguments: []cli.Argument{
+		&cli.StringArg{Name: "host"},
+		&cli.StringArg{Name: "mode"},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetSensorModeCtx(ctx, cmd.StringArg("mode"))
+	},
+}
+
 var setmanualaction = &cli.Command{
 	Name:      "setmanualaction",
 	Usage:     "set default manual action",
@@ -453,6 +489,46 @@ var mcudiagnose = &cli.Command{
 		}
 		fmt.Printf("I2C Total Num: %d\nMCU I2C Reset Num: %d\nMaster I2C Abnormal Num: %d\n", d.I2CTotalNum, d.MCUI2CResetNum, d.MasterI2CAbnormal)
 		return nil
+	},
+}
+
+var pirconfig = &cli.Command{
+	Name:      "pirconfig",
+	Usage:     "get PIR configuration",
+	UsageText: "kasa pirconfig host",
+	Before:    RequireDevice,
+	ArgsUsage: "host",
+	Arguments: []cli.Argument{
+		&cli.StringArg{Name: "host"},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		p, err := k.GetPIRConfigCtx(ctx)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Enabled: %d, Cold Time: %d, Trigger Index: %d, Min ADC: %d, Max ADC: %d\n", p.Enable, p.ColdTime, p.TriggerIndex, p.MinADC, p.MaxADC)
+		return nil
+	},
+}
+
+var setpirenable = &cli.Command{
+	Name:      "setpirenable",
+	Usage:     "enable or disable PIR",
+	UsageText: "kasa setpirenable host true|false",
+	Before:    RequireDevice,
+	ArgsUsage: "host state",
+	Arguments: []cli.Argument{
+		&cli.StringArg{Name: "host"},
+		&cli.StringArg{Name: "state"},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		b, err := strconv.ParseBool(cmd.StringArg("state"))
+		if err != nil {
+			return err
+		}
+		k := ctx.Value("kasaDev").(*kasa.Device)
+		return k.SetPIREnableCtx(ctx, b)
 	},
 }
 

@@ -502,6 +502,29 @@ func (d *Device) GetWIFIStatusCtx(ctx context.Context) (*StaInfo, error) {
 	return &ksta.NetIf.StaInfo, nil
 }
 
+// GetScanInfo returns the WiFi scan info
+func (d *Device) GetScanInfo(refresh int) (*ScanInfo, error) {
+	return d.GetScanInfoCtx(context.Background(), refresh)
+}
+
+func (d *Device) GetScanInfoCtx(ctx context.Context, refresh int) (*ScanInfo, error) {
+	res, err := d.sendTCP(ctx, fmt.Sprintf(CmdWifiScanInfo, refresh))
+	if err != nil {
+		return nil, err
+	}
+
+	var ksta KasaDevice
+	if err := json.Unmarshal(res, &ksta); err != nil {
+		return nil, err
+	}
+
+	if err := ksta.NetIf.ScanInfo.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &ksta.NetIf.ScanInfo, nil
+}
+
 // SetWIFI configures the WiFi station info
 func (d *Device) SetWIFI(ssid string, key string) (*SetStaInfo, error) {
 	return d.SetWIFICtx(context.Background(), ssid, key)
@@ -812,6 +835,49 @@ func (d *Device) GetMCUDiagnoseCtx(ctx context.Context) (*MCUDiagnose, error) {
 	return &kd.Debug.MCUDiagnose, nil
 }
 
+// GetPIRConfig returns PIR configuration
+func (d *Device) GetPIRConfig() (*PIRSensorConfig, error) {
+	return d.GetPIRConfigCtx(context.Background())
+}
+
+func (d *Device) GetPIRConfigCtx(ctx context.Context) (*PIRSensorConfig, error) {
+	res, err := d.sendTCP(ctx, CmdGetPIRConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	var p PIRSensor
+	if err = json.Unmarshal(res, &p); err != nil {
+		return nil, err
+	}
+
+	if err := p.GetConfig.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &p.GetConfig, nil
+}
+
+// SetPIREnable enables/disables PIR
+func (d *Device) SetPIREnable(enable bool) error {
+	return d.SetPIREnableCtx(context.Background(), enable)
+}
+
+func (d *Device) SetPIREnableCtx(ctx context.Context, enable bool) error {
+	cmd := fmt.Sprintf(CmdSetPIREnable, boolToInt(enable))
+	return d.sendUDP(ctx, cmd)
+}
+
+// SetPIRColdTime sets PIR cold time
+func (d *Device) SetPIRColdTime(t int) error {
+	return d.SetPIRColdTimeCtx(context.Background(), t)
+}
+
+func (d *Device) SetPIRColdTimeCtx(ctx context.Context, t int) error {
+	cmd := fmt.Sprintf(CmdSetPIRColdTime, t)
+	return d.sendUDP(ctx, cmd)
+}
+
 // GetFirmwareList returns available firmware updates
 func (d *Device) GetFirmwareList() ([]Firmware, error) {
 	return d.GetFirmwareListCtx(context.Background())
@@ -945,6 +1011,39 @@ func (d *Device) GetDefaultManualActionCtx(ctx context.Context) (int, error) {
 	}
 
 	return kd.SensorTrig.Manual.OffToS, nil
+}
+
+// GetSensorMode returns the sensor mode
+func (d *Device) GetSensorMode() (*SensorMode, error) {
+	return d.GetSensorModeCtx(context.Background())
+}
+
+func (d *Device) GetSensorModeCtx(ctx context.Context) (*SensorMode, error) {
+	res, err := d.sendTCP(ctx, CmdGetSensorMode)
+	if err != nil {
+		return nil, err
+	}
+
+	var kd KasaDevice
+	if err = json.Unmarshal(res, &kd); err != nil {
+		return nil, err
+	}
+
+	if err := kd.SensorTrig.Mode.KasaErr.OK(); err != nil {
+		return nil, err
+	}
+
+	return &kd.SensorTrig.Mode, nil
+}
+
+// SetSensorMode sets the sensor mode
+func (d *Device) SetSensorMode(mode string) error {
+	return d.SetSensorModeCtx(context.Background(), mode)
+}
+
+func (d *Device) SetSensorModeCtx(ctx context.Context, mode string) error {
+	cmd := fmt.Sprintf(CmdSetSensorMode, mode)
+	return d.sendUDP(ctx, cmd)
 }
 
 // SetDefaultManualAction sets the default action configuration
