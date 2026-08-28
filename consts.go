@@ -1,17 +1,5 @@
 package kasa
 
-// https://lib.dr.iastate.edu/cgi/viewcontent.cgi?article=1424&context=creativecomponents
-// https://github.com/whitslack/kasa/blob/master/API.md
-
-/* -- found in firmware
-smartlife.common.debug
-smartlife.iot.LAS
-smartlife.iot.PIR
-smartlife.iot.sensor_trigger
-smartlife.iot.smartpowerstrip.manage
-*/
-
-// Request strings
 const (
 	CmdSetRelayState    = `{"system":{"set_relay_state":{"state":%d}}}` // 0 or 1
 	CmdGetSysinfo       = `{"system":{"get_sysinfo":{}}}`
