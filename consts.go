@@ -15,9 +15,9 @@ const (
 	CmdCheckUboot       = `{"system":{"test_check_uboot":null}}`
 	CmdReset            = `{"system":{"reset":{"delay":1}}}`
 	CmdSetMAC           = `{"system":{"set_mac_addr":{"mac":"%s"}}}`                                                                            // 50-C7-BF-01-02-03
-	CmdSetHWID          = `{"system":{"set_hw_id":{"hwId":%s}}}`                                                                                // "0123456789ABCDEF0123456789ABCDEF"
-	CmdSetDevID         = `{"system":{"set_device_id":{"deviceId":%s}}}`                                                                        //  "0123456789ABCDEF0123456789ABCDEF01234567"
-	CmdDownloadFirmware = `{"system":{"download_firmware":{"url":%s}}}`                                                                         // http://
+	CmdSetHWID          = `{"system":{"set_hw_id":{"hwId":"%s"}}}`                                                                                // "0123456789ABCDEF0123456789ABCDEF"
+	CmdSetDevID         = `{"system":{"set_device_id":{"deviceId":"%s"}}}`                                                                        //  "0123456789ABCDEF0123456789ABCDEF01234567"
+	CmdDownloadFirmware = `{"system":{"download_firmware":{"url":"%s"}}}`                                                                         // http://
 	CmdSetLocation      = `{"system":{"device_location_change":{"latitude":%d,"longitude":%d,"latitude_i":%d,"longitude_i":%d,"timezone":%d}}}` //ints
 
 	CmdGetDebug         = `{"smartlife.common.debug":{"get_diagnose_status":{}}}`
@@ -83,22 +83,22 @@ const (
 	CmdGetSensorRoutine       = `{"smartlife.iot.sensor_trigger":{"get_weekday_routine":{}}}`
 	CmdGetSensorMode          = `{"smartlife.iot.sensor_trigger":{"get_mode":{}}}`
 	CmdSetSensorMode          = `{"smartlife.iot.sensor_trigger":{"set_mode":"%s"}}`
-	CmdAddSensorRoutine       = `{"smartlife.iot.sensor_trigger":{"edit_weekday_routine":%s}}` // JSON struct string
+	CmdAddSensorRoutine       = `{"smartlife.iot.sensor_trigger":{"edit_weekday_routine":"%s"}}` // JSON struct string
 	CmdDeleteSensorRoutine    = `{"smartlife.iot.sensor_trigger":{"delete_weekday_routine":{"id":"%s"}}}`
 	CmdGetDefaultManualAction = `{"smartlife.iot.sensor_trigger":{"get_default_manual_action":{}}}`
 	CmdSetDefaultManualAction = `{"smartlife.iot.sensor_trigger":{"set_default_manual_action":{"offToS":%d}}}`
 
 	CmdGetScheduleRules       = `{"schedule":{"get_rules":null}}`
-	CmdAddScheduleRule        = `{"schedule":{"edit_rule":%s}}`
+	CmdAddScheduleRule        = `{"schedule":{"edit_rule":"%s"}}`
 	CmdDeleteScheduleRule     = `{"schedule":{"delete_rule":{"id":"%s"}}}`
 	CmdDeleteAllScheduleRules = `{"schedule":{"delete_all_rules":null}}`
 	CmdSetScheduleEnabled     = `{"schedule":{"set_overall_enable":{"enable":%d}}}`
 
 	CmdGetLightState        = `{"smartlife.iot.smartbulb.lightingservice":{"get_light_state":{}}}`
-	CmdTransitionLightState = `{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":%s}}`
+	CmdTransitionLightState = `{"smartlife.iot.smartbulb.lightingservice":{"transition_light_state":"%s"}}`
 	CmdGetPreferredState    = `{"smartlife.iot.smartbulb.lightingservice":{"get_preferred_state":{}}}`
-	CmdSetPreferredState    = `{"smartlife.iot.smartbulb.lightingservice":{"set_preferred_state":%s}}`
+	CmdSetPreferredState    = `{"smartlife.iot.smartbulb.lightingservice":{"set_preferred_state":"%s"}}`
 	CmdGetDefaultBehavior   = `{"smartlife.iot.smartbulb.lightingservice":{"get_default_behavior":{}}}`
-	CmdSetDefaultBehavior   = `{"smartlife.iot.smartbulb.lightingservice":{"set_default_behavior":%s}}`
+	CmdSetDefaultBehavior   = `{"smartlife.iot.smartbulb.lightingservice":{"set_default_behavior":"%s"}}`
 	CmdGetLightDetails      = `{"smartlife.iot.smartbulb.lightingservice":{"get_light_details":{}}}`
 )
