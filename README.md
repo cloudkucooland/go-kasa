@@ -9,23 +9,31 @@ Go library to control TP-Link Kasa devices.
 This library uses the local API, not the cloud API.
 It uses UDP rather than TCP where possible for better performance.
 
-## Includes a CLI tool
-The CLI is robust and feature-rich, including JSON output. All the commands you need to manage your Kasa environment should be covered.
+## Includes an Interactive TUI (kasaview)
+`kasaview` is a feature-rich terminal user interface built with Charmbracelet Bubble Tea for discovering, monitoring, and controlling Kasa devices in real-time.
 
-## CLI install
+### kasaview Features
+- **Discovery & Filtering**: Auto-discovers local Kasa devices and supports real-time search (`/`) by name, model, IP, or outlet ID.
+- **Detail View**: Inspect device firmware, signal strength (`RSSI`), live power wattage, monthly energy history, countdown timers, and schedule rules.
+- **Child Outlets & Dimmers**: Navigate power strip child outlets and control dimmer brightness.
+- **Quick Management**: Toggle power (`t`), rename devices/outlets (`n`), refresh state (`r`), add 30-minute countdown timers (`c`), and clear timers (`x`).
+
+## TUI (kasaview) and CLI (kasa) install
 Make sure you have Go version 1.25 or newer installed on your system. See [The Go install instructions](https://go.dev/doc/install) for details.
+
+Make sure ``~/go/bin`` is in your [shell's path](https://janelbrandon.medium.com/understanding-the-path-variable-6eae0936e976#:~:text=PATH%20environment%20variable,referenced%20by%20your%20operating%20environment.)
 
 In your shell (terminal on macOS, PowerShell on Windows, lots of options on Linux and UNIX systems...) 
 ``go install github.com/cloudkucooland/go-kasa/cmd/kasa@latest``
+``go install github.com/cloudkucooland/go-kasa/cmd/kasaview@latest``
 
-This will place the ``kasa`` binary in ``~/go/bin/kasa`` 
-Make sure ``~/go/bin`` is in your [shell's path](https://janelbrandon.medium.com/understanding-the-path-variable-6eae0936e976#:~:text=PATH%20environment%20variable,referenced%20by%20your%20operating%20environment.)
+This will place the ``kasa`` and ``kasaview`` binaries in ``~/go/bin/kasa`` 
 
 ## If you need to control your Kasa devices from Apple HomeKit, I have built a bridge which works well.
 [https://github.com/cloudkucooland/HomeKitBrigdges/](https://github.com/cloudkucooland/HomeKitBridges)
 
-## Monitor your electricity usage
-If you need to monitor your Kasa devices that support emetering, this includes a daemon which feeds the emeter data into InfluxDB. A sample Grafana setup is included, all running in docker.
+## For a comprehensive Kasa energy use system, please see
+[https://github.com/cloudkucooland/HomeEnergy/](https://github.com/cloudkucooland/HomeEnergy)
 
 ## CLI examples
 discover devices on the local subnets
