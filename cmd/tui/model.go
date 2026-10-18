@@ -13,6 +13,7 @@ type deviceItem struct {
 	info          *kasa.Sysinfo
 	child         *kasa.Child
 	childID       string
+	childIndex    int
 	emeter        *kasa.EmeterRealtime
 	emeterMonth   *kasa.EmeterDaystat
 	emeterLoaded  bool
@@ -87,6 +88,7 @@ type model struct {
 	status        string
 	isScanning    bool
 	pendingRename *renameRequest
+	brightnessSeq int
 }
 
 type renameRequest struct {

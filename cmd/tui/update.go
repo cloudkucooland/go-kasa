@@ -12,11 +12,19 @@ import (
 )
 
 type discoveryMsg map[string]*kasa.Sysinfo
-type actionMsg string
+type actionMsg struct {
+	addr string
+	text string
+}
 type renameMsg struct {
 	addr    string
 	childID string
 	alias   string
+}
+type deviceRefreshMsg struct {
+	addr string
+	info *kasa.Sysinfo
+	err  error
 }
 type emeterMsg struct {
 	addr     string
@@ -36,6 +44,22 @@ func scanDevices() tea.Cmd {
 			return errMsg(err)
 		}
 		return discoveryMsg(devices)
+	}
+}
+
+func refreshDevice(addr string) tea.Cmd {
+	return func() tea.Msg {
+		d, err := kasa.NewDevice(addr)
+		if err != nil {
+			return deviceRefreshMsg{addr: addr, err: err}
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		info, err := d.GetSettingsCtx(ctx)
+		if err != nil {
+			return deviceRefreshMsg{addr: addr, err: err}
+		}
+		return deviceRefreshMsg{addr: addr, info: info}
 	}
 }
 
@@ -68,7 +92,7 @@ func toggleDevice(item deviceItem) tea.Cmd {
 		if err != nil {
 			return errMsg(err)
 		}
-		return actionMsg("Device toggled")
+		return actionMsg{addr: item.addr, text: "Device toggled"}
 	}
 }
 
@@ -89,7 +113,7 @@ func setBrightness(addr string, brightness int) tea.Cmd {
 		if err := d.SetBrightnessCtx(ctx, brightness); err != nil {
 			return errMsg(err)
 		}
-		return actionMsg(fmt.Sprintf("Brightness set to %d%%", brightness))
+		return actionMsg{addr: addr, text: fmt.Sprintf("Brightness set to %d%%", brightness)}
 	}
 }
 
@@ -219,8 +243,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.selected.emeterLoading = true
 				m.selected.emeterError = nil
-				m.status = "Contacting device for energy data…"
-				return m, fetchEmeter(*m.selected)
+				m.status = "Contacting device for energy data and status…"
+				return m, tea.Batch(refreshDevice(m.selected.addr), fetchEmeter(*m.selected))
 			}
 			m.isScanning = true
 			m.status = "Scanning for devices…"
@@ -267,27 +291,39 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "+", "=":
 			if m.selected != nil && m.selected.supportsBrightness() {
-				m.status = "Contacting device to set brightness…"
-				return m, setBrightness(m.selected.addr, int(m.selected.info.Brightness)+5)
+				target := clampBrightness(int(m.selected.info.Brightness) + 5)
+				m.updateBrightness(target)
+				m.brightnessSeq++
+				m.status = "Adjusting brightness…"
+				return m, debounceBrightness(m.selected.addr, target, m.brightnessSeq)
 			}
 		case "-":
 			if m.selected != nil && m.selected.supportsBrightness() {
-				m.status = "Contacting device to set brightness…"
-				return m, setBrightness(m.selected.addr, int(m.selected.info.Brightness)-5)
+				target := clampBrightness(int(m.selected.info.Brightness) - 5)
+				m.updateBrightness(target)
+				m.brightnessSeq++
+				m.status = "Adjusting brightness…"
+				return m, debounceBrightness(m.selected.addr, target, m.brightnessSeq)
 			}
 		case "left", "h":
 			if m.selected == nil {
 				m.moveCursor(-1)
 			} else if m.selected.supportsBrightness() {
-				m.status = "Contacting device to set brightness…"
-				return m, setBrightness(m.selected.addr, int(m.selected.info.Brightness)-5)
+				target := clampBrightness(int(m.selected.info.Brightness) - 5)
+				m.updateBrightness(target)
+				m.brightnessSeq++
+				m.status = "Adjusting brightness…"
+				return m, debounceBrightness(m.selected.addr, target, m.brightnessSeq)
 			}
 		case "right", "l":
 			if m.selected == nil {
 				m.moveCursor(1)
 			} else if m.selected.supportsBrightness() {
-				m.status = "Contacting device to set brightness…"
-				return m, setBrightness(m.selected.addr, int(m.selected.info.Brightness)+5)
+				target := clampBrightness(int(m.selected.info.Brightness) + 5)
+				m.updateBrightness(target)
+				m.brightnessSeq++
+				m.status = "Adjusting brightness…"
+				return m, debounceBrightness(m.selected.addr, target, m.brightnessSeq)
 			}
 		default:
 			switch msg.String() {
@@ -311,7 +347,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		previousSelection := m.selected
 		m.items = make([]deviceItem, 0, len(msg))
 		for addr, info := range msg {
-			m.items = append(m.items, deviceItem{addr: addr, info: info})
+			m.items = append(m.items, deviceItem{addr: addr, info: info, childIndex: -1})
 		}
 		sort.Slice(m.items, func(i, j int) bool {
 			if m.items[i].info.Alias != m.items[j].info.Alias {
@@ -332,12 +368,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if root.addr != previousSelection.addr {
 					continue
 				}
-				if previousSelection.childID != "" {
-					childID, child, err := resolveChild(root.info.Children, previousSelection.childID, previousSelection.title())
-					if err == nil {
-						root.child = &child
-						root.childID = childID
-					}
+				root.childIndex = previousSelection.childIndex
+				if previousSelection.childIndex >= 0 && previousSelection.childIndex < len(root.info.Children) {
+					child := root.info.Children[previousSelection.childIndex]
+					root.child = &child
+					root.childID = child.ID
 				}
 				root.emeter = previousSelection.emeter
 				root.emeterMonth = previousSelection.emeterMonth
@@ -408,20 +443,100 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.status = ""
 		}
 	case actionMsg:
-		m.status = string(msg) + "; refreshing…"
-		m.isScanning = true
-		return m, scanDevices()
+		m.status = msg.text + "; refreshing…"
+		return m, refreshDevice(msg.addr)
+	case brightnessTickMsg:
+		if msg.seq != m.brightnessSeq {
+			return m, nil
+		}
+		m.status = fmt.Sprintf("Contacting device to set brightness to %d%%…", msg.brightness)
+		return m, setBrightness(msg.addr, msg.brightness)
 	case renameMsg:
 		m.pendingRename = &renameRequest{addr: msg.addr, childID: msg.childID, alias: msg.alias}
 		m.status = "Alias saved; confirming with device…"
-		m.isScanning = true
-		return m, scanDevices()
+		return m, refreshDevice(msg.addr)
+	case deviceRefreshMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			if m.pendingRename != nil {
+				m.pendingRename = nil
+				m.status = "Could not confirm rename from device"
+			}
+			return m, nil
+		}
+		found := false
+		for i := range m.items {
+			if m.items[i].addr == msg.addr {
+				m.items[i].info = msg.info
+				found = true
+				break
+			}
+		}
+		if !found {
+			m.items = append(m.items, deviceItem{addr: msg.addr, info: msg.info, childIndex: -1})
+		}
+		sort.Slice(m.items, func(i, j int) bool {
+			if m.items[i].info.Alias != m.items[j].info.Alias {
+				return m.items[i].info.Alias < m.items[j].info.Alias
+			}
+			if m.items[i].title() != m.items[j].title() {
+				return m.items[i].title() < m.items[j].title()
+			}
+			if m.items[i].addr != m.items[j].addr {
+				return m.items[i].addr < m.items[j].addr
+			}
+			return m.items[i].childID < m.items[j].childID
+		})
+		if m.selected != nil && m.selected.addr == msg.addr {
+			root := deviceItem{addr: msg.addr, info: msg.info, childIndex: m.selected.childIndex}
+			if m.selected.childIndex >= 0 && m.selected.childIndex < len(msg.info.Children) {
+				child := msg.info.Children[m.selected.childIndex]
+				root.child = &child
+				root.childID = child.ID
+			}
+			root.emeter = m.selected.emeter
+			root.emeterMonth = m.selected.emeterMonth
+			root.emeterLoaded = m.selected.emeterLoaded
+			root.emeterLoading = m.selected.emeterLoading
+			root.emeterError = m.selected.emeterError
+			root.monthError = m.selected.monthError
+			m.selected = &root
+		}
+		m.applyFilter()
+		if strings.HasSuffix(m.status, "; refreshing…") {
+			m.status = strings.TrimSuffix(m.status, "; refreshing…")
+		} else if m.status == "Contacting device for energy data and status…" {
+			m.status = ""
+		}
+		if m.pendingRename != nil {
+			pending := m.pendingRename
+			m.pendingRename = nil
+			confirmed, reported := false, "device not found"
+			for _, item := range m.items {
+				if item.addr != pending.addr {
+					continue
+				}
+				if pending.childID == "" {
+					reported = item.info.Alias
+					confirmed = reported == pending.alias
+				} else if _, child, err := resolveChild(item.info.Children, pending.childID, ""); err == nil {
+					reported = child.Alias
+					confirmed = reported == pending.alias
+				}
+				break
+			}
+			if confirmed {
+				m.status = fmt.Sprintf("Rename confirmed: %s", pending.alias)
+			} else {
+				m.status = fmt.Sprintf("Rename not confirmed: device reports %q", reported)
+			}
+		}
 	case errMsg:
 		m.err = msg
 		m.isScanning = false
 		if m.pendingRename != nil {
 			m.pendingRename = nil
-			m.status = "Could not confirm rename from refreshed device list"
+			m.status = "Could not confirm rename from refreshed device"
 		}
 	}
 	return m, nil
@@ -431,29 +546,37 @@ func (m *model) focusChild(delta int) tea.Cmd {
 	if m.selected == nil || len(m.selected.info.Children) == 0 {
 		return nil
 	}
-	current := -1
-	if m.selected.childID != "" {
-		for i, child := range m.selected.info.Children {
-			if child.ID == m.selected.childID || child.Alias == m.selected.title() {
-				current = i
-				break
-			}
+	currentIndex := m.selected.childIndex
+	nextIndex := currentIndex + delta
+	if nextIndex < -1 {
+		return nil
+	}
+	if nextIndex >= len(m.selected.info.Children) {
+		return nil
+	}
+	if nextIndex == -1 {
+		root := deviceItem{
+			addr:         m.selected.addr,
+			info:         m.selected.info,
+			childIndex:   -1,
+			emeter:       m.selected.emeter,
+			emeterMonth:  m.selected.emeterMonth,
+			emeterLoaded: m.selected.emeterLoaded,
+			emeterError:  m.selected.emeterError,
+			monthError:   m.selected.monthError,
 		}
-	}
-	next := current + delta
-	if next < -1 {
-		return nil
-	}
-	if next >= len(m.selected.info.Children) {
-		return nil
-	}
-	if next == -1 {
-		root := deviceItem{addr: m.selected.addr, info: m.selected.info}
 		m.selected = &root
 		return nil
 	}
-	child := m.selected.info.Children[next]
-	item := deviceItem{addr: m.selected.addr, info: m.selected.info, child: &child, childID: child.ID, emeterLoading: true}
+	child := m.selected.info.Children[nextIndex]
+	item := deviceItem{
+		addr:          m.selected.addr,
+		info:          m.selected.info,
+		child:         &child,
+		childID:       child.ID,
+		childIndex:    nextIndex,
+		emeterLoading: true,
+	}
 	m.selected = &item
 	m.status = "Contacting device for live and historical energy…"
 	return fetchEmeter(item)
@@ -547,5 +670,40 @@ func (m *model) keepCursorVisible() {
 	}
 	if m.rowOffset < 0 {
 		m.rowOffset = 0
+	}
+}
+
+func clampBrightness(v int) int {
+	if v < 1 {
+		return 1
+	}
+	if v > 100 {
+		return 100
+	}
+	return v
+}
+
+func (m *model) updateBrightness(val int) {
+	if m.selected == nil {
+		return
+	}
+	m.selected.info.Brightness = uint(val)
+	for i := range m.items {
+		if m.items[i].addr == m.selected.addr {
+			m.items[i].info.Brightness = uint(val)
+		}
+	}
+}
+
+type brightnessTickMsg struct {
+	addr       string
+	brightness int
+	seq        int
+}
+
+func debounceBrightness(addr string, brightness int, seq int) tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(200 * time.Millisecond)
+		return brightnessTickMsg{addr: addr, brightness: brightness, seq: seq}
 	}
 }

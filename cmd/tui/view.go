@@ -195,9 +195,9 @@ func (m model) detailView(item deviceItem) string {
 	}
 	if len(item.info.Children) > 0 {
 		detail += "\n\n" + headerStyle.Render("OUTLETS")
-		for _, child := range item.info.Children {
+		for idx, child := range item.info.Children {
 			prefix := "  "
-			if child.ID == item.childID {
+			if idx == item.childIndex {
 				prefix = "> "
 			}
 			childStyle := offStyle
