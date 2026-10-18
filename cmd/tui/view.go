@@ -119,7 +119,7 @@ func (m model) renderCard(item deviceItem, selected bool, width int) []string {
 	if selected {
 		title = "> " + title
 	}
-	modelLine := item.info.Model + " · " + item.addr
+	modelLine := item.info.Model + " · " + item.addr + " " + formatRSSIBadge(item.info.RSSI)
 	statusLine := item.state()
 	if len(item.info.Children) > 0 {
 		active := 0
@@ -184,10 +184,11 @@ func (m model) detailView(item deviceItem) string {
 		stateStyle = onStyle
 	}
 	var detail string
+	signalStr := renderRSSI(item.info.RSSI)
 	if item.child != nil {
-		detail = fmt.Sprintf("%s\n\n%s %s\n%s %s\n%s %s\n%s %s\n%s %s", nameStyle.Render(title), labelStyle.Render("Device:"), item.info.Alias, labelStyle.Render("Outlet ID:"), item.childID, labelStyle.Render("Address:"), item.addr, labelStyle.Render("Model:"), item.info.Model, labelStyle.Render("State:"), stateStyle.Render(state))
+		detail = fmt.Sprintf("%s\n\n%s %s\n%s %s\n%s %s\n%s %s\n%s %s\n%s %s", nameStyle.Render(title), labelStyle.Render("Device:"), item.info.Alias, labelStyle.Render("Outlet ID:"), item.childID, labelStyle.Render("Address:"), item.addr, labelStyle.Render("Model:"), item.info.Model, labelStyle.Render("Signal:"), signalStr, labelStyle.Render("State:"), stateStyle.Render(state))
 	} else {
-		detail = fmt.Sprintf("%s\n\n%s %s\n%s %s\n%s %s\n%s %s\n%s %d dBm", nameStyle.Render(title), labelStyle.Render("Address:"), item.addr, labelStyle.Render("Model:"), item.info.Model, labelStyle.Render("State:"), stateStyle.Render(state), labelStyle.Render("Firmware:"), item.info.SWVersion, labelStyle.Render("Signal:"), item.info.RSSI)
+		detail = fmt.Sprintf("%s\n\n%s %s\n%s %s\n%s %s\n%s %s\n%s %s", nameStyle.Render(title), labelStyle.Render("Address:"), item.addr, labelStyle.Render("Model:"), item.info.Model, labelStyle.Render("State:"), stateStyle.Render(state), labelStyle.Render("Firmware:"), item.info.SWVersion, labelStyle.Render("Signal:"), signalStr)
 		if item.supportsBrightness() {
 			bar := brightnessBar(item.info.Brightness)
 			detail += fmt.Sprintf("\n%s %s", labelStyle.Render("Brightness:"), onStyle.Render(fmt.Sprintf("%s %d%%", bar, item.info.Brightness)))
@@ -247,18 +248,80 @@ func (m model) detailView(item deviceItem) string {
 	} else {
 		detail += "\n" + mutedStyle.Render("No monthly history loaded; press r to refresh.")
 	}
+	detail += "\n\n" + headerStyle.Render("COUNTDOWN TIMERS")
+	switch {
+	case item.rulesLoading:
+		detail += "\n" + mutedStyle.Render("Loading countdown timers…")
+	case item.rulesError != nil:
+		detail += "\n" + mutedStyle.Render("Countdown rules unavailable: "+formatOperationError(item.rulesError))
+	case len(item.countdownRules) > 0:
+		for _, r := range item.countdownRules {
+			status := "Disabled"
+			if r.Enable != 0 {
+				status = fmt.Sprintf("Enabled (delay: %ds, active: %d)", r.Delay, r.Active)
+			}
+			detail += fmt.Sprintf("\n  %s: %s", nameStyle.Render(r.Name), labelStyle.Render(status))
+		}
+	default:
+		detail += "\n" + mutedStyle.Render("No countdown timers")
+	}
+
+	detail += "\n\n" + headerStyle.Render("SCHEDULE RULES")
+	switch {
+	case item.rulesLoading:
+		detail += "\n" + mutedStyle.Render("Loading schedule rules…")
+	case item.rulesError != nil:
+		detail += "\n" + mutedStyle.Render("Schedule rules unavailable: "+formatOperationError(item.rulesError))
+	case len(item.scheduleRules) > 0:
+		for _, s := range item.scheduleRules {
+			status := "Disabled"
+			if s.Enable != 0 {
+				status = "Enabled"
+			}
+			timeStr := fmt.Sprintf("%02d:%02d", s.SMin/60, s.SMin%60)
+			detail += fmt.Sprintf("\n  %s [%s]: %s", nameStyle.Render(s.Name), timeStr, labelStyle.Render(status))
+		}
+	default:
+		detail += "\n" + mutedStyle.Render("No schedule rules")
+	}
 	if m.err != nil {
 		detail += "\n\n" + errorStyle.Render(formatOperationError(m.err))
 	} else if m.status != "" {
 		detail += "\n\n" + onStyle.Render(m.status)
 	}
-	controls := "t toggle   n rename   r refresh   esc back   q quit"
+	controls := "↑↓/j/k or pgup/pgdown scroll   t toggle   c 30m timer   x clear timers   n rename   r refresh   esc back   q quit"
 	if len(item.info.Children) > 0 {
-		controls = "↑↓ / j/k choose outlet   t toggle focused   n rename focused   r meter   esc back   q quit"
+		controls = "↑↓ / j/k choose outlet   pgup/pgdown scroll   t toggle   c 30m timer   x clear timers   n rename   r meter   esc back   q quit"
 	} else if item.supportsBrightness() {
-		controls = "← / - dimmer   + / → brighter   t toggle   n rename   r refresh   esc back   q quit"
+		controls = "← / - dimmer   + / → brighter   t toggle   c 30m timer   x clear timers   n rename   r refresh   esc back   q quit"
 	}
-	return detail + "\n\n" + mutedStyle.Render(controls)
+
+	lines := strings.Split(detail, "\n")
+	maxHeight := max(10, m.height-3)
+	if maxHeight <= 0 {
+		maxHeight = 20
+	}
+
+	totalLines := len(lines)
+	maxScroll := max(0, totalLines-maxHeight)
+	offset := min(m.detailScrollOffset, maxScroll)
+	if offset < 0 {
+		offset = 0
+	}
+
+	end := min(offset+maxHeight, totalLines)
+	visibleLines := lines[offset:end]
+
+	var b strings.Builder
+	if offset > 0 {
+		b.WriteString(mutedStyle.Render(fmt.Sprintf("  [↑ %d more lines above]", offset)) + "\n")
+	}
+	b.WriteString(strings.Join(visibleLines, "\n"))
+	if end < totalLines {
+		b.WriteString("\n" + mutedStyle.Render(fmt.Sprintf("  [↓ %d more lines below]", totalLines-end)))
+	}
+	b.WriteString("\n\n" + mutedStyle.Render(controls))
+	return b.String()
 }
 
 func formatEnergyDay(day kasa.EmeterDay) string {
@@ -296,4 +359,38 @@ func (m model) renameView() string {
 func brightnessBar(value uint) string {
 	filled := min(10, int(value+9)/10)
 	return strings.Repeat("▰", filled) + strings.Repeat("▱", 10-filled)
+}
+
+var (
+	signalStrong = lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
+	signalGood   = lipgloss.NewStyle().Foreground(lipgloss.Color("220"))
+	signalWeak   = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
+)
+
+func renderRSSI(rssi int) string {
+	var style lipgloss.Style
+	var label string
+	switch {
+	case rssi >= -50:
+		style = signalStrong
+		label = "Strong"
+	case rssi >= -70:
+		style = signalGood
+		label = "Good"
+	default:
+		style = signalWeak
+		label = "Weak"
+	}
+	return style.Render(fmt.Sprintf("%d dBm (%s)", rssi, label))
+}
+
+func formatRSSIBadge(rssi int) string {
+	switch {
+	case rssi >= -50:
+		return lipgloss.NewStyle().Foreground(lipgloss.Color("42")).Render("●")
+	case rssi >= -70:
+		return lipgloss.NewStyle().Foreground(lipgloss.Color("220")).Render("●")
+	default:
+		return lipgloss.NewStyle().Foreground(lipgloss.Color("203")).Render("●")
+	}
 }

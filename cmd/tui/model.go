@@ -9,17 +9,22 @@ import (
 )
 
 type deviceItem struct {
-	addr          string
-	info          *kasa.Sysinfo
-	child         *kasa.Child
-	childID       string
-	childIndex    int
-	emeter        *kasa.EmeterRealtime
-	emeterMonth   *kasa.EmeterDaystat
-	emeterLoaded  bool
-	emeterLoading bool
-	emeterError   error
-	monthError    error
+	addr           string
+	info           *kasa.Sysinfo
+	child          *kasa.Child
+	childID        string
+	childIndex     int
+	emeter         *kasa.EmeterRealtime
+	emeterMonth    *kasa.EmeterDaystat
+	emeterLoaded   bool
+	emeterLoading  bool
+	emeterError    error
+	monthError     error
+	countdownRules []kasa.Rule
+	scheduleRules  []kasa.SchedRule
+	rulesLoaded    bool
+	rulesLoading   bool
+	rulesError     error
 }
 
 func (d deviceItem) matches(query string) bool {
@@ -73,22 +78,23 @@ func (d deviceItem) supportsBrightness() bool {
 }
 
 type model struct {
-	items         []deviceItem
-	visible       []int
-	cursor        int
-	selected      *deviceItem
-	renameInput   textinput.Model
-	renaming      bool
-	searchInput   textinput.Model
-	searching     bool
-	width         int
-	height        int
-	rowOffset     int
-	err           error
-	status        string
-	isScanning    bool
-	pendingRename *renameRequest
-	brightnessSeq int
+	items              []deviceItem
+	visible            []int
+	cursor             int
+	selected           *deviceItem
+	renameInput        textinput.Model
+	renaming           bool
+	searchInput        textinput.Model
+	searching          bool
+	width              int
+	height             int
+	rowOffset          int
+	err                error
+	status             string
+	isScanning         bool
+	pendingRename      *renameRequest
+	brightnessSeq      int
+	detailScrollOffset int
 }
 
 type renameRequest struct {

@@ -181,6 +181,29 @@ func fetchEmeter(item deviceItem) tea.Cmd {
 	}
 }
 
+type rulesMsg struct {
+	addr      string
+	childID   string
+	countdown []kasa.Rule
+	schedules []kasa.SchedRule
+	err       error
+}
+
+func fetchRules(item deviceItem) tea.Cmd {
+	return func() tea.Msg {
+		d, err := kasa.NewDevice(item.addr)
+		if err != nil {
+			return rulesMsg{addr: item.addr, childID: item.childID, err: err}
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		countdown, _ := d.GetCountdownRulesCtx(ctx)
+		schedules, _ := d.GetScheduleRulesCtx(ctx)
+		return rulesMsg{addr: item.addr, childID: item.childID, countdown: countdown, schedules: schedules}
+	}
+}
+
 func (m model) Init() tea.Cmd { return scanDevices() }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -242,9 +265,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.focusChild(1)
 				}
 				m.selected.emeterLoading = true
+				m.selected.rulesLoading = true
 				m.selected.emeterError = nil
-				m.status = "Contacting device for energy data and status…"
-				return m, tea.Batch(refreshDevice(m.selected.addr), fetchEmeter(*m.selected))
+				m.selected.rulesError = nil
+				m.status = "Contacting device for energy data, rules and status…"
+				return m, tea.Batch(refreshDevice(m.selected.addr), fetchEmeter(*m.selected), fetchRules(*m.selected))
 			}
 			m.isScanning = true
 			m.status = "Scanning for devices…"
@@ -265,6 +290,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc":
 			if m.selected != nil {
 				m.selected = nil
+				m.detailScrollOffset = 0
 			} else if m.searchInput.Value() != "" {
 				m.searchInput.SetValue("")
 				m.applyFilter()
@@ -273,10 +299,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.selected == nil && len(m.visible) > 0 {
 				item := m.items[m.visible[m.cursor]]
 				m.selected = &item
+				m.detailScrollOffset = 0
 				if len(item.info.Children) == 0 && !item.emeterLoaded {
 					m.selected.emeterLoading = true
-					m.status = "Contacting device for live and historical energy…"
-					return m, fetchEmeter(item)
+					m.selected.rulesLoading = true
+					m.status = "Contacting device for energy data and rules…"
+					return m, tea.Batch(fetchEmeter(item), fetchRules(item))
 				}
 			}
 		case "t":
@@ -288,6 +316,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				item := m.items[m.visible[m.cursor]]
 				m.status = "Contacting " + item.title() + "…"
 				return m, toggleDevice(item)
+			}
+		case "c":
+			if m.selected != nil {
+				m.status = "Adding 30-minute countdown timer…"
+				return m, addCountdown(*m.selected, 30, false)
+			}
+		case "x":
+			if m.selected != nil {
+				m.status = "Clearing countdown timers…"
+				return m, clearCountdowns(*m.selected)
 			}
 		case "+", "=":
 			if m.selected != nil && m.selected.supportsBrightness() {
@@ -329,14 +367,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case "up", "k":
 				if m.selected != nil {
-					return m, m.focusChild(-1)
+					if len(m.selected.info.Children) > 0 {
+						return m, m.focusChild(-1)
+					}
+					m.detailScrollOffset = max(0, m.detailScrollOffset-1)
+					return m, nil
 				}
 				m.moveCursor(-m.columns())
 			case "down", "j":
 				if m.selected != nil {
-					return m, m.focusChild(1)
+					if len(m.selected.info.Children) > 0 {
+						return m, m.focusChild(1)
+					}
+					m.detailScrollOffset++
+					return m, nil
 				}
 				m.moveCursor(m.columns())
+			case "pgup", "ctrl+u":
+				if m.selected != nil {
+					m.detailScrollOffset = max(0, m.detailScrollOffset-10)
+					return m, nil
+				}
+			case "pgdown", "ctrl+d":
+				if m.selected != nil {
+					m.detailScrollOffset += 10
+					return m, nil
+				}
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -380,6 +436,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				root.emeterLoading = previousSelection.emeterLoading
 				root.emeterError = previousSelection.emeterError
 				root.monthError = previousSelection.monthError
+				root.countdownRules = previousSelection.countdownRules
+				root.scheduleRules = previousSelection.scheduleRules
+				root.rulesLoaded = previousSelection.rulesLoaded
+				root.rulesLoading = previousSelection.rulesLoading
+				root.rulesError = previousSelection.rulesError
 				m.selected = &root
 				break
 			}
@@ -442,9 +503,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selected.monthError = msg.monthErr
 			m.status = ""
 		}
+	case rulesMsg:
+		for i := range m.items {
+			if m.items[i].addr == msg.addr {
+				m.items[i].countdownRules = msg.countdown
+				m.items[i].scheduleRules = msg.schedules
+				m.items[i].rulesLoaded = true
+				m.items[i].rulesLoading = false
+				m.items[i].rulesError = msg.err
+				break
+			}
+		}
+		if m.selected != nil && m.selected.addr == msg.addr {
+			m.selected.countdownRules = msg.countdown
+			m.selected.scheduleRules = msg.schedules
+			m.selected.rulesLoaded = true
+			m.selected.rulesLoading = false
+			m.selected.rulesError = msg.err
+			m.status = ""
+		}
 	case actionMsg:
 		m.status = msg.text + "; refreshing…"
-		return m, refreshDevice(msg.addr)
+		cmds := []tea.Cmd{refreshDevice(msg.addr)}
+		if m.selected != nil && m.selected.addr == msg.addr {
+			m.selected.rulesLoading = true
+			cmds = append(cmds, fetchRules(*m.selected))
+		}
+		return m, tea.Batch(cmds...)
 	case brightnessTickMsg:
 		if msg.seq != m.brightnessSeq {
 			return m, nil
@@ -500,6 +585,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			root.emeterLoading = m.selected.emeterLoading
 			root.emeterError = m.selected.emeterError
 			root.monthError = m.selected.monthError
+			root.countdownRules = m.selected.countdownRules
+			root.scheduleRules = m.selected.scheduleRules
+			root.rulesLoaded = m.selected.rulesLoaded
+			root.rulesLoading = m.selected.rulesLoading
+			root.rulesError = m.selected.rulesError
 			m.selected = &root
 		}
 		m.applyFilter()
@@ -576,10 +666,11 @@ func (m *model) focusChild(delta int) tea.Cmd {
 		childID:       child.ID,
 		childIndex:    nextIndex,
 		emeterLoading: true,
+		rulesLoading:  true,
 	}
 	m.selected = &item
-	m.status = "Contacting device for live and historical energy…"
-	return fetchEmeter(item)
+	m.status = "Contacting device for energy data and rules…"
+	return tea.Batch(fetchEmeter(item), fetchRules(item))
 }
 
 func resolveChild(children []kasa.Child, requestedID, alias string) (string, kasa.Child, error) {
@@ -705,5 +796,36 @@ func debounceBrightness(addr string, brightness int, seq int) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(200 * time.Millisecond)
 		return brightnessTickMsg{addr: addr, brightness: brightness, seq: seq}
+	}
+}
+
+func addCountdown(item deviceItem, minutes int, target bool) tea.Cmd {
+	return func() tea.Msg {
+		d, err := kasa.NewDevice(item.addr)
+		if err != nil {
+			return errMsg(err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		seconds := minutes * 60
+		if err := d.AddCountdownRuleCtx(ctx, seconds, target, "TUI Timer"); err != nil {
+			return errMsg(err)
+		}
+		return actionMsg{addr: item.addr, text: fmt.Sprintf("Added %d-min countdown timer", minutes)}
+	}
+}
+
+func clearCountdowns(item deviceItem) tea.Cmd {
+	return func() tea.Msg {
+		d, err := kasa.NewDevice(item.addr)
+		if err != nil {
+			return errMsg(err)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := d.ClearCountdownRulesCtx(ctx); err != nil {
+			return errMsg(err)
+		}
+		return actionMsg{addr: item.addr, text: "Cleared countdown timers"}
 	}
 }
